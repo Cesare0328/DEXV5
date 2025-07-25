@@ -25,7 +25,7 @@ local Bindables = WaitForChild(Dex, "Bindables", 300)
 local GetSpecials_Bindable = WaitForChild(Bindables, "GetSpecials", 300)
 -- < Libraries > --
 local Api = {
-	Dump = JSONDecode(HttpService, game:HttpGet("https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"))
+	Dump = JSONDecode(HttpService, game:HttpGet("https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/API-DUMP.JSON"))
 }
 
 Api.Dump.Properties = {}
