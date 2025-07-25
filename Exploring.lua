@@ -1,3 +1,5 @@
+-- < Fix for module threads not being supported since synapse x > --
+local script = getgenv().Dex:WaitForChild("ExplorerPanel"):WaitForChild("Exploring")
 -- < Aliases > --
 local Instance_new = Instance.new
 local UDim2_new = UDim2.new

@@ -1,3 +1,5 @@
+-- < Fix for module threads not being supported since synapse x > --
+local script = getgenv().Dex:WaitForChild("Specials")
 -- < Services > --
 local HttpService = cloneref(game:GetService("HttpService"))
 -- < Aliases > --

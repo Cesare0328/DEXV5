@@ -1,3 +1,5 @@
+-- < Fix for module threads not being supported since synapse x > --
+local script = getgenv().Dex:WaitForChild("Selection")
 -- < Aliases > --
 local table_insert = table.insert
 local string_format = string.format

@@ -1,3 +1,5 @@
+-- < Fix for module threads not being supported since synapse x > --
+local script = getgenv().Dex:WaitForChild("PropertiesFrame"):WaitForChild("Properties")
 -- < Aliases > --
 local math_floor = math.floor
 local math_ceil = math.ceil
