@@ -13963,4 +13963,4 @@
                     "Name": "EnableOnTypeAutocomplete",
                     "Security": {
                         "Read": "RobloxScriptSecurity",
-                        "Write": "RobloxScriptSecurity"
+                        "Write": "RobloxScriptSecurity"
