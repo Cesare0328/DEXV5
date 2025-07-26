@@ -2033,13 +2033,12 @@ function rightClickMenu(sObj)
 				return
 			end
 			Selection:StopUpdates()
-			local Parent = Selection:Get()
-			for _, Selected in ipairs(Parent) do
+			for _, Selected in ipairs(Selection:Get()) do
+				Selection:Set({})
 				for _, Selected_Instance in ipairs(GetChildren(Selected)) do
 					Selection:Add(Selected_Instance)
 				end
 			end
-			Selection:Remove(Parent, true)
 			Selection:ResumeUpdates()
 		elseif option == "Teleport to" then
 			if not Option.Modifiable then
