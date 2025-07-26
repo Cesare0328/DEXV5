@@ -1,5 +1,5 @@
 -- < Fix for module threads not being supported since synapse x > --
-local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("ScriptEditor")
+local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("LocalScript")
 -- < Aliases > --
 local Vector2_zero = Vector2.zero
 local Vector2_new = Vector2.new
@@ -66,7 +66,7 @@ do
 					if key.UserInputType == Enum.UserInputType.MouseButton1 then
 						local objectPosition = Vector2_new(PlayerMouse.X - frame.AbsolutePosition.X, PlayerMouse.Y - frame.AbsolutePosition.Y)
 						while IsMouseButtonPressed(UserInputService, Enum.UserInputType.MouseButton1) do
-							wait(0)
+							task.wait(0)
 							pcall(function()
 								frame:TweenPosition(udim2(0, PlayerMouse.X - objectPosition.X + (frame.Size.X.Offset * frame.AnchorPoint.X), 0, PlayerMouse.Y - objectPosition.Y + (frame.Size.Y.Offset * frame.AnchorPoint.Y)), 'Out', 'Quad', .1, true)
 							end)
@@ -1231,7 +1231,7 @@ function EditorLib.Initialize(Frame, Options)
 				ProcessInput(not (not Ctrl or Shift) and "Control+Key" or "KeyPress", KeyCode)
 				local UniqueID = newproxy()
 				WorkingKey = UniqueID
-				wait(.25)
+				task.wait(.25)
 				if WorkingKey == UniqueID then
 					WorkingKey = true
 				end
@@ -1358,7 +1358,7 @@ local function openScript(o)
 			end
 		end
 		cache[id] = decompiled
-		wait(0)
+		task.wait(0)
 		ScriptEditor.SetContent(cache[id])
 	end
 
