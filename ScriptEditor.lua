@@ -1316,7 +1316,7 @@ local function openScript(o)
     else
         local guid = tostring(gethiddenproperty(o,"ScriptGuid")) or "{Couldn't grab GUID}"
         local path
-        if o.Parent == nil then
+        if not o:IsDescendantOf(game) then
             local ancestors = {}
             local current = o
             while current do
@@ -1339,6 +1339,14 @@ local function openScript(o)
             elseif #decompiled <= 0 then
                 decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
             else
+				local lines = {}
+                for line in decompiled:gmatch("[^\r\n]+") do
+                    table.insert(lines, line)
+                end
+                if #lines > 0 and lines[1]:match("^%s*%-%-") then
+                    table.remove(lines, 1)
+                    decompiled = table.concat(lines, "\n")
+                end
                 decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
             end
         elseif IsA(o, "Script") then
