@@ -143,7 +143,7 @@ local ActionTextures = {
 
 local NodeTextures = {"rbxasset://textures/AnimationEditor/btn_expand.png", "rbxasset://textures/AnimationEditor/btn_collapse.png"}
 
-local ExplorerIndex, ReflectionMetadata = {}, "https://api.factmaven.com/xml-to-json/?xml=https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml"
+local ExplorerIndex, ReflectionMetadata = {}, "https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/ReflectionMetadata.JSON"
 
 for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).roblox.Item[1].Item) do
 	local Item = Metadata.Properties.string
