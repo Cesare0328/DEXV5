@@ -448,16 +448,7 @@ local Specials = {
 	firetouchinterest = firetouchinterest,
 	fireproximityprompt = fireproximityprompt,
 	getpropertylist = getproperties,
-	getinstancelist = (function()
-		for A, B in next, getreg() do
-			if type(B) == "function" and islclosure(B) and isexecutorfunction(B) then
-				local C = rawget(getfenv(B), "script")
-				if C == InitScript and getconstant(B, 1) == "table" and getconstant(B, 2) == "insert" then
-					return getupvalue(B, 1)
-				end
-			end
-		end
-	end)() or getinstances,
+	getinstancelist = getinstances or getinstancelist,
 	writeinstance = function(p1, p2)
 		local A, B = Class:new(p1.ClassName)
 		local C = B.." ("..tostring(p1)..")."..p2
