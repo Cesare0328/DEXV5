@@ -81,9 +81,9 @@ local wait = task.wait
 local function BeforeLoad()
 	local A, B = pcall(readfile, "dexv4_settings.json")
 	local C = A and JSONDecode(HttpService, B) or {}
-	local D = "UUID : " .. string.gsub('xxxx-xxxx-xxxx-xxxx', '[x]', function() return string.format('%X', math.random(0, 15)) end) .. "VERSION : " .. settings()["Diagnostics"].RobloxVersion
-	WaitForChild(IntroFrame, "USID", 10).Text = D
-	WaitForChild(AboutPanel, "USID", 10).Text = D
+	local D = string.gsub('xxxx-xxxx-xxxx-xxxx', '[x]', function() return string.format('%X', math.random(0, 15)) end)
+	WaitForChild(IntroFrame, "USID", 10).Text = "UUID : " .. D .. "VERSION : " .. settings()["Diagnostics"].RobloxVersion
+	WaitForChild(AboutPanel, "USID", 10).Text = "UUID : " .. D .. "VERSION : " .. settings()["Diagnostics"].RobloxVersion
 	if C.Save then
 		local E = C.Save
 		WaitForChild(SettingHeader, "TextLabel", 10).Text = string_format("Settings | Last Save - %s/%s/%s (%s:%s:%s.%s)", E.Day, E.Month, string_sub(E.Year, #E.Year - 1, #E.Year), E.Hours, E.Minutes, E.Seconds, E.Milliseconds)
