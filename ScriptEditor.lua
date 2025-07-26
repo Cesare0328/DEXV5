@@ -1309,177 +1309,7 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 })
 
 local function DebugScriptAt(o)
-    if not o or not o:IsA("LocalScript") then
-        return "ERROR: Provided instance is not a LocalScript"
-    end
-    
-    local output = {}
-    
-    table.insert(output, "═══════════════════════════════════════════════════════════════")
-    table.insert(output, "                    LOCALSCRIPT DEBUG OUTPUT")
-    table.insert(output, "═══════════════════════════════════════════════════════════════")
-    table.insert(output, "")
-    
-    table.insert(output, "📋 SCRIPT INFORMATION:")
-    table.insert(output, "├─ Name: " .. o.Name)
-    
-    local function safeGetHiddenProperty(obj, prop)
-        local success, result = pcall(function()
-            return gethiddenproperty(obj, prop)
-        end)
-        return success and tostring(result) or "Unable to retrieve"
-    end
-    
-    table.insert(output, "├─ Script GUID: " .. safeGetHiddenProperty(o, "ScriptGuid"))
-    table.insert(output, "├─ Bytecode Hash: " .. safeGetHiddenProperty(o, "BytecodeHash"))
-    table.insert(output, "└─ Source Asset ID: " .. safeGetHiddenProperty(o, "SourceAssetId"))
-    table.insert(output, "")
-    
-    table.insert(output, "🌐 SCRIPT ENVIRONMENT:")
-    local envSuccess, env = pcall(function()
-        return getsenv(o)
-    end)
-    
-    if envSuccess and env then
-        local envTables = {}
-        for key, value in pairs(env) do
-            if type(value) == "table" then
-                local size = 0
-                pcall(function()
-                    size = #value
-                end)
-                table.insert(envTables, {name = key, size = size})
-            end
-        end
-        
-        if #envTables > 0 then
-            table.insert(output, "├─ Available Tables: " .. #envTables)
-            for i, tbl in ipairs(envTables) do
-                local prefix = i == #envTables and "└─" or "├─"
-                table.insert(output, prefix .. " " .. tbl.name .. " (size: " .. tbl.size .. ")")
-            end
-        else
-            table.insert(output, "└─ No tables found in environment")
-        end
-    else
-        table.insert(output, "└─ Unable to retrieve script environment")
-    end
-    table.insert(output, "")
-    
-    table.insert(output, "🔧 FUNCTION DUMPS:")
-    local success, functions = pcall(function()
-        return getgc(true)
-    end)
-    
-    if success and functions then
-        local scriptFunctions = {}
-        for _, obj in pairs(functions) do
-            if type(obj) == "function" then
-                local info = debug.getinfo(obj)
-                if info and info.source and info.source:find(o.Name) then
-                    table.insert(scriptFunctions, obj)
-                end
-            end
-        end
-        
-        table.insert(output, "├─ Total Functions: " .. #scriptFunctions)
-        for i, func in ipairs(scriptFunctions) do
-            local prefix = i == #scriptFunctions and "└─" or "├─"
-            local info = debug.getinfo(func)
-            local name = info.name or "<anonymous>"
-            local line = info.linedefined or "?"
-            table.insert(output, prefix .. " Function " .. i .. ": " .. name .. " (line " .. line .. ")")
-        end
-        functions = scriptFunctions
-    else
-        table.insert(output, "└─ Unable to retrieve functions")
-        functions = {}
-    end
-    table.insert(output, "")
-    
-    table.insert(output, "📦 UPVALUES:")
-    if #functions > 0 then
-        local totalUpvalues = 0
-        for i, func in ipairs(functions) do
-            local upvalues = {}
-            local j = 1
-            while true do
-                local success, name, value = pcall(debug.getupvalue, func, j)
-                if not success or not name then break end
-                
-                local safeValue = "Unable to retrieve"
-                local valueType = "unknown"
-                pcall(function()
-                    safeValue = tostring(value)
-                    valueType = type(value)
-                end)
-                
-                table.insert(upvalues, {name = name, value = safeValue, type = valueType})
-                totalUpvalues = totalUpvalues + 1
-                j = j + 1
-            end
-            
-            if #upvalues > 0 then
-                table.insert(output, "├─ Function " .. i .. " upvalues:")
-                for k, upval in ipairs(upvalues) do
-                    local prefix = k == #upvalues and "│  └─" or "│  ├─"
-                    table.insert(output, prefix .. " " .. upval.name .. " (" .. upval.type .. "): " .. upval.value)
-                end
-            end
-        end
-        if totalUpvalues == 0 then
-            table.insert(output, "└─ No upvalues found")
-        end
-    else
-        table.insert(output, "└─ Unable to retrieve upvalues")
-    end
-    table.insert(output, "")
-    
-    table.insert(output, "📊 CONSTANTS:")
-    local constants = {}
-    if #functions > 0 then
-        for i, func in ipairs(functions) do
-            local j = 1
-            while true do
-                local success, constant = pcall(debug.getconstant, func, j)
-                if not success or constant == nil then break end
-                
-                local safeValue = "Unable to retrieve"
-                local valueType = "unknown"
-                pcall(function()
-                    safeValue = tostring(constant)
-                    valueType = type(constant)
-                end)
-                
-                table.insert(constants, {
-                    func = i,
-                    index = j,
-                    value = safeValue,
-                    type = valueType
-                })
-                j = j + 1
-            end
-        end
-        
-        if #constants > 0 then
-            table.insert(output, "├─ Total Constants: " .. #constants)
-            for i, const in ipairs(constants) do
-                local prefix = i == #constants and "└─" or "├─"
-                table.insert(output, prefix .. " Func" .. const.func .. "[" .. const.index .. "] (" .. const.type .. "): " .. const.value)
-            end
-        else
-            table.insert(output, "└─ No constants found")
-        end
-    else
-        table.insert(output, "└─ Unable to retrieve constants")
-    end
-    table.insert(output, "")
-    
-    table.insert(output, "═══════════════════════════════════════════════════════════════")
-    table.insert(output, "Debug generated at: " .. os.date("%Y-%m-%d %H:%M:%S"))
-    table.insert(output, "═══════════════════════════════════════════════════════════════")
-    
-    return table.concat(output, "\n")
+	return "WIP -Cesare"
 end
 
 local function openScript(o)
@@ -1562,6 +1392,12 @@ local function openScript(o)
     end
     Title.Text = "[Script Viewer] Viewing: " .. o.Name
 end
+
+--Resize Logic
+editor:GetPropertyChangedSignal("AbsoluteSize"):Connect(function(v)
+local X = v.X
+OtherFrame.Size = UDim2.new(0, X/5, 0, 25)
+end)
 
 Connect(OpenScript_Bindable.Event, function(object)
 	script.Parent.Visible = true
