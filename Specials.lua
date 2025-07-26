@@ -13,6 +13,7 @@ local string_sub = string.sub
 local string_find = string.find
 local string_split = string.split
 local table_insert = table.insert
+local isexecutorfunction = isvolcanofunction or iselectronfunction
 --
 local WaitForChild = HttpService.WaitForChild
 local JSONDecode = HttpService.JSONDecode
@@ -446,10 +447,10 @@ local Specials = {
 	fireclickdetector = fireclickdetector,
 	firetouchinterest = firetouchinterest,
 	fireproximityprompt = fireproximityprompt,
-	getpropertylist = getupvalue(getprops,  2) or getprops,
+	getpropertylist = getproperties,
 	getinstancelist = (function()
 		for A, B in next, getreg() do
-			if type(B) == "function" and islclosure(B) and is_synapse_function(B) then
+			if type(B) == "function" and islclosure(B) and isexecutorfunction(B) then
 				local C = rawget(getfenv(B), "script")
 				if C == InitScript and getconstant(B, 1) == "table" and getconstant(B, 2) == "insert" then
 					return getupvalue(B, 1)
