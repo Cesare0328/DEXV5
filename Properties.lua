@@ -173,6 +173,8 @@ local function getRbxApi()
 		end
 		for Property, is_scriptable in next, gottenprops do
 			local Tags = {}
+			print("Property -->" .. Property)
+			print("iss -->" .. is_scriptable)
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
 			local Value_Type = typeof(Value)
 			if not Success then
