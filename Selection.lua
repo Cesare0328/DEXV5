@@ -79,7 +79,7 @@ local Windows = {
 local wait = task.wait
 -- < Source > --
 local function BeforeLoad()
-	local A, B = pcall(readfile, "dexv4_settings.json")
+	local A, B = pcall(readfile, "dexv5_settings.json")
 	local C = A and JSONDecode(HttpService, B) or {}
     local D = "UUID : " .. string.gsub('xxxx-xxxx-xxxx-xxxx', '[x]', function() return string.format('%X', math.random(0, 15)) end) .. "\nVERSION : " .. settings()["Diagnostics"].RobloxVersion
 	WaitForChild(IntroFrame, "UUID", 10).Text = D
@@ -146,7 +146,7 @@ local Settings = {
 }
 
 pcall(function()
-	local A, B = pcall(readfile, "dexv4_settings.json")
+	local A, B = pcall(readfile, "dexv5_settings.json")
 	if A then
 		local C = JSONDecode(HttpService, B).Settings
 		for D, E in next, C do
@@ -171,7 +171,7 @@ function SaveSettings()
 		Seconds = ((G < 10) and "0"..tostring(G) or tostring(G)),
 		Milliseconds = string_split(tick(),".")[2] or 0
 	}
-	pcall(writefile, "dexv4_settings.json", JSONEncode(HttpService, A))
+	pcall(writefile, "dexv5_settings.json", JSONEncode(HttpService, A))
 end
 
 Connect(OpenToggleButton.MouseButton1Up, function()
