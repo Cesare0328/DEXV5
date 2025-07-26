@@ -163,28 +163,34 @@ local function getRbxApi()
 			}
 		}
 		local gottenprops = getpropertylist(classInstance)
-		for _, prop in next, Properties do
-			gottenprops[prop.Name] = nil
-		end
-		for Property, is_scriptable in next, gottenprops do
-			local Tags = {}
-			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
-			local Value_Type = typeof(Value)
-			if not Success then
-				Value = ""
-			end
-			local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
-			if PropertyData and PropertyData.Tags then
-				Tags = PropertyData.Tags
-			end
-			table_insert(Properties, {
-				ValueType = Value_Type,
-				CurrentValue = Value,
-				Name = Property,
-				Binary = Binary[Property] and true,
-				Tags = Tags,
-				Class = ClassName
-			})
+        for _, prop in ipairs(Properties) do
+            for i, name in ipairs(gottenprops) do
+                if name == prop.Name then
+                    table.remove(gottenprops, i)
+                    break
+                end
+            end
+        end
+		for _, Property in ipairs(gottenprops) do
+    		local Tags = {}
+    		local Success, Value = pcall(gethiddenproperty, classInstance, Property)
+    		local Value_Type = typeof(Value)
+    		if not Success then
+        		Value = ""
+        		warn("Failed to get property: " .. tostring(Property) .. " for " .. classInstance.ClassName)
+    		end
+    		local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
+    		if PropertyData and PropertyData.Tags then
+        		Tags = PropertyData.Tags
+    		end
+    		table.insert(Properties, {
+        		ValueType = Value_Type,
+        		CurrentValue = Value,
+        		Name = Property,
+        		Binary = Binary[Property] and true,
+        		Tags = Tags,
+        		Class = ClassName
+    		})
 		end
 		for prop,_ in pairs(Blacklist) do
 			for index, data in pairs(Properties) do
