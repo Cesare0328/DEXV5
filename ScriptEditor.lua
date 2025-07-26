@@ -1308,61 +1308,69 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 })
 
 local function openScript(o)
-	EditorGrid.Text = ""
-
-	local Triggers = {'--This script could not be decompiled due to it having no bytecode', '"--This script could not be decompiled due to it having no bytecode"'}
-
-	local id = o:GetDebugId()
-
-	if cache[id] then
-		ScriptEditor.SetContent(cache[id])
-	else
-		local guid = tostring(gethiddenproperty(o,"ScriptGuid")) or "{Couldn't grab GUID}"
-		local decompiled
-		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
-			decompiled = decompile(o)
-			if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
-				if #o.Source > 0 then
-					decompiled = format("-- Script GUID: %s\n\n%s\n", guid, o.Source)
-				elseif #o.Source <= 0 then
-					decompiled = "-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed."
-				end
-			elseif #decompiled <= 0 then
-				decompiled = format("-- Script GUID: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", tostring(gethiddenproperty(o,"ScriptGuid")))
-			else
-				decompiled = format("-- Script GUID: %s\n%s", guid, decompiled)
-			end
-		elseif IsA(o, "Script") then
-			local passed = false
-			local linkedSource = o.LinkedSource
-			if linkedSource and #linkedSource >= 1 then
-				local result = tonumber(string.match(linkedSource, "(%d+)"))
-				if result then
-					result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-					decompiled = format("-- Script GUID: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, result)
-					passed = true
-				end
-			end
-			if not passed then
-				local sourceAssetId = tonumber(gethiddenproperty(o, "SourceAssetId"))
-				if sourceAssetId and sourceAssetId ~= -1 then
-					local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
-					if asset then
-						local source = asset.Source
-						if source and #source > 0 then
-							decompiled = format("-- Script GUID: %s\n%s", guid, source)
-							passed = true
-						end
-					end
-				end
-			end
-		end
-		cache[id] = decompiled
-		task.wait(0)
-		ScriptEditor.SetContent(cache[id])
-	end
-
-	Title.Text = "[Script Viewer] Viewing: " .. o.Name
+    EditorGrid.Text = ""
+    local Triggers = {'--This script could not be decompiled due to it having no bytecode', '"--This script could not be decompiled due to it having no bytecode"'}
+    local id = o:GetDebugId()
+    if cache[id] then
+        ScriptEditor.SetContent(cache[id])
+    else
+        local guid = tostring(gethiddenproperty(o,"ScriptGuid")) or "{Couldn't grab GUID}"
+        local path
+        if o.Parent == nil then
+            local ancestors = {}
+            local current = o
+            while current do
+                table.insert(ancestors, 1, current.Name)
+                current = current.Parent
+            end
+            path = "getnilinstances()." .. table.concat(ancestors, ".")
+        else
+            path = o:GetFullName()
+        end
+        local decompiled
+        if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
+            decompiled = decompile(o)
+            if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
+                if #o.Source > 0 then
+                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, o.Source)
+                elseif #o.Source <= 0 then
+                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                end
+            elseif #decompiled <= 0 then
+                decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+            else
+                decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+            end
+        elseif IsA(o, "Script") then
+            local passed = false
+            local linkedSource = o.LinkedSource
+            if linkedSource and #linkedSource >= 1 then
+                local result = tonumber(string.match(linkedSource, "(%d+)"))
+                if result then
+                    result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
+                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
+                    passed = true
+                end
+            end
+            if not passed then
+                local sourceAssetId = tonumber(gethiddenproperty(o, "SourceAssetId"))
+                if sourceAssetId and sourceAssetId ~= -1 then
+                    local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
+                    if asset then
+                        local source = asset.Source
+                        if source and #source > 0 then
+                            decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
+                            passed = true
+                        end
+                    end
+                end
+            end
+        end
+        cache[id] = decompiled
+        task.wait(0)
+        ScriptEditor.SetContent(cache[id])
+    end
+    Title.Text = "[Script Viewer] Viewing: " .. o.Name
 end
 
 Connect(OpenScript_Bindable.Event, function(object)
