@@ -54,7 +54,7 @@ local maxChunkSize = 100 * 1000
 local function getCurrentApiJson()
 	local jsonStr
 	local success = pcall(function()
-		jsonStr = game:HttpGet("https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json", true)
+		jsonStr = game:HttpGet("https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/API-DUMP.JSON", true)
 	end)
 	if success then
 		return jsonStr
