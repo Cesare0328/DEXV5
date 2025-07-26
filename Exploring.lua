@@ -152,11 +152,9 @@ for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata
 	for Category, Data in ipairs(Item) do
 		if Data._name == "ExplorerImageIndex" then
 			ImageOrder = tonumber(Data.__text)
-			warn(Data.__text)
 		end
 		if Data._name == "Name" then
 			ClassName = Data.__text
-			warn(Data.__text)
 		end
 	end
 	ExplorerIndex[ClassName] = ImageOrder
