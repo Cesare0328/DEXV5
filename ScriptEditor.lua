@@ -1323,6 +1323,12 @@ local function openScript(o)
                 table.insert(ancestors, 1, current.Name)
                 current = current.Parent
             end
+			if ancestors[1] == "Dex Internal Storage" then
+                table.remove(ancestors, 1)
+            end
+            if ancestors[1] == "Nil instances" then
+                table.remove(ancestors, 1)
+            end
             path = "getnilinstances()." .. table.concat(ancestors, ".")
         else
             path = o:GetFullName()
