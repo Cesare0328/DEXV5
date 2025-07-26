@@ -1394,9 +1394,8 @@ local function openScript(o)
 end
 
 --Resize Logic
-editor:GetPropertyChangedSignal("AbsoluteSize"):Connect(function(v)
-local X = v.X
-OtherFrame.Size = UDim2.new(0, X/5, 0, 25)
+Connect(GetPropertyChangedSignal(editor, "AbsoluteSize"), function()
+	OtherFrame.Size = UDim2.new(0, editor.AbsoluteSize.X/5, 0, 25)
 end)
 
 Connect(OpenScript_Bindable.Event, function(object)
