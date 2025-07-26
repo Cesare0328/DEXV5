@@ -105,7 +105,7 @@ local function getRbxApi()
 
 	local function sortAlphabetic(t, property)
 		table_sort(t,function(x,y)
-			return tonumber(x[property]) < tonumber(y[property]) --yeah idk why either
+			return tostring(x[property]) < tostring(y[property])
 		end)
 	end
 
