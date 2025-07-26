@@ -128,7 +128,6 @@ end
 local function toggleDex(p1)
 	TweenPosition(SideMenu, p1 and UDim2_new(1, -330, 0, 0) or UDim2_new(1, 0, 0, 0), "Out", "Quad", .5, true)
 	TweenPosition(OpenToggleButton, p1 and UDim2_new(1, 0, 0, 0) or UDim2_new(1, -40, 0, 0), "Out", "Quad", .5, true)
-	task.wait(1)
 	switchWindows(p1 and CurrentWindow or "Nothing c:", p1 and true or nil)
 end
 
@@ -206,7 +205,7 @@ local function createSetting(p1, p2, p3)
 	end	
 	Connect(B.Activated, function()
 		C(not Settings[p2])
-		wait(1 / 12)
+		task.wait(1 / 12)
 		pcall(SaveSettings)
 	end)
 	A.Visible = true
@@ -287,13 +286,15 @@ Connect(SaveMapButton.Activated, function()
 	saveinstance({noscripts = not SaveMapSettings.SaveScripts, scriptcache = SaveMapSettings.ScriptCache, mode = "optimized"})
 end)
 
-wait(0)
+task.wait(0)
 
 TweenPosition(IntroFrame, UDim2_new(1 ,-301, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 
+task.wait(0.5)
+
 switchWindows("Explorer")
 
-wait(1)
+task.wait(1)
 
 SideMenu.Visible = true
 
@@ -305,7 +306,7 @@ for i = 0,1,.1 do
 	IntroFrame.Version.TextTransparency = i
 	IntroFrame.Creator.TextTransparency = i
 	IntroFrame.Sad.ImageTransparency = i
-	wait(0)
+	task.wait(0)
 end
 
 IntroFrame.Visible = false
@@ -315,10 +316,10 @@ TweenPosition(OpenScriptEditorButton, UDim2_new(0,0,0,150), Enum.EasingDirection
 TweenPosition(CloseToggleButton, UDim2_new(0,0,0,180), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 TweenPosition(Slant, UDim2_new(0,0,0,210), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 
-wait(.5)
+task.wait(.5)
 
 for i = 1,0,-.1 do
 	OpenScriptEditorButton.Icon.ImageTransparency = i
 	CloseToggleButton.TextTransparency = i
-	wait(0)
+	task.wait(0)
 end
