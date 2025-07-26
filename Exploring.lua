@@ -145,7 +145,7 @@ local NodeTextures = {"rbxasset://textures/AnimationEditor/btn_expand.png", "rbx
 
 local ExplorerIndex, ReflectionMetadata = {}, "https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/ReflectionMetadata.JSON"
 
-for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).roblox.Item[1].Item) do
+for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).roblox.Item[0].Item) do
 	local Item = Metadata.Properties.string
 	local ImageOrder = 0
 	local ClassName = "Instance"
@@ -1144,7 +1144,7 @@ function CreateRightClickMenuItem(text, customizationData, onClick, insObj)
 	})
 
 	if insObj == 1 then
-		local newIcon = Icon(nil,GetCorrectIcon(text) or 0)
+		local newIcon = Icon(nil, GetCorrectIcon(text) or 0)
 		newIcon.Position = UDim2_new(0,0,0,2)
 		newIcon.Size = UDim2_new(0,GUI_SIZE,0,GUI_SIZE)
 		newIcon.IconMap.ZIndex = 5
