@@ -376,7 +376,7 @@ end
 
 local function SortTable(T)
 	table_sort(T, function(x,y) 
-		return x.Name < y.Name 
+		return tostring(x.Name) < tostring(y.Name)
 	end)
 end
 -- Spritesheet
@@ -1548,7 +1548,7 @@ end
 
 local function sortProps(t)
 	table_sort(t, function(x,y) 
-		return x.propertyData.Name < y.propertyData.Name 
+		return tostring(x.propertyData.Name) < tostring(y.propertyData.Name)
 	end)
 end
 
