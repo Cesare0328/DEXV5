@@ -145,16 +145,16 @@ local NodeTextures = {"rbxasset://textures/AnimationEditor/btn_expand.png", "rbx
 
 local ExplorerIndex, ReflectionMetadata = {}, "https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/ReflectionMetadata.JSON"
 
-for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).roblox.Item[0].Item) do
+for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).roblox.Item[1].Item) do
 	local Item = Metadata.Properties.string
 	local ImageOrder = 0
 	local ClassName = "Instance"
 	for Category, Data in ipairs(Item) do
 		if Data.name == "ExplorerImageIndex" then
-			ImageOrder = tonumber(Data.text)
+			ImageOrder = tonumber(Data.__text)
 		end
 		if Data.name == "Name" then
-			ClassName = Data.text
+			ClassName = Data.__text
 		end
 	end
 	ExplorerIndex[ClassName] = ImageOrder
