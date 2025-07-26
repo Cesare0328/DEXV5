@@ -166,7 +166,7 @@ local function getRbxApi()
 		for _, prop in ipairs(Properties) do
 		for i, name in ipairs(gottenprops) do
         		if name == prop.Name then
-            		table.remove(gottenprops, i)
+            		--table.remove(gottenprops, i)
             		break
         		end
     		end
