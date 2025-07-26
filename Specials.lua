@@ -440,7 +440,7 @@ function Class:finish()
 end
 -- < Source > --
 local Specials = {
-	checkrbxlocked = getupvalue(require, 3) or function()
+	checkrbxlocked = function()
 		return false
 	end,
 	fireclickdetector = fireclickdetector,
