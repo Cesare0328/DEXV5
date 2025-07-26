@@ -173,8 +173,6 @@ local function getRbxApi()
 		end
 		for Property, is_scriptable in next, gottenprops do
 			local Tags = {}
-			table.foreach(Property, warn)
-			warn("=============")
 			table.foreach(PropertyData, warn)
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
 			local Value_Type = typeof(Value)
@@ -189,7 +187,7 @@ local function getRbxApi()
 			table_insert(Properties, {
 				ValueType = Value_Type,
 				CurrentValue = Value,
-				Name = Property,
+				Name = gottenprops[Property],
 				Binary = Binary[Property] and true,
 				Tags = Tags,
 				Class = ClassName
