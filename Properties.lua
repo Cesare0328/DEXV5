@@ -174,11 +174,9 @@ local function getRbxApi()
 		for Property, is_scriptable in next, gottenprops do
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
-			warn(gottenprops[Property])
 			local Value_Type = typeof(Value)
 			if not Success then
 				Value = ""
-				warn("Failed to get property: " .. tostring(Property) .. " for " .. classInstance.ClassName)
 			end
 			local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
 			if PropertyData and PropertyData.Tags then
