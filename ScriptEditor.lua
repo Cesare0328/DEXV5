@@ -1,5 +1,5 @@
 -- < Fix for module threads not being supported since synapse x > --
-local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("LocalScript")
+local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("ScriptEditor")
 -- < Aliases > --
 local Vector2_zero = Vector2.zero
 local Vector2_new = Vector2.new
@@ -1325,10 +1325,10 @@ local function openScript(o)
 				if #o.Source > 0 then
 					decompiled = format("-- Script GUID: %s\n\n%s\n", guid, o.Source)
 				elseif #o.Source <= 0 then
-					decompiled = "-- Synapse X Dex Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed."
+					decompiled = "-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed."
 				end
 			elseif #decompiled <= 0 then
-				decompiled = format("-- Script GUID: %s\n-- Synapse X Dex Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", tostring(gethiddenproperty(o,"ScriptGuid")))
+				decompiled = format("-- Script GUID: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", tostring(gethiddenproperty(o,"ScriptGuid")))
 			else
 				decompiled = format("-- Script GUID: %s\n%s", guid, decompiled)
 			end
