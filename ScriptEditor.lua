@@ -1326,7 +1326,7 @@ local function openScript(o)
 			if ancestors[1] == "Dex Internal Storage" then
                 table.remove(ancestors, 1)
             end
-            if ancestors[1] == "Nil instances" then
+            if ancestors[1] == "Nil Instances" then
                 table.remove(ancestors, 1)
             end
             path = "getnilinstances()." .. table.concat(ancestors, ".")
