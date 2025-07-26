@@ -39,13 +39,14 @@ end)()
 local Bindables = WaitForChild(script.Parent.Parent, "Bindables", 300)
 local OpenScript_Bindable = WaitForChild(Bindables, "OpenScript", 300)
 -- < Upvalues > --
-local cache, dragger = {}, {}
+local cache, dragger, CurrentScript = {}, {}, nil
 local editor = script.Parent
 local TopBar = WaitForChild(editor, "TopBar")
 local OtherFrame = WaitForChild(TopBar, "Other")
 local SaveScript = WaitForChild(OtherFrame, 'SaveScript')
 local CopyScript = WaitForChild(OtherFrame, 'CopyScript')
 local ClearScript = WaitForChild(OtherFrame, 'ClearScript')
+local DebugScript = WaitForChild(OtherFrame, 'DebugScript')
 local FileName = WaitForChild(OtherFrame, 'FileName')
 local CloseEditor = WaitForChild(TopBar, "Close")
 local Title	= WaitForChild(TopBar, "Title")
@@ -1307,7 +1308,162 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 	CaretBlinkingRate = .5
 })
 
+local function DebugScriptAt(o)
+    if not script or not script:IsA("LocalScript") then
+        return "ERROR: Provided instance is not a LocalScript"
+    end
+    
+    local output = {}
+    
+    table.insert(output, "═══════════════════════════════════════════════════════════════")
+    table.insert(output, "                    LOCALSCRIPT DEBUG OUTPUT")
+    table.insert(output, "═══════════════════════════════════════════════════════════════")
+    table.insert(output, "")
+    
+    table.insert(output, "📋 SCRIPT INFORMATION:")
+    table.insert(output, "├─ Name: " .. script.Name)
+    
+    local function safeGetHiddenProperty(obj, prop)
+        local success, result = pcall(function()
+            return gethiddenproperty(obj, prop)
+        end)
+        return success and tostring(result) or "Unable to retrieve"
+    end
+    
+    table.insert(output, "├─ Script GUID: " .. safeGetHiddenProperty(script, "ScriptGuid"))
+    table.insert(output, "├─ Bytecode Hash: " .. safeGetHiddenProperty(script, "BytecodeHash"))
+    table.insert(output, "└─ Source Asset ID: " .. safeGetHiddenProperty(script, "SourceAssetId"))
+    table.insert(output, "")
+    
+    table.insert(output, "🌐 SCRIPT ENVIRONMENT:")
+    local envSuccess, env = pcall(function()
+        return getsenv(script)
+    end)
+    
+    if envSuccess and env then
+        local envTables = {}
+        for key, value in pairs(env) do
+            if type(value) == "table" then
+                table.insert(envTables, {name = key, size = #value})
+            end
+        end
+        
+        if #envTables > 0 then
+            table.insert(output, "├─ Available Tables: " .. #envTables)
+            for i, tbl in ipairs(envTables) do
+                local prefix = i == #envTables and "└─" or "├─"
+                table.insert(output, prefix .. " " .. tbl.name .. " (size: " .. tbl.size .. ")")
+            end
+        else
+            table.insert(output, "└─ No tables found in environment")
+        end
+    else
+        table.insert(output, "└─ Unable to retrieve script environment")
+    end
+    table.insert(output, "")
+    
+    table.insert(output, "🔧 FUNCTION DUMPS:")
+    local success, functions = pcall(function()
+        return getgc(true)
+    end)
+    
+    if success and functions then
+        local scriptFunctions = {}
+        for _, obj in pairs(functions) do
+            if type(obj) == "function" then
+                local info = debug.getinfo(obj)
+                if info and info.source and info.source:find(script.Name) then
+                    table.insert(scriptFunctions, obj)
+                end
+            end
+        end
+        
+        table.insert(output, "├─ Total Functions: " .. #scriptFunctions)
+        for i, func in ipairs(scriptFunctions) do
+            local prefix = i == #scriptFunctions and "└─" or "├─"
+            local info = debug.getinfo(func)
+            local name = info.name or "<anonymous>"
+            local line = info.linedefined or "?"
+            table.insert(output, prefix .. " Function " .. i .. ": " .. name .. " (line " .. line .. ")")
+        end
+        functions = scriptFunctions
+    else
+        table.insert(output, "└─ Unable to retrieve functions")
+        functions = {}
+    end
+    table.insert(output, "")
+    
+    table.insert(output, "📦 UPVALUES:")
+    if #functions > 0 then
+        local totalUpvalues = 0
+        for i, func in ipairs(functions) do
+            local upvalues = {}
+            local j = 1
+            while true do
+                local name, value = debug.getupvalue(func, j)
+                if not name then break end
+                table.insert(upvalues, {name = name, value = tostring(value), type = type(value)})
+                totalUpvalues = totalUpvalues + 1
+                j = j + 1
+            end
+            
+            if #upvalues > 0 then
+                table.insert(output, "├─ Function " .. i .. " upvalues:")
+                for k, upval in ipairs(upvalues) do
+                    local prefix = k == #upvalues and "│  └─" or "│  ├─"
+                    table.insert(output, prefix .. " " .. upval.name .. " (" .. upval.type .. "): " .. upval.value)
+                end
+            end
+        end
+        if totalUpvalues == 0 then
+            table.insert(output, "└─ No upvalues found")
+        end
+    else
+        table.insert(output, "└─ Unable to retrieve upvalues")
+    end
+    table.insert(output, "")
+    
+    table.insert(output, "📊 CONSTANTS:")
+    local constants = {}
+    if #functions > 0 then
+        for i, func in ipairs(functions) do
+            local j = 1
+            while true do
+                local constant = debug.getconstant(func, j)
+                if constant == nil then break end
+                table.insert(constants, {
+                    func = i,
+                    index = j,
+                    value = tostring(constant),
+                    type = type(constant)
+                })
+                j = j + 1
+            end
+        end
+        
+        if #constants > 0 then
+            table.insert(output, "├─ Total Constants: " .. #constants)
+            for i, const in ipairs(constants) do
+                local prefix = i == #constants and "└─" or "├─"
+                table.insert(output, prefix .. " Func" .. const.func .. "[" .. const.index .. "] (" .. const.type .. "): " .. const.value)
+            end
+        else
+            table.insert(output, "└─ No constants found")
+        end
+    else
+        table.insert(output, "└─ Unable to retrieve constants")
+    end
+    table.insert(output, "")
+    
+    table.insert(output, "═══════════════════════════════════════════════════════════════")
+    table.insert(output, "Debug generated at: " .. os.date("%Y-%m-%d %H:%M:%S"))
+    table.insert(output, "═══════════════════════════════════════════════════════════════")
+    
+    return table.concat(output, "\n")
+end
+
 local function openScript(o)
+	CurrentScript = o
     EditorGrid.Text = ""
     local Triggers = {'--This script could not be decompiled due to it having no bytecode', '"--This script could not be decompiled due to it having no bytecode"'}
     local id = o:GetDebugId()
@@ -1408,10 +1564,17 @@ Connect(CopyScript.Activated, function()
 end)
 
 Connect(ClearScript.Activated, function()
+	CurrentScript = nil
 	ScriptEditor.SetContent("")
 	TxtArea.CanvasPosition = Vector2_zero
 	Title.Text = "[Script Viewer]"
 	Clear()
+end)
+
+Connect(DebugScript.Activated, function()
+	if not Title.Text:find("Viewing") then return end
+    ScriptEditor.SetContent("")
+	ScriptEditor.SetContent(DebugScriptAt(CurrentScript))
 end)
 
 Connect(CloseEditor.Activated, function()
