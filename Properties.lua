@@ -279,7 +279,7 @@ local BrickColors = {
 	OuterBorderColor = Styles.Black
 }
 
-wait(1)
+task.wait(1)
 
 local ContentUrl = "rbxassetid://"
 
@@ -1990,11 +1990,11 @@ do
 			end)
 			MouseDrag.Parent = GetScreen(ScrollFrame)
 			Class:ScrollDown()
-			wait(.2)
+			task.wait(.2)
 			while scrollEventID == current do
 				Class:ScrollDown()
 				if not Class:CanScrollDown() then break end
-				wait()
+				task.wait()
 			end
 		end)
 
@@ -2014,11 +2014,11 @@ do
 			end)
 			MouseDrag.Parent = GetScreen(ScrollFrame)
 			Class:ScrollUp()
-			wait(.2)
+			task.wait(.2)
 			while scrollEventID == current do
 				Class:ScrollUp()
 				if not Class:CanScrollUp() then break end
-				wait(0)
+				task.wait(0)
 			end
 		end)
 
@@ -2041,19 +2041,19 @@ do
 				MouseDrag.Parent = GetScreen(ScrollFrame)
 				if x > ScrollThumbFrame.AbsolutePosition.X then
 					Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
-					wait(.2)
+					task.wait(.2)
 					while scrollEventID == current do
 						if x < ScrollThumbFrame.AbsolutePosition.X + ScrollThumbFrame.AbsoluteSize.X then break end
 						Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
-						wait(0)
+						task.wait(0)
 					end
 				else
 					Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
-					wait(.2)
+					task.wait(.2)
 					while scrollEventID == current do
 						if x > ScrollThumbFrame.AbsolutePosition.X then break end
 						Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
-						wait(0)
+						task.wait(0)
 					end
 				end
 			end)
@@ -2071,19 +2071,19 @@ do
 				MouseDrag.Parent = GetScreen(ScrollFrame)
 				if y > ScrollThumbFrame.AbsolutePosition.Y then
 					Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
-					wait(.2)
+					task.wait(.2)
 					while scrollEventID == current do
 						if y < ScrollThumbFrame.AbsolutePosition.Y + ScrollThumbFrame.AbsoluteSize.Y then break end
 						Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
-						wait(0)
+						task.wait(0)
 					end
 				else
 					Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
-					wait(.2)
+					task.wait(.2)
 					while scrollEventID == current do
 						if y > ScrollThumbFrame.AbsolutePosition.Y then break end
 						Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
-						wait(0)
+						task.wait(0)
 					end
 				end
 			end)
