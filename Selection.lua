@@ -81,9 +81,9 @@ local wait = task.wait
 local function BeforeLoad()
 	local A, B = pcall(readfile, "dexv4_settings.json")
 	local C = A and JSONDecode(HttpService, B) or {}
-	local D = Player:GetDebugId()
-	WaitForChild(IntroFrame, "USID", 10).Text = string_format("USID: %s", D)
-	WaitForChild(AboutPanel, "USID", 10).Text = string_format("USID: %s", D)
+	local D = string.gsub('xxxx-xxxx', '[x]', function() return string.format('%X', math.random(0, 15)) end)
+	WaitForChild(IntroFrame, "USID", 10).Text = "UUID : " .. D
+	WaitForChild(AboutPanel, "USID", 10).Text = "UUID : " .. D
 	if C.Save then
 		local E = C.Save
 		WaitForChild(SettingHeader, "TextLabel", 10).Text = string_format("Settings | Last Save - %s/%s/%s (%s:%s:%s.%s)", E.Day, E.Month, string_sub(E.Year, #E.Year - 1, #E.Year), E.Hours, E.Minutes, E.Seconds, E.Milliseconds)
@@ -128,6 +128,7 @@ end
 local function toggleDex(p1)
 	TweenPosition(SideMenu, p1 and UDim2_new(1, -330, 0, 0) or UDim2_new(1, 0, 0, 0), "Out", "Quad", .5, true)
 	TweenPosition(OpenToggleButton, p1 and UDim2_new(1, 0, 0, 0) or UDim2_new(1, -40, 0, 0), "Out", "Quad", .5, true)
+	task.wait(1)
 	switchWindows(p1 and CurrentWindow or "Nothing c:", p1 and true or nil)
 end
 
