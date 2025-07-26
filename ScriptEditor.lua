@@ -1,5 +1,5 @@
 -- < Fix for module threads not being supported since synapse x > --
-local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("LocalScript")
+local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("ScriptEditor")
 -- < Aliases > --
 local Vector2_zero = Vector2.zero
 local Vector2_new = Vector2.new
