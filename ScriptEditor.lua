@@ -1309,7 +1309,7 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 })
 
 local function DebugScriptAt(o)
-    if not script or not script:IsA("LocalScript") then
+    if not o or not o:IsA("LocalScript") then
         return "ERROR: Provided instance is not a LocalScript"
     end
     
@@ -1321,7 +1321,7 @@ local function DebugScriptAt(o)
     table.insert(output, "")
     
     table.insert(output, "📋 SCRIPT INFORMATION:")
-    table.insert(output, "├─ Name: " .. script.Name)
+    table.insert(output, "├─ Name: " .. o.Name)
     
     local function safeGetHiddenProperty(obj, prop)
         local success, result = pcall(function()
@@ -1330,21 +1330,25 @@ local function DebugScriptAt(o)
         return success and tostring(result) or "Unable to retrieve"
     end
     
-    table.insert(output, "├─ Script GUID: " .. safeGetHiddenProperty(script, "ScriptGuid"))
-    table.insert(output, "├─ Bytecode Hash: " .. safeGetHiddenProperty(script, "BytecodeHash"))
-    table.insert(output, "└─ Source Asset ID: " .. safeGetHiddenProperty(script, "SourceAssetId"))
+    table.insert(output, "├─ Script GUID: " .. safeGetHiddenProperty(o, "ScriptGuid"))
+    table.insert(output, "├─ Bytecode Hash: " .. safeGetHiddenProperty(o, "BytecodeHash"))
+    table.insert(output, "└─ Source Asset ID: " .. safeGetHiddenProperty(o, "SourceAssetId"))
     table.insert(output, "")
     
     table.insert(output, "🌐 SCRIPT ENVIRONMENT:")
     local envSuccess, env = pcall(function()
-        return getsenv(script)
+        return getsenv(o)
     end)
     
     if envSuccess and env then
         local envTables = {}
         for key, value in pairs(env) do
             if type(value) == "table" then
-                table.insert(envTables, {name = key, size = #value})
+                local size = 0
+                pcall(function()
+                    size = #value
+                end)
+                table.insert(envTables, {name = key, size = size})
             end
         end
         
@@ -1372,7 +1376,7 @@ local function DebugScriptAt(o)
         for _, obj in pairs(functions) do
             if type(obj) == "function" then
                 local info = debug.getinfo(obj)
-                if info and info.source and info.source:find(script.Name) then
+                if info and info.source and info.source:find(o.Name) then
                     table.insert(scriptFunctions, obj)
                 end
             end
@@ -1400,9 +1404,17 @@ local function DebugScriptAt(o)
             local upvalues = {}
             local j = 1
             while true do
-                local name, value = debug.getupvalue(func, j)
-                if not name then break end
-                table.insert(upvalues, {name = name, value = tostring(value), type = type(value)})
+                local success, name, value = pcall(debug.getupvalue, func, j)
+                if not success or not name then break end
+                
+                local safeValue = "Unable to retrieve"
+                local valueType = "unknown"
+                pcall(function()
+                    safeValue = tostring(value)
+                    valueType = type(value)
+                end)
+                
+                table.insert(upvalues, {name = name, value = safeValue, type = valueType})
                 totalUpvalues = totalUpvalues + 1
                 j = j + 1
             end
@@ -1429,13 +1441,21 @@ local function DebugScriptAt(o)
         for i, func in ipairs(functions) do
             local j = 1
             while true do
-                local constant = debug.getconstant(func, j)
-                if constant == nil then break end
+                local success, constant = pcall(debug.getconstant, func, j)
+                if not success or constant == nil then break end
+                
+                local safeValue = "Unable to retrieve"
+                local valueType = "unknown"
+                pcall(function()
+                    safeValue = tostring(constant)
+                    valueType = type(constant)
+                end)
+                
                 table.insert(constants, {
                     func = i,
                     index = j,
-                    value = tostring(constant),
-                    type = type(constant)
+                    value = safeValue,
+                    type = valueType
                 })
                 j = j + 1
             end
