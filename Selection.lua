@@ -294,7 +294,7 @@ task.wait(0.5)
 
 switchWindows("Explorer")
 
-task.wait(1)
+task.wait(0.5)
 
 SideMenu.Visible = true
 
