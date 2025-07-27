@@ -2436,16 +2436,18 @@ do
 							a.Parent = b
 						end
 						if Option.Selectable then
-							rconsolewarn("Selection.List[1] type:".. type(Selection.List[1]).. "name:".. Selection.List[1].Name.. "classname:".. Selection.List[1].ClassName)
     						local list = Selection.List
-    						for i = 1,#list do 
+    						for i = 1,#list do
         						list[i].Parent = parentObj
-								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
+        						if NilInstances[list[i]] then
+           							NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
+        						end
     						end
 						else
-							rconsolewarn("object type:".. type(object).. "name:".. object.Name.. "classname:".. object.ClassName)
     						object.Parent = parentObj
-							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
+    						if NilInstances[object] then
+        						NilInstances[object].Parent = NilInstances[parentObj] or parentObj
+    						end
 						end
 						rawUpdateList()
 					end
