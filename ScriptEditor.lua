@@ -1337,8 +1337,12 @@ local function openScript(o)
             end
             path = "getnilinstances()." .. table.concat(ancestors, ".")
         else
-            path = o:GetFullName()
+            local TargetPath = o:GetFullName()
+            local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
+            local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
+            path = string.format("game:GetService(\"%s\")%s", ServiceName, Rest ~= "" and "." .. Rest or "")
         end
+		
         local decompiled
         if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
             decompiled = decompile(o)
