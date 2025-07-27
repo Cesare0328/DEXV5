@@ -3053,10 +3053,8 @@ end
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
-			warn("Yes")
             if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
-				warn("yes1")
-				local TargetIndex = findObjectIndex(Selection:Get())
+				local TargetIndex = findObjectIndex(Selection:Get()[1])
                 local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
                 scrollBar:ScrollTo(ScrollIndex)
 			end
