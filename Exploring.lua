@@ -874,13 +874,14 @@ if NilStorageEnabled then
 		Parent = NilStorage
 	})
 	for _, NilInstance in next, getnilinstances() do
-		local nilInstance
-		NilInstance.Archivable = true
-		pcall(function()
-			nilInstance = Clone(NilInstance)
-			nilInstance.Disabled = true
-			nilInstance.Parent = NilStorageMain
-		end)
+    	local nilInstance
+    	NilInstance.Archivable = true
+    	pcall(function()
+        	nilInstance = Clone(NilInstance)
+        	nilInstance.Disabled = true
+        	nilInstance.Parent = NilStorageMain
+        	nilInstance:SetAttribute("OriginalInstance", NilInstance)
+    	end)
 	end
 end
 
@@ -2430,17 +2431,28 @@ do
 							a.Parent = b
 						end
 						if Option.Selectable then
-							warn(Selection:Get()[1])
-    						object.Parent = parentObj
-							Selection:Get()[1].Parent = parentObj
-    						local list = Selection.List
-    						for i = 1,#list do 
-        						list[i].Parent = parentObj 
-    						end
+   						local list = Selection.List
+   						for i = 1,#list do
+       						local visualInstance = list[i]
+       						local originalInstance = visualInstance:GetAttribute("OriginalInstance")
+       
+       						if originalInstance then
+           						originalInstance.Parent = parentObj
+           						visualInstance.Parent = parentObj
+       						else
+           						visualInstance.Parent = parentObj
+       						end
+   						end
 						else
-							warn(Selection:Get()[1])
-    						object.Parent = parentObj
-							Selection:Get()[1].Parent = parentObj
+   						local visualInstance = object
+   						local originalInstance = visualInstance:GetAttribute("OriginalInstance")
+   
+   						if originalInstance then
+       						originalInstance.Parent = parentObj
+       						visualInstance.Parent = parentObj
+   						else
+       						visualInstance.Parent = parentObj
+   						end
 						end
 						rawUpdateList()
 					end
