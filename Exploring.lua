@@ -1942,6 +1942,8 @@ function rightClickMenu(sObj)
 		table_insert(actions, 10, "Call Remote")
 	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
+	elseif explorerFilter.Text ~= "" then
+		table_insert(actions, 8, "Clear Search and Jump to")
 	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
 	elseif IsA(sObj, "TouchTransmitter") then
@@ -2078,6 +2080,14 @@ function rightClickMenu(sObj)
 			    end
 				break
 			end
+		elseif option == "Clear Search and Jump to" then
+			explorerFilter.Text = ""
+            rawUpdateList()
+		    if #Selection:Get() == 1 then
+			    local TargetIndex = findObjectIndex(Selection:Get()[1])
+                local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+                scrollBar:ScrollTo(ScrollIndex)
+		    end
 		elseif option == "Insert Part" then
 			if not Option.Modifiable then
 				return
