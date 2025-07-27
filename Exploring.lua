@@ -2114,74 +2114,82 @@ function rightClickMenu(sObj)
 				end
 			end
 		elseif option == 'Copy Path' then
-			if not Option.Modifiable then
-				return
-			end
-		local path
-		local obj = Selection:Get()[1]
-		if not obj:IsDescendantOf(game) then
-    		local ancestors = {}
-    		local current = obj
-    		while current do
-        		table.insert(ancestors, 1, current.Name)
-        		current = current.Parent
+    		if not Option.Modifiable then
+        		return
     		end
-    		if ancestors[1] == "Dex Internal Storage" then
-       			table.remove(ancestors, 1)
-    		end
-    		if ancestors[1] == "Nil Instances" then
-        		table.remove(ancestors, 1)
-    		end
-    
-    		if #ancestors > 0 then
-        		local pathParts = {"getnilinstances()"}
-        		for i = 1, #ancestors do
-            		local name = ancestors[i]
-            		if name:match("^[%a_][%w_]*$") then
-                		if i == 1 then
-                    		table.insert(pathParts, name)
+    		local path
+    		local obj = Selection:Get()[1]
+    		if not obj:IsDescendantOf(game) then
+        		local ancestors = {}
+        		local current = obj
+        		while current do
+            		table.insert(ancestors, 1, current.Name)
+            		current = current.Parent
+        		end
+        		if ancestors[1] == "Dex Internal Storage" then
+            		table.remove(ancestors, 1)
+        		end
+        		if ancestors[1] == "Nil Instances" then
+            		table.remove(ancestors, 1)
+        		end
+
+        		if #ancestors > 0 then
+            		local pathParts = {"getnilinstances()"}
+            		for i = 1, #ancestors do
+                		local name = ancestors[i]
+                		if name:match("^[%a_][%w_]*$") then
+                    		if i == 1 then
+                        		table.insert(pathParts, name)
+                    		else
+                        		table.insert(pathParts, "." .. name)
+                    		end
                 		else
-                    		table.insert(pathParts, "." .. name)
+                    		local escapedName = name:gsub('"', '\\"')
+                    		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
                 		end
-            		else
-                		local escapedName = name:gsub('"', '\\"')
-                		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
             		end
-        		end
-        		path = table.concat(pathParts, "")
-    		else
-        		path = "getnilinstances()"
-    		end
-		else
-    		local TargetPath = obj:GetFullName()
-    		local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
-    		local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
-    
-		if Rest ~= "" then
-    		local segments = {}
-    		for segment in Rest:gmatch("[^%.]+") do
-        		if segment ~= "" then
-            		table.insert(segments, segment)
-        		end
-    		end
-    
-    		local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
-    		for i = 1, #segments do
-        		local name = segments[i]
-        		if name:match("^[%a_][%w_]*$") then
-            		table.insert(pathParts, "." .. name)
+            		path = table.concat(pathParts, "")
         		else
-            		local escapedName = name:gsub('"', '\\"')
-            		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+            		path = "getnilinstances()"
+        		end
+    		else
+        		local TargetPath = obj:GetFullName()
+        		local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
+        		local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
+
+        		if Rest ~= "" then
+            		local segments = {}
+            		local start = 1
+            		while start <= #Rest do
+                		local dotPos = Rest:find("%.", start)
+                		if dotPos then
+                    		local segment = Rest:sub(start, dotPos - 1)
+                    		table.insert(segments, segment)
+                    		start = dotPos + 1
+                		else
+                    		local segment = Rest:sub(start)
+                    		table.insert(segments, segment)
+                    		break
+                		end
+            		end
+    
+            		local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+            		for i = 1, #segments do
+                		local name = segments[i]
+                		if name:match("^[%a_][%w_]*$") and not name:match("^%.") then
+                    		table.insert(pathParts, "." .. name)
+                		else
+                    		local escapedName = name:gsub('"', '\\"')
+                    		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+                		end
+            		end
+    
+            		path = table.concat(pathParts, "")
+        		else
+            		path = string.format("game:GetService(\"%s\")", ServiceName)
         		end
     		end
-    
-    		path = table.concat(pathParts, "")
-    		else
-        		path = string.format("game:GetService(\"%s\")", ServiceName)
-    		end
-		end
-		setclipboard(path)
+    		setclipboard(path)
 		elseif option == "Call Remote" then
 			if not Option.Modifiable then
 				return
