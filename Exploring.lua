@@ -67,6 +67,7 @@ local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
+local NilInstances = {}
 local Mouse = LocalPlayer:GetMouse()
 local Option = {
 	Modifiable = true, -- can modify object parents in the hierarchy
@@ -876,7 +877,7 @@ if NilStorageEnabled then
 	for _, v in next, getnilinstances() do
 		v.Archivable = true
 		local Cloned = Clone(v)
-		Cloned:SetAttribute(v, "RealObj")
+		NilInstances[Cloned] = v
 		pcall(function()
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
@@ -2432,11 +2433,11 @@ do
     						local list = Selection.List
     						for i = 1,#list do 
         						list[i].Parent = parentObj
-								list[i]:GetAttribute("RealObj").Parent = parentObj:GetAttribute("RealObj") or parentObj
+								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
     						end
 						else
     						object.Parent = parentObj
-							object:GetAttribute("RealObj").Parent = parentObj:GetAttribute("RealObj") or parentObj
+							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
 						end
 						rawUpdateList()
 					end
