@@ -2224,7 +2224,7 @@ do
 			local pos, size = Vector2_new(x,y) - listFrame.AbsolutePosition, listFrame.AbsoluteSize
 			if pos.X < 0 or pos.X > size.X or pos.Y < 0 or pos.Y > size.Y then return end
 
-			local i = math_ceil(pos.Y/ENTRY_BOUND) + scrollBar.ScrollIndex
+			local i = math_floor(pos.Y/ENTRY_BOUND) + 1 + scrollBar.ScrollIndex
 			for n = i<last and i or last, i>last and i or last do
 				local node = TreeList[n]
 				if node then
@@ -2258,29 +2258,29 @@ do
 			Visible = false,
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(),
-				BackgroundTransparency = .1,
+				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundTransparency = .3,
 				Position = UDim2_new(),
 				Size = UDim2_new(1,0,0,1)
 			}),
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(),
-				BackgroundTransparency = .1,
+				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundTransparency = .3,
 				Position = UDim2_new(1,0,0,0),
 				Size = UDim2_new(0,1,1,0)
 			}),
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(),
-				BackgroundTransparency = .1,
+				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundTransparency = .3,
 				Position = UDim2_new(0,0,1,0),
 				Size = UDim2_new(1,0,0,1)
 			}),
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(),
-				BackgroundTransparency = .1,
+				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundTransparency = .3,
 				Position = UDim2_new(),
 				Size = UDim2_new(0,1,1,0)
 			}),
@@ -2292,21 +2292,22 @@ do
 				local pos,size = dragPos - listFrame.AbsolutePosition,listFrame.AbsoluteSize
 				parentIndex = nil
 				parentHighlight.Visible = false
-				if pos.X >= 0 and pos.X <= size.X and pos.Y >= 0 and pos.Y <= size.Y + ENTRY_SIZE*2 then
-					local i = math_ceil(pos.Y/ENTRY_BOUND-2)
+				if pos.X >= -5 and pos.X <= size.X + 5 and pos.Y >= -5 and pos.Y <= size.Y + ENTRY_SIZE*2 then
+					local i = math_floor(pos.Y/ENTRY_BOUND) + 1
 					local node = TreeList[i + scrollBar.ScrollIndex]
 					if node and node.Object ~= object and not IsAncestorOf(object, node.Object) then
 						parentIndex = i
 						local entry = listEntries[i]
 						if entry then
 							parentHighlight.Visible = true
-							parentHighlight.Position = UDim2_new(0,1,0,entry.AbsolutePosition.Y-listFrame.AbsolutePosition.Y)
+							local entryRelativeY = entry.AbsolutePosition.Y - listFrame.AbsolutePosition.Y
+							parentHighlight.Position = UDim2_new(0,1,0,entryRelativeY)
 							parentHighlight.Size = UDim2_new(0,size.X-4,0,entry.AbsoluteSize.Y)
 						end
 					end
 				end
 				dragGhost.Position = UDim2_new(0,dragPos.X+ghostOffset.X,0,dragPos.Y+ghostOffset.Y)
-			elseif (clickPos-dragPos).Magnitude > 8 then
+			elseif (clickPos-dragPos).Magnitude > 6 then
 				dragged = true
 				SetZIndex(dragGhost,9)
 				dragGhost.IndentFrame.Transparency = .25
