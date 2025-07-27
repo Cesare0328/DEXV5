@@ -2224,7 +2224,7 @@ do
 			local pos, size = Vector2_new(x,y) - listFrame.AbsolutePosition, listFrame.AbsoluteSize
 			if pos.X < 0 or pos.X > size.X or pos.Y < 0 or pos.Y > size.Y then return end
 
-			local i = math_floor(pos.Y/ENTRY_BOUND) - 3 + scrollBar.ScrollIndex
+			local i = math_floor(pos.Y/ENTRY_BOUND) - 2 + scrollBar.ScrollIndex
 			for n = i<last and i or last, i>last and i or last do
 				local node = TreeList[n]
 				if node then
@@ -2293,7 +2293,7 @@ do
 				parentIndex = nil
 				parentHighlight.Visible = false
 				if pos.X >= -5 and pos.X <= size.X + 5 and pos.Y >= 0 and pos.Y <= size.Y + ENTRY_SIZE*2 then
-					local i = math_floor(pos.Y/ENTRY_BOUND) - 3
+					local i = math_floor(pos.Y/ENTRY_BOUND) - 2
 					local actualIndex = i + scrollBar.ScrollIndex
 					local node = TreeList[actualIndex]
 					if node and node.Object ~= object and not IsAncestorOf(object, node.Object) then
