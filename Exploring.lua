@@ -2062,10 +2062,10 @@ function rightClickMenu(sObj)
 					    LocalPlayer.Character:MoveTo(Selected.RootPart.Position)
 				    end)
 				elseif Selected:IsA("Player") and Selected.Character and Selected.Character.PrimaryPart then
-                    pcall(function()
+                    --pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.Character.PrimaryPart.CFrame)
 					    LocalPlayer.Character:MoveTo(Selected.Character.PrimaryPart.Position)
-				    end)
+				    --end)
 			    end
 				break
 			end
