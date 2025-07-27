@@ -2117,29 +2117,69 @@ function rightClickMenu(sObj)
 			if not Option.Modifiable then
 				return
 			end
-        	local path
-			local obj = Selection:Get()[1]
-        	if not obj:IsDescendantOf(game) then
-            	local ancestors = {}
-            	local current = obj
-            	while current do
-                	table.insert(ancestors, 1, current.Name)
-                	current = current.Parent
-            	end
-				if ancestors[1] == "Dex Internal Storage" then
-                	table.remove(ancestors, 1)
-            	end
-            	if ancestors[1] == "Nil Instances" then
-                	table.remove(ancestors, 1)
-            	end
-            	path = "getnilinstances()." .. table.concat(ancestors, ".")
-        	else
-            	local TargetPath = obj:GetFullName()
-            	local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
-            	local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
-            	path = string.format("game:GetService(\"%s\")%s", ServiceName, Rest ~= "" and "." .. Rest or "")
-        	end
-			setclipboard(path)
+		local path
+		local obj = Selection:Get()[1]
+		if not obj:IsDescendantOf(game) then
+    		local ancestors = {}
+    		local current = obj
+    		while current do
+        		table.insert(ancestors, 1, current.Name)
+        		current = current.Parent
+    		end
+    		if ancestors[1] == "Dex Internal Storage" then
+       			table.remove(ancestors, 1)
+    		end
+    		if ancestors[1] == "Nil Instances" then
+        		table.remove(ancestors, 1)
+    		end
+    
+    		if #ancestors > 0 then
+        		local pathParts = {"getnilinstances()"}
+        		for i = 1, #ancestors do
+            		local name = ancestors[i]
+            		if name:match("^[%a_][%w_]*$") then
+                		if i == 1 then
+                    		table.insert(pathParts, name)
+                		else
+                    		table.insert(pathParts, "." .. name)
+                		end
+            		else
+                		local escapedName = name:gsub('"', '\\"')
+                		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+            		end
+        		end
+        		path = table.concat(pathParts, "")
+    		else
+        		path = "getnilinstances()"
+    		end
+		else
+    		local TargetPath = obj:GetFullName()
+    		local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
+    		local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
+    
+    		if Rest ~= "" then
+        		local segments = {}
+        		for segment in Rest:gmatch("[^%.]+") do
+            		table.insert(segments, segment)
+        		end
+        
+        		local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+        		for i = 1, #segments do
+            		local name = segments[i]
+            		if name:match("^[%a_][%w_]*$") then
+                		table.insert(pathParts, "." .. name)
+            		else
+                		local escapedName = name:gsub('"', '\\"')
+                		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+            		end
+        		end
+        
+        		path = table.concat(pathParts, "")
+    		else
+        		path = string.format("game:GetService(\"%s\")", ServiceName)
+    		end
+		end
+		setclipboard(path)
 		elseif option == "Call Remote" then
 			if not Option.Modifiable then
 				return
