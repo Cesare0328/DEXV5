@@ -2117,15 +2117,28 @@ function rightClickMenu(sObj)
 			if not Option.Modifiable then
 				return
 			end
-			local paths = {}
-			for _, Selected in ipairs(Selection:Get()) do
-				table_insert(paths, GetPath(Selected))
-			end
-			if #paths > 1 then
-				setclipboard(tableToString(paths))
-			elseif #paths == 1 then
-				setclipboard(paths[1])
-			end
+        	local path
+        	if not o:IsDescendantOf(game) then
+            	local ancestors = {}
+            	local current = o
+            	while current do
+                	table.insert(ancestors, 1, current.Name)
+                	current = current.Parent
+            	end
+				if ancestors[1] == "Dex Internal Storage" then
+                	table.remove(ancestors, 1)
+            	end
+            	if ancestors[1] == "Nil Instances" then
+                	table.remove(ancestors, 1)
+            	end
+            	path = "getnilinstances()." .. table.concat(ancestors, ".")
+        	else
+            	local TargetPath = o:GetFullName()
+            	local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
+            	local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
+            	path = string.format("game:GetService(\"%s\")%s", ServiceName, Rest ~= "" and "." .. Rest or "")
+        	end
+			setclipboard(path)
 		elseif option == "Call Remote" then
 			if not Option.Modifiable then
 				return
