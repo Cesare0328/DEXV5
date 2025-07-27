@@ -474,7 +474,7 @@ function PerformResize(MousePos)
 
     editor.Editor.Size = NewSize
     editor.Editor.Position = StartFramePos
-    ScriptEditor.Size = NewEditorSize
+    editor.Size = NewEditorSize
 end
 function Place.fromIndex(CodeEditor, Index)
 	local cache = CodeEditor.PlaceCache
@@ -1291,7 +1291,7 @@ function EditorLib.Initialize(Frame, Options)
             	StartMousePos = MousePos
             	StartFrameSize = editor.Editor.Size
             	StartFramePos = editor.Editor.Position
-            	StartEditorSize = ScriptEditor.Size
+            	StartEditorSize = editor.Size
         	end
     	end
 	end)
