@@ -2118,9 +2118,10 @@ function rightClickMenu(sObj)
 				return
 			end
         	local path
-        	if not o:IsDescendantOf(game) then
+			local obj = Selection:Get()[1]
+        	if not obj:IsDescendantOf(game) then
             	local ancestors = {}
-            	local current = o
+            	local current = obj
             	while current do
                 	table.insert(ancestors, 1, current.Name)
                 	current = current.Parent
@@ -2133,7 +2134,7 @@ function rightClickMenu(sObj)
             	end
             	path = "getnilinstances()." .. table.concat(ancestors, ".")
         	else
-            	local TargetPath = o:GetFullName()
+            	local TargetPath = obj:GetFullName()
             	local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
             	local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
             	path = string.format("game:GetService(\"%s\")%s", ServiceName, Rest ~= "" and "." .. Rest or "")
