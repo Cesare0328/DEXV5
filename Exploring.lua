@@ -2369,6 +2369,7 @@ do
 						else
 							pcall(parent,object,parentObj)
 						end
+						rawUpdateList()
 					end
 				end
 			else
@@ -2378,6 +2379,7 @@ do
 					Selection:Set({})
 				end
 			end
+			cancelReparentDrag()
 		end)
 		conUp2 = Connect(mouseDrag.MouseButton2Down, function()
 			cancelReparentDrag()
