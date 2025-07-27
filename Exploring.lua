@@ -3052,6 +3052,7 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
+		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
             if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
 				local TargetIndex = findObjectIndex(Selection:Get()[1])
@@ -3059,7 +3060,6 @@ Connect(explorerFilter.FocusLost, function(p1)
                 scrollBar:ScrollTo(ScrollIndex)
 			end
 		end
-		rawUpdateList()
 	end
 end)
 
