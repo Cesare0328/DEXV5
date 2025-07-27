@@ -1385,9 +1385,9 @@ local function openScript(o)
     else
         local guid = tostring(gethiddenproperty(o,"ScriptGuid")) or "{Couldn't grab GUID}"
     	local path
-    	if not 0:IsDescendantOf(game) then
+    	if not o:IsDescendantOf(game) then
         	local ancestors = {}
-        	local current = 0
+        	local current = o
         	while current do
             	table.insert(ancestors, 1, current.Name)
             	current = current.Parent
@@ -1416,7 +1416,7 @@ local function openScript(o)
         	end
 		else
             local ancestors = {}
-            local current = 0
+            local current = o
             while current.Parent ~= game do
                 table.insert(ancestors, 1, current.Name)
                 current = current.Parent
