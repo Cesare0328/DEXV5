@@ -2152,55 +2152,30 @@ function rightClickMenu(sObj)
         		else
             		path = "getnilinstances()"
         		end
-    		else
-        		local TargetPath = obj:GetFullName()
-        		local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
-        		local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
-
-        		if Rest ~= "" then
-				local segments = {}
-				local start = 1
-				while start <= #Rest do
-    				local dotPos = Rest:find("%.", start)
-    				if dotPos then
-        				local segment = Rest:sub(start, dotPos - 1)
-        				if segment == "" then
-            				local nextDotPos = Rest:find("%.", dotPos + 1)
-            				if nextDotPos then
-                				segment = "." .. Rest:sub(dotPos + 1, nextDotPos - 1)
-                				start = nextDotPos + 1
-            				else
-                				segment = "." .. Rest:sub(dotPos + 1)
-                				start = #Rest + 1
-            				end
-        				else
-            				start = dotPos + 1
-        				end
-        				table.insert(segments, segment)
-    				else
-        				local segment = Rest:sub(start)
-        				table.insert(segments, segment)
-        				break
-    				end
-				end
-    
-            	local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
-            	for i = 1, #segments do
-                	local name = segments[i]
-                	if name:match("^[%a_][%w_]*$") and not name:match("^%.") then
-                    	table.insert(pathParts, "." .. name)
-                	else
-                    	local escapedName = name:gsub('"', '\\"')
-                    	table.insert(pathParts, "[\"" .. escapedName .. "\"]")
-                	end
-            	end
-
-            	path = table.concat(pathParts, "")
-        	else
-            	path = string.format("game:GetService(\"%s\")", ServiceName)
-        	end
-    	end
-    	setclipboard(path)
+			else
+                local ancestors = {}
+                local current = obj
+                while current.Parent ~= game do
+                    table.insert(ancestors, 1, current.Name)
+                    current = current.Parent
+                end
+                
+                local ServiceName = current.ClassName
+                
+                local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+                for i = 1, #ancestors do
+                    local name = ancestors[i]
+                    if name:match("^[%a_][%w_]*$") then
+                        table.insert(pathParts, "." .. name)
+                    else
+                        local escapedName = name:gsub('"', '\\"')
+                        table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+                    end
+                end
+                
+                path = table.concat(pathParts, "")
+            end
+        setclipboard(path)
 		elseif option == "Call Remote" then
 			if not Option.Modifiable then
 				return
