@@ -2158,38 +2158,49 @@ function rightClickMenu(sObj)
         		local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
 
         		if Rest ~= "" then
-            		local segments = {}
-            		local start = 1
-            		while start <= #Rest do
-                		local dotPos = Rest:find("%.", start)
-                		if dotPos then
-                    		local segment = Rest:sub(start, dotPos - 1)
-                    		table.insert(segments, segment)
-                    		start = dotPos + 1
-                		else
-                    		local segment = Rest:sub(start)
-                    		table.insert(segments, segment)
-                    		break
-                		end
-            		end
+				local segments = {}
+				local start = 1
+				while start <= #Rest do
+    				local dotPos = Rest:find("%.", start)
+    				if dotPos then
+        				local segment = Rest:sub(start, dotPos - 1)
+        				if segment == "" then
+            				local nextDotPos = Rest:find("%.", dotPos + 1)
+            				if nextDotPos then
+                				segment = "." .. Rest:sub(dotPos + 1, nextDotPos - 1)
+                				start = nextDotPos + 1
+            				else
+                				segment = "." .. Rest:sub(dotPos + 1)
+                				start = #Rest + 1
+            				end
+        				else
+            				start = dotPos + 1
+        				end
+        				table.insert(segments, segment)
+    				else
+        				local segment = Rest:sub(start)
+        				table.insert(segments, segment)
+        				break
+    				end
+				end
     
-            		local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
-            		for i = 1, #segments do
-                		local name = segments[i]
-                		if name:match("^[%a_][%w_]*$") and not name:match("^%.") then
-                    		table.insert(pathParts, "." .. name)
-                		else
-                    		local escapedName = name:gsub('"', '\\"')
-                    		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
-                		end
-            		end
-    
-            		path = table.concat(pathParts, "")
-        		else
-            		path = string.format("game:GetService(\"%s\")", ServiceName)
-        		end
-    		end
-    		setclipboard(path)
+            	local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+            	for i = 1, #segments do
+                	local name = segments[i]
+                	if name:match("^[%a_][%w_]*$") and not name:match("^%.") then
+                    	table.insert(pathParts, "." .. name)
+                	else
+                    	local escapedName = name:gsub('"', '\\"')
+                    	table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+                	end
+            	end
+
+            	path = table.concat(pathParts, "")
+        	else
+            	path = string.format("game:GetService(\"%s\")", ServiceName)
+        	end
+    	end
+    	setclipboard(path)
 		elseif option == "Call Remote" then
 			if not Option.Modifiable then
 				return
