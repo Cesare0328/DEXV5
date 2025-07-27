@@ -2420,27 +2420,24 @@ do
 		conUp = Connect(mouseDrag.MouseButton1Up, function()
 			cancelReparentDrag()
 			if dragged then
-				warn("1")
 				if parentIndex then
-					warn("2")
 					local actualParentIndex = parentIndex + scrollBar.ScrollIndex
 					local parentNode = TreeList[actualParentIndex]
 					if parentNode then
-						warn("3")
 						parentNode.Expanded = true
 						local parentObj = parentNode.Object
 						local function parent(a,b)
 							a.Parent = b
 						end
-						if Option.Selectable and object:IsDescendantOf(game) and parentObj:IsDescendantOf(game) then
-							warn("6")
+						if Option.Selectable then
     						local list = Selection.List
     						for i = 1,#list do 
         						list[i].Parent = parentObj 
     						end
 						else
-							warn("5")
+							warn(Selection:Get()[1])
     						object.Parent = parentObj
+							Selection:Get()[1].Parent = parentObj
 						end
 						rawUpdateList()
 					end
