@@ -1281,7 +1281,7 @@ function EditorLib.Initialize(Frame, Options)
 				end
 			end
 		end
-		if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 and editor.Visible then
         	local MousePos = UserInputService:GetMouseLocation()
         	local Direction = GetResizeDirection(MousePos)
         
@@ -1296,7 +1296,7 @@ function EditorLib.Initialize(Frame, Options)
     	end
 	end)
 	Connect(UserInputService.InputEnded, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 and editor.Visible then
 			BeginSelect = nil
 			IsResizing = false
             ResizeDirection = ""
@@ -1321,7 +1321,7 @@ function EditorLib.Initialize(Frame, Options)
 		end
 	end)
 	Connect(UserInputService.InputChanged, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseMovement and IsResizing then
+		if Input.UserInputType == Enum.UserInputType.MouseMovement and IsResizing and editor.Visible then
         	PerformResize(UserInputService:GetMouseLocation())
     	end
 	end)
