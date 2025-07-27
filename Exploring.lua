@@ -1340,7 +1340,7 @@ local updateList,rawUpdateList,updateScroll,rawUpdateSize do
 	function updateList()
 		if updatingList or filteringInstances() then return end
 		updatingList = true
-		delay(1.5, function()
+		task.delay(0.25, function()
 			updatingList = false
 			rawUpdateList()
 		end)
@@ -1350,7 +1350,7 @@ local updateList,rawUpdateList,updateScroll,rawUpdateSize do
 	function updateScroll()
 		if updatingScroll then return end
 		updatingScroll = true
-		delay(1.5, function()
+		task.delay(0.25, function()
 			updatingScroll = false
 			scrollBar:Update()
 		end)
