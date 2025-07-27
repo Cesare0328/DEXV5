@@ -2430,6 +2430,9 @@ do
 							a.Parent = b
 						end
 						if Option.Selectable then
+							warn(Selection:Get()[1])
+    						object.Parent = parentObj
+							Selection:Get()[1].Parent = parentObj
     						local list = Selection.List
     						for i = 1,#list do 
         						list[i].Parent = parentObj 
