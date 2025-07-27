@@ -1931,7 +1931,7 @@ function rightClickMenu(sObj)
 		table_insert(actions, 1, "Refresh Instances")
 	elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
 		table_insert(actions, 10, "Call Remote")
-	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") then
+	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
 	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
@@ -2051,7 +2051,7 @@ function rightClickMenu(sObj)
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.CFrame)
 					    LocalPlayer.Character:MoveTo(Selected.Position)
 				    end)
-				elseif Selected:IsA("Model") and Selected.PrimaryPart then
+				elseif Selected:IsA("Model") then
                     pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected:GetPivot())
 					    LocalPlayer.Character:MoveTo(Selected:GetPivot().p)
