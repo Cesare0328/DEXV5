@@ -1260,6 +1260,15 @@ end
 
 local nameScanned, TreeList, NodeLookup, QuickButtons, nodeWidth = false, {}, {}, {}, 0
 
+function findObjectIndex(targetObject)
+    for i = 1, #TreeList do
+        if TreeList[i] and TreeList[i].Object == targetObject then
+            return i
+        end
+    end
+    return nil
+end
+
 function filteringInstances()
 	return (explorerFilter.Text ~= "" and explorerFilter.Text ~= "Filter Instances") and true or false
 end
@@ -1274,6 +1283,7 @@ function lookForAName(obj, name)
 end
 
 function scanName(obj)
+	IsInSearch = true
 	nameScanned = false
 	if string_find(string_lower(obj.Name),string_lower(explorerFilter.Text)) then
 		nameScanned = true
@@ -3043,6 +3053,8 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
+		warn("Stopped")
+		IsInSearch = false
 		rawUpdateList()
 	end
 end)
