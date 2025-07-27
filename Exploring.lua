@@ -2436,12 +2436,14 @@ do
 							a.Parent = b
 						end
 						if Option.Selectable then
+							print("Selection.List[1] type:", type(Selection.List[1]), "name:", Selection.List[1].Name, "classname:", Selection.List[1].ClassName)
     						local list = Selection.List
     						for i = 1,#list do 
         						list[i].Parent = parentObj
 								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
     						end
 						else
+							print("object type:", type(object), "name:", object.Name, "classname:", object.ClassName)
     						object.Parent = parentObj
 							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
 						end
