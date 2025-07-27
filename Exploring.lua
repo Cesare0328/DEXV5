@@ -66,6 +66,7 @@ local SetOption_Bindable = WaitForChild(Bindables, "SetOption", 300)
 local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
+local Searched = false
 local Mouse = LocalPlayer:GetMouse()
 local Option = {
 	Modifiable = true, -- can modify object parents in the hierarchy
@@ -1270,7 +1271,7 @@ function findObjectIndex(targetObject)
 end
 
 function filteringInstances()
-	return (explorerFilter.Text ~= "" and explorerFilter.Text ~= "Filter Instances") and true or false
+	return (explorerFilter.Text ~= "" and (explorerFilter.Text ~= "Filter Instances" and not Searched)) and true or false
 end
 
 function lookForAName(obj, name)
@@ -1942,7 +1943,7 @@ function rightClickMenu(sObj)
 		table_insert(actions, 10, "Call Remote")
 	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
-	elseif explorerFilter.Text ~= "" then
+	elseif filteringInstances() then
 		table_insert(actions, 8, "Clear Search and Jump to")
 	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
@@ -3108,6 +3109,7 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
+		Searched = true
 		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
             if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
