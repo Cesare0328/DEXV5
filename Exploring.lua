@@ -2292,17 +2292,34 @@ do
 				local pos,size = dragPos - listFrame.AbsolutePosition,listFrame.AbsoluteSize
 				parentIndex = nil
 				parentHighlight.Visible = false
-				if pos.X >= -5 and pos.X <= size.X + 5 and pos.Y >= -5 and pos.Y <= size.Y + ENTRY_SIZE*2 then
+				if pos.X >= -5 and pos.X <= size.X + 5 and pos.Y >= 0 and pos.Y <= size.Y + ENTRY_SIZE*2 then
 					local i = math_floor(pos.Y/ENTRY_BOUND) + 1
-					local node = TreeList[i + scrollBar.ScrollIndex]
+					local actualIndex = i + scrollBar.ScrollIndex
+					local node = TreeList[actualIndex]
 					if node and node.Object ~= object and not IsAncestorOf(object, node.Object) then
-						parentIndex = i
-						local entry = listEntries[i]
-						if entry then
-							parentHighlight.Visible = true
-							local entryRelativeY = entry.AbsolutePosition.Y - listFrame.AbsolutePosition.Y
-							parentHighlight.Position = UDim2_new(0,1,0,entryRelativeY)
-							parentHighlight.Size = UDim2_new(0,size.X-4,0,entry.AbsoluteSize.Y)
+						-- Additional check: make sure we're not highlighting the dragged object itself
+						local isDraggedObject = false
+						if Option.Selectable then
+							local selectedList = Selection.List
+							for j = 1, #selectedList do
+								if selectedList[j] == node.Object then
+									isDraggedObject = true
+									break
+								end
+							end
+						else
+							isDraggedObject = (node.Object == object)
+						end
+						
+						if not isDraggedObject then
+							parentIndex = i
+							local entry = listEntries[i]
+							if entry then
+								parentHighlight.Visible = true
+								local entryRelativeY = entry.AbsolutePosition.Y - listFrame.AbsolutePosition.Y
+								parentHighlight.Position = UDim2_new(0,1,0,entryRelativeY)
+								parentHighlight.Size = UDim2_new(0,size.X-4,0,entry.AbsoluteSize.Y)
+							end
 						end
 					end
 				end
@@ -2338,7 +2355,8 @@ do
 			cancelReparentDrag()
 			if dragged then
 				if parentIndex then
-					local parentNode = TreeList[parentIndex + scrollBar.ScrollIndex]
+					local actualParentIndex = parentIndex + scrollBar.ScrollIndex
+					local parentNode = TreeList[actualParentIndex]
 					if parentNode then
 						parentNode.Expanded = true
 						local parentObj = parentNode.Object
