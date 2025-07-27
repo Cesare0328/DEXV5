@@ -133,7 +133,8 @@ end
 
 local SaveMapSettings = {
 	SaveScripts = true,
-	ScriptCache = true
+	ScriptCache = true,
+	CloseRobloxAfterSave = false
 }
 
 local Settings = {
@@ -218,7 +219,7 @@ createSetting("Click part to select", "ClickSelect", Settings.ClickSelect)
 createSetting("Selection Box", "SelBox", Settings.SelBox)
 createSetting("Clear property value on focus", "ClearProps", Settings.ClearProps)
 createSetting("Select ungrouped models" , "SelectUngrouped", Settings.SelectUngrouped)
-createSetting("Skip to selected Object after Search Exit", "SkipToAfterSearch", Settings.SkipToAfterSearch)
+createSetting("Jump to selected Object after Search Exit", "SkipToAfterSearch", Settings.SkipToAfterSearch)
 createSetting("Hide unnecessary services (requires restart)", "UseInstanceBlacklist", Settings.UseInstanceBlacklist)
 createSetting("Script Storage includes RobloxLocked scripts", "RSSIncludeRL", Settings.RSSIncludeRL)
 
@@ -283,6 +284,7 @@ end
 
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
 createMapSetting(SaveMapSettingFrame.ScriptCache, "ScriptCache", SaveMapSettings.ScriptCache)
+createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
 
 Connect(SaveMapButton.Activated, function()
 	saveinstance({noscripts = not SaveMapSettings.SaveScripts, scriptcache = SaveMapSettings.ScriptCache, mode = "optimized"})
