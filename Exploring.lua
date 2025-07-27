@@ -2432,7 +2432,7 @@ do
 						local function parent(a,b)
 							a.Parent = b
 						end
-						if Option.Selectable then
+						if Option.Selectable and object:IsDescendantOf(game) and parentObj:IsDescendantOf(game) then
 							warn("6")
     						local list = Selection.List
     						for i = 1,#list do 
