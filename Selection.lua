@@ -141,6 +141,7 @@ local Settings = {
 	SelBox = false,
 	ClearProps = false,
 	SelectUngrouped = true,
+	SkipToAfterSearch = true
 	UseInstanceBlacklist = true,
 	RSSIncludeRL = false
 }
@@ -216,7 +217,8 @@ end
 createSetting("Click part to select", "ClickSelect", Settings.ClickSelect)
 createSetting("Selection Box", "SelBox", Settings.SelBox)
 createSetting("Clear property value on focus", "ClearProps", Settings.ClearProps)
-createSetting("Select ungrouped models" ,"SelectUngrouped", Settings.SelectUngrouped)
+createSetting("Select ungrouped models" , "SelectUngrouped", Settings.SelectUngrouped)
+createSetting("Skip to selected Object after Search Exit", "SkipToAfterSearch", Settings.SkipToAfterSearch)
 createSetting("Hide unnecessary services (requires restart)", "UseInstanceBlacklist", Settings.UseInstanceBlacklist)
 createSetting("Script Storage includes RobloxLocked scripts", "RSSIncludeRL", Settings.RSSIncludeRL)
 
