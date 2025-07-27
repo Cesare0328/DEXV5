@@ -876,7 +876,7 @@ if NilStorageEnabled then
 	for _, v in next, getnilinstances() do
 		v.Archivable = true
 		local Cloned = Clone(v)
-		Cloned:SetAttribute("RealObj", v)
+		Cloned:SetAttribute(v, "RealObj")
 		pcall(function()
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
