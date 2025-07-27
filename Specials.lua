@@ -1,7 +1,7 @@
 -- < Fix for module threads not being supported since synapse x > --
 local script = getgenv().Dex:WaitForChild("Specials")
 -- < Override getnilinstances to not rely on table > --
-do local o=getgenv().getnilinstances;getgenv().getnilinstances=function()return setmetatable(o(),{__index=function(t,k)for _,v in pairs(t)do if v and v.Name==k then return v end end end})end end
+do local o=getgenv().getnilinstances;getgenv().getnilinstances=function()local t=o()return setmetatable(t,{__index=function(tb,k)for _,v in pairs(tb)do if v and v.Name==k then return v end end return t end})end end
 -- < Services > --
 local HttpService = cloneref(game:GetService("HttpService"))
 -- < Aliases > --
