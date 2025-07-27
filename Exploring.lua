@@ -2157,24 +2157,26 @@ function rightClickMenu(sObj)
     		local ServiceName = game:FindFirstChild(TargetPath:match("^[^%.]+")).ClassName
     		local Rest = TargetPath:match("^[^%.]+%.(.+)") or ""
     
-    		if Rest ~= "" then
-        		local segments = {}
-        		for segment in Rest:gmatch("[^%.]+") do
+		if Rest ~= "" then
+    		local segments = {}
+    		for segment in Rest:gmatch("[^%.]+") do
+        		if segment ~= "" then
             		table.insert(segments, segment)
         		end
-        
-        		local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
-        		for i = 1, #segments do
-            		local name = segments[i]
-            		if name:match("^[%a_][%w_]*$") then
-                		table.insert(pathParts, "." .. name)
-            		else
-                		local escapedName = name:gsub('"', '\\"')
-                		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
-            		end
+    		end
+    
+    		local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+    		for i = 1, #segments do
+        		local name = segments[i]
+        		if name:match("^[%a_][%w_]*$") then
+            		table.insert(pathParts, "." .. name)
+        		else
+            		local escapedName = name:gsub('"', '\\"')
+            		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
         		end
-        
-        		path = table.concat(pathParts, "")
+    		end
+    
+    		path = table.concat(pathParts, "")
     		else
         		path = string.format("game:GetService(\"%s\")", ServiceName)
     		end
