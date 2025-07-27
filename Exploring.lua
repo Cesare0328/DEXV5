@@ -2045,7 +2045,7 @@ function rightClickMenu(sObj)
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
-				if not Selected:IsDescendantOf(workspace) then break end
+				if not Selected:IsDescendantOf(workspace) and not Selected:IsDescendantOf(Players) then break end
 				if Selected:IsA("BasePart") then
 				    pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.CFrame)
@@ -2062,10 +2062,10 @@ function rightClickMenu(sObj)
 					    LocalPlayer.Character:MoveTo(Selected.RootPart.Position)
 				    end)
 				elseif Selected:IsA("Player") and Selected.Character and Selected.Character.PrimaryPart then
-                    --pcall(function()
+                    pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.Character.PrimaryPart.CFrame)
 					    LocalPlayer.Character:MoveTo(Selected.Character.PrimaryPart.Position)
-				    --end)
+				    end)
 			    end
 				break
 			end
