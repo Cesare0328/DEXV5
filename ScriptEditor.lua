@@ -1393,11 +1393,6 @@ local function openScript(o)
     Title.Text = "[Script Viewer] Viewing: " .. o.Name
 end
 
---Resize Logic
-Connect(GetPropertyChangedSignal(editor, "AbsoluteSize"), function()
-	OtherFrame.Size = UDim2.new(0, editor.AbsoluteSize.X/5, 0, 25)
-end)
-
 Connect(OpenScript_Bindable.Event, function(object)
 	script.Parent.Visible = true
 	openScript(object)
