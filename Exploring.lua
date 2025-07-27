@@ -1271,7 +1271,7 @@ function findObjectIndex(targetObject)
 end
 
 function filteringInstances()
-	return (explorerFilter.Text ~= "" and (explorerFilter.Text ~= "Filter Instances" and not Searched)) and true or false
+	return (explorerFilter.Text ~= "" and explorerFilter.Text ~= "Filter Instances") and true or false
 end
 
 function lookForAName(obj, name)
@@ -1943,7 +1943,7 @@ function rightClickMenu(sObj)
 		table_insert(actions, 10, "Call Remote")
 	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
-	elseif filteringInstances() then
+	elseif filteringInstances() and not Searched then
 		table_insert(actions, 8, "Clear Search and Jump to")
 	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
