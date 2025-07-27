@@ -875,10 +875,11 @@ if NilStorageEnabled then
 		Parent = NilStorage
 	})
 	for _, v in next, getnilinstances() do
+		local Cloned
 		v.Archivable = true
-		local Cloned = Clone(v)
-		NilInstances[Cloned] = v
 		pcall(function()
+			Cloned = Clone(v)
+		    NilInstances[Cloned] = v
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
 		end)
