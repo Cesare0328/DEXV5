@@ -15,9 +15,10 @@ local udim2 = UDim2.new
 local newInst = Instance.new
 local wait = task.wait
 -- < Services > --
-local UserInputService = cloneref(game:GetService('UserInputService'))
+local UserInputService = cloneref(game:GetService("UserInputService"))
 local InsertService = cloneref(game:GetService("InsertService"))
-local TextService = cloneref(game:GetService('TextService'))
+local TweenService = cloneref(game:GetService("TweenService"))
+local TextService = cloneref(game:GetService("TextService"))
 local RunService = cloneref(game:GetService("RunService"))
 local Players = cloneref(game:GetService("Players"))
 -- < Class Aliases > --
@@ -53,6 +54,15 @@ local Title	= WaitForChild(TopBar, "Title")
 local LocalPlayer = Players.LocalPlayer
 local PlayerMouse = LocalPlayer:GetMouse()
 local Heartbeat = RunService.Heartbeat
+local MinSize = Frame.Size
+local ResizeEdgeSize = 0.1
+local IsResizing = false
+local ResizeDirection = ""
+local StartMousePos = Vector2.new(0, 0)
+local StartFrameSize = UDim2.new(0, 0, 0, 0)
+local StartFramePos = UDim2.new(0, 0, 0, 0)
+local StartEditorSize = UDim2.new(0, 0, 0, 0)
+
 -- < Source > --
 do
 	function dragger.new(frame)
@@ -432,7 +442,40 @@ local Lexer do
 		return self
 	end
 end
+function GetResizeDirection(MousePos)
+    local FramePos = Frame.AbsolutePosition
+    local FrameSize = Frame.AbsoluteSize
+    local IsRightEdge = MousePos.X >= FramePos.X + FrameSize.X - ResizeEdgeSize
+    local IsBottomEdge = MousePos.Y >= FramePos.Y + FrameSize.Y - ResizeEdgeSize
 
+    if IsRightEdge and IsBottomEdge then return "southeast"
+    elseif IsRightEdge then return "east"
+    elseif IsBottomEdge then return "south"
+    end
+    return ""
+end
+
+function PerformResize(MousePos)
+    local Delta = MousePos - StartMousePos
+    local NewSize = StartFrameSize
+    local NewEditorSize = StartEditorSize
+
+    if ResizeDirection:find("east") then
+        local NewWidth = math.max(MinSize.X.Offset, StartFrameSize.X.Offset + Delta.X)
+        NewSize = UDim2.new(0, NewWidth, StartFrameSize.Y.Scale, StartFrameSize.Y.Offset)
+        NewEditorSize = UDim2.new(0, StartEditorSize.X.Offset + (NewWidth - StartFrameSize.X.Offset), 
+            StartEditorSize.Y.Scale, StartEditorSize.Y.Offset)
+    end
+
+    if ResizeDirection:find("south") then
+        NewSize = UDim2.new(NewSize.X.Scale, NewSize.X.Offset, 0, 
+            math.max(MinSize.Y.Offset, StartFrameSize.Y.Offset + Delta.Y))
+    end
+
+    Frame.Size = NewSize
+    Frame.Position = StartFramePos
+    ScriptEditor.Size = NewEditorSize
+end
 function Place.fromIndex(CodeEditor, Index)
 	local cache = CodeEditor.PlaceCache
 	local fromCache = {}
@@ -1238,10 +1281,25 @@ function EditorLib.Initialize(Frame, Options)
 				end
 			end
 		end
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+        	local MousePos = UserInputService:GetMouseLocation()
+        	local Direction = GetResizeDirection(MousePos)
+        
+        	if Direction ~= "" then
+            	IsResizing = true
+            	ResizeDirection = Direction
+            	StartMousePos = MousePos
+            	StartFrameSize = Frame.Size
+            	StartFramePos = Frame.Position
+            	StartEditorSize = ScriptEditor.Size
+        	end
+    	end
 	end)
 	Connect(UserInputService.InputEnded, function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1 then
 			BeginSelect = nil
+			IsResizing = false
+            ResizeDirection = ""
 		end
 		if Input.KeyCode == Enum.KeyCode.LeftShift then
 			LeftShift = false
@@ -1261,6 +1319,11 @@ function EditorLib.Initialize(Frame, Options)
 			PressedKey = nil
 			WorkingKey = nil
 		end
+	end)
+	Connect(UserInputService.InputChanged, function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement and IsResizing then
+        	PerformResize(UserInputService:GetMouseLocation())
+    	end
 	end)
 	local Count = 0
 	Connect(Heartbeat, function()
