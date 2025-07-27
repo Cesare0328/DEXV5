@@ -2137,16 +2137,12 @@ function rightClickMenu(sObj)
             		local pathParts = {"getnilinstances()"}
             		for i = 1, #ancestors do
                 		local name = ancestors[i]
-                		if name:match("^[%a_][%w_]*$") then
-                    		if i == 1 then
-                        		table.insert(pathParts, name)
-                    		else
-                        		table.insert(pathParts, "." .. name)
-                    		end
-                		else
-                    		local escapedName = name:gsub('"', '\\"')
-                    		table.insert(pathParts, "[\"" .. escapedName .. "\"]")
-                		end
+						if name:match("^[%a_][%w_]*$") then
+    						table.insert(pathParts, "." .. name)
+						else
+    						local escapedName = name:gsub('"', '\\"')
+    						table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+						end
             		end
             		path = table.concat(pathParts, "")
         		else
