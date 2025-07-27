@@ -2228,11 +2228,9 @@ function rightClickMenu(sObj)
         		for i, v in ipairs(getnilinstances()) do
             		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and not OriginalToClone[v] then
                 		pcall(function()
-                    		v.Archivable = true
                     		local Cloned = Clone(v)
                     		NilInstances[Cloned] = v
 							OriginalToClone[v] = Cloned
-                    		Cloned.Disabled = true
                     		Cloned.Parent = NilStorageMain
                 		end)
             		end
