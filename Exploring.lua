@@ -1283,7 +1283,6 @@ function lookForAName(obj, name)
 end
 
 function scanName(obj)
-	IsInSearch = true
 	nameScanned = false
 	if string_find(string_lower(obj.Name),string_lower(explorerFilter.Text)) then
 		nameScanned = true
@@ -3053,8 +3052,13 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
-		warn("Stopped")
-		IsInSearch = false
+		if explorerFilter.Text == "" and #Selection:Get() == 1 then
+            if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+				local TargetIndex = findObjectIndex(Selection:Get())
+                local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+                scrollBar:ScrollTo(ScrollIndex)
+			end
+		end
 		rawUpdateList()
 	end
 end)
