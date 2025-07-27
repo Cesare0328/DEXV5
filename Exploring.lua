@@ -2420,26 +2420,30 @@ do
 		conUp = Connect(mouseDrag.MouseButton1Up, function()
 			cancelReparentDrag()
 			if dragged then
-				if parentIndex then
-					local actualParentIndex = parentIndex + scrollBar.ScrollIndex
-					local parentNode = TreeList[actualParentIndex]
-					if parentNode then
-						parentNode.Expanded = true
-						local parentObj = parentNode.Object
-						local function parent(a,b)
-							a.Parent = b
-						end
-						if Option.Selectable then
-    						local list = Selection.List
-    						for i = 1,#list do 
-        						list[i].Parent = parentObj 
-    						end
-						else
-    						object[1].Parent = parentObj
-						end
-						rawUpdateList()
-					end
-				end
+    			if parentIndex then
+        			local actualParentIndex = parentIndex + scrollBar.ScrollIndex
+        			local parentNode = TreeList[actualParentIndex]
+        			if parentNode then
+            			parentNode.Expanded = true
+            			local parentObj = parentNode.Object
+            
+            			print("Attempting to reparent to:", parentObj:GetFullName())
+            
+            			if Option.Selectable then
+                			local list = Selection.List
+                			for i = 1,#list do
+                    			print("Reparenting:", list[i].Name, "from:", list[i].Parent)
+                    			list[i].Parent = parentObj
+                    			print("After reparent - Parent:", list[i].Parent)
+                			end
+            			else
+               				print("Reparenting:", object.Name, "from:", object.Parent)
+                			object.Parent = parentObj
+                			print("After reparent - Parent:", object.Parent)
+            			end
+            			rawUpdateList()
+        			end
+    			end
 			else
 				if not wasSelected and Option.Selectable then 
 					Selection:Set({object})
