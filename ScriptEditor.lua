@@ -54,7 +54,7 @@ local Title	= WaitForChild(TopBar, "Title")
 local LocalPlayer = Players.LocalPlayer
 local PlayerMouse = LocalPlayer:GetMouse()
 local Heartbeat = RunService.Heartbeat
-local MinSize = Frame.Size
+local MinSize = editor.Editor.Size
 local ResizeEdgeSize = 0.1
 local IsResizing = false
 local ResizeDirection = ""
@@ -443,8 +443,8 @@ local Lexer do
 	end
 end
 function GetResizeDirection(MousePos)
-    local FramePos = Frame.AbsolutePosition
-    local FrameSize = Frame.AbsoluteSize
+    local FramePos = editor.Editor.AbsolutePosition
+    local FrameSize = editor.Editor.AbsoluteSize
     local IsRightEdge = MousePos.X >= FramePos.X + FrameSize.X - ResizeEdgeSize
     local IsBottomEdge = MousePos.Y >= FramePos.Y + FrameSize.Y - ResizeEdgeSize
 
@@ -472,8 +472,8 @@ function PerformResize(MousePos)
             math.max(MinSize.Y.Offset, StartFrameSize.Y.Offset + Delta.Y))
     end
 
-    Frame.Size = NewSize
-    Frame.Position = StartFramePos
+    editor.Editor.Size = NewSize
+    editor.Editor.Position = StartFramePos
     ScriptEditor.Size = NewEditorSize
 end
 function Place.fromIndex(CodeEditor, Index)
@@ -1289,8 +1289,8 @@ function EditorLib.Initialize(Frame, Options)
             	IsResizing = true
             	ResizeDirection = Direction
             	StartMousePos = MousePos
-            	StartFrameSize = Frame.Size
-            	StartFramePos = Frame.Position
+            	StartFrameSize = editor.Editor.Size
+            	StartFramePos = editor.Editor.Position
             	StartEditorSize = ScriptEditor.Size
         	end
     	end
