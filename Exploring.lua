@@ -2045,12 +2045,13 @@ function rightClickMenu(sObj)
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
+				if not Selected:IsDescendantOf(workspace) then break end
 				if Selected:IsA("BasePart") then
 				    pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.CFrame)
 					    LocalPlayer.Character:MoveTo(Selected.Position)
 				    end)
-				elseif Selected:IsA("Model") then
+				elseif Selected:IsA("Model") and Selected.PrimaryPart then
                     pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected:GetPivot())
 					    LocalPlayer.Character:MoveTo(Selected:GetPivot().p)
@@ -2059,6 +2060,11 @@ function rightClickMenu(sObj)
                     pcall(function()
 						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.RootPart.CFrame)
 					    LocalPlayer.Character:MoveTo(Selected.RootPart.Position)
+				    end)
+				elseif Selected:IsA("Player") and Selected.Character and Selected.Character.PrimaryPart then
+                    pcall(function()
+						LocalPlayer.Character:SetPrimaryPartCFrame(Selected.Character.PrimaryPart.CFrame)
+					    LocalPlayer.Character:MoveTo(Selected.Character.PrimaryPart.Position)
 				    end)
 			    end
 				break
