@@ -2430,10 +2430,12 @@ do
 							a.Parent = b
 						end
 						if Option.Selectable then
-							local list = Selection.List
-							for i = 1,#list do pcall(parent,list[i],parentObj) end
+    						local list = Selection.List
+    						for i = 1,#list do 
+        						list[i].Parent = parentObj 
+    						end
 						else
-							pcall(parent,object,parentObj)
+    						object[1].Parent = parentObj
 						end
 						rawUpdateList()
 					end
