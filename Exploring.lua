@@ -873,15 +873,14 @@ if NilStorageEnabled then
 		Name = "Nil Instances",
 		Parent = NilStorage
 	})
-	for _, NilInstance in next, getnilinstances() do
-    	local nilInstance
-    	NilInstance.Archivable = true
-    	pcall(function()
-        	nilInstance = Clone(NilInstance)
-        	nilInstance.Disabled = true
-        	nilInstance.Parent = NilStorageMain
-        	nilInstance:SetAttribute("OriginalInstance", NilInstance)
-    	end)
+	for _, v in next, getnilinstances() do
+		v.Archivable = true
+		local Cloned = Clone(v)
+		Cloned:SetAttribute("RealObj", v)
+		pcall(function()
+			Cloned.Disabled = true
+			Cloned.Parent = NilStorageMain
+		end)
 	end
 end
 
@@ -2364,7 +2363,6 @@ do
 					local actualIndex = i + scrollBar.ScrollIndex
 					local node = TreeList[actualIndex]
 					if node and node.Object ~= object and not IsAncestorOf(object, node.Object) then
-						-- Additional check: make sure we're not highlighting the dragged object itself
 						local isDraggedObject = false
 						if Option.Selectable then
 							local selectedList = Selection.List
@@ -2431,28 +2429,14 @@ do
 							a.Parent = b
 						end
 						if Option.Selectable then
-   						local list = Selection.List
-   						for i = 1,#list do
-       						local visualInstance = list[i]
-       						local originalInstance = visualInstance:GetAttribute("OriginalInstance")
-       
-       						if originalInstance then
-           						originalInstance.Parent = parentObj
-           						visualInstance.Parent = parentObj
-       						else
-           						visualInstance.Parent = parentObj
-       						end
-   						end
+    						local list = Selection.List
+    						for i = 1,#list do 
+        						list[i].Parent = parentObj
+								list[i]:GetAttribute("RealObj").Parent = parentObj:GetAttribute("RealObj") or parentObj
+    						end
 						else
-   						local visualInstance = object
-   						local originalInstance = visualInstance:GetAttribute("OriginalInstance")
-   
-   						if originalInstance then
-       						originalInstance.Parent = parentObj
-       						visualInstance.Parent = parentObj
-   						else
-       						visualInstance.Parent = parentObj
-   						end
+    						object.Parent = parentObj
+							object:GetAttribute("RealObj").Parent = parentObj:GetAttribute("RealObj") or parentObj
 						end
 						rawUpdateList()
 					end
