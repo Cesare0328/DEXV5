@@ -1944,21 +1944,28 @@ function rightClickMenu(sObj)
 	local IsSearching = explorerFilter.Text ~= "" or (explorerFilter.Text == "Filter Instances" and Searched == true)
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
-	elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
+	end
+	if IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
 		table_insert(actions, 10, "Call Remote")
-	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
+	end
+	if IsA(sObj, "BasePart") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
-	elseif IsSearching then
-		table_insert(actions, 8, "Clear Search and Jump to")
-	elseif IsA(sObj, "ClickDetector") then
+	elseif IsA(sObj, "Model") then
+		table_insert(actions, 7, "Ungroup")
+		table_insert(actions, 8, "Teleport to")
+	end
+	if IsSearching then
+		table_insert(actions, 1, "Clear Search and Jump to")
+	end
+	if IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
 	elseif IsA(sObj, "TouchTransmitter") then
 		table_insert(actions, 8, "Fire TouchTransmitter")
 	elseif IsA(sObj, "ProximityPrompt") then
 		table_insert(actions, 8, "Fire ProximityPrompt")
-	elseif IsA(sObj, "Model") then
-		table_insert(actions, 7, "Ungroup")
-	elseif IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
+	end
+	end
+	if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
 		table_insert(actions, 8, "Save Script")
 	end
