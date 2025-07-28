@@ -1928,41 +1928,67 @@ local function canViewServerScript(scriptObj)
 end
 
 function rightClickMenu(sObj)
-	local actions = {
-		'Cut',
-		'Copy',
-		'Paste Into',
-		'Duplicate',
-		'Delete',
-		'Group',
-		'Select Children',
-		'Insert Part',
-		'Insert Object',
-		'Save to File',
-		'Copy Path'
-	}
-	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
-		table_insert(actions, 1, "Refresh Instances")
-	elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
-		table_insert(actions, 10, "Call Remote")
-	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
-		table_insert(actions, 8, "Teleport to")
-	elseif explorerFilter.Text ~= "" and (explorerFilter.Text ~= "Filter Instances" and Searched) then
-		table_remove(actions, 1)
-		table_insert(actions, 1, "Clear Search and Jump to")
-	elseif IsA(sObj, "ClickDetector") then
-		table_insert(actions, 8, "Fire ClickDetector")
-	elseif IsA(sObj, "TouchTransmitter") then
-		table_insert(actions, 8, "Fire TouchTransmitter")
-	elseif IsA(sObj, "ProximityPrompt") then
-		table_insert(actions, 8, "Fire ProximityPrompt")
-	elseif IsA(sObj, "Model") then
-		table_insert(actions, 7, "Ungroup")
-	elseif IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
-		table_remove(actions, 10)
-		table_insert(actions, 7, "View Script")
-		table_insert(actions, 8, "Save Script")
-	end
+    local actions = {
+        'Cut',
+        'Copy',
+        'Paste Into',
+        'Duplicate',
+        'Delete',
+        'Group',
+        'Select Children',
+        'Insert Part',
+        'Insert Object',
+        'Save to File',
+        'Copy Path'
+    }
+
+    local inSearchMode = (explorerFilter.Text ~= "" and explorerFilter.Text ~= "Filter Instances" and Searched)
+
+    if inSearchMode then
+        local foundCut = false
+        for i, v in ipairs(actions) do
+            if v == 'Cut' then
+                table_remove(actions, i)
+                foundCut = true
+                break
+            end
+        end
+        table_insert(actions, 1, "Clear Search and Jump to")
+    end
+
+    local isScript = IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj))
+    if isScript then
+        local foundSaveToFile = false
+        for i, v in ipairs(actions) do
+            if v == 'Save to File' then
+                table_remove(actions, i)
+                foundSaveToFile = true
+                break
+            end
+        end
+        table_insert(actions, 7, "View Script")
+        table_insert(actions, 8, "Save Script")
+    end
+    
+    if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
+        table_insert(actions, 1, "Refresh Instances")
+    elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
+        table_insert(actions, #actions + 1, "Call Remote")
+    elseif IsA(sObj, "BasePart") or IsA(sObj, "Player") then
+        table_insert(actions, 8, "Teleport to")
+    elseif IsA(sObj, "ClickDetector") then
+        table_insert(actions, 8, "Fire ClickDetector")
+    elseif IsA(sObj, "TouchTransmitter") then
+        table_insert(actions, 8, "Fire TouchTransmitter")
+    elseif IsA(sObj, "ProximityPrompt") then
+        table_insert(actions, 8, "Fire ProximityPrompt")
+    elseif IsA(sObj, "Model") then
+        table_insert(actions, 7, "Ungroup")
+    end
+
+    while #actions > 12 do
+        table_remove(actions, #actions)
+    end
 
 	currentRightClickMenu = CreateRightClickMenu(actions, "", false, function(option)
 		if option == "Cut" then
