@@ -1941,7 +1941,7 @@ function rightClickMenu(sObj)
 		'Save to File',
 		'Copy Path'
 	}
-	local IsSearching = explorerFilter.Text ~= "" and (explorerFilter.Text == "Filter Instances" and Searched)
+	local IsSearching = explorerFilter.Text ~= "" or (explorerFilter.Text == "Filter Instances" and Searched)
 	rconsoleprint(tostring(IsSearching))
 	rconsoleprint(explorerFilter.Text)
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
