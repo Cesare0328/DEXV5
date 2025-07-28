@@ -1942,6 +1942,8 @@ function rightClickMenu(sObj)
 		'Copy Path'
 	}
 	local IsSearching = explorerFilter.Text ~= "" and (explorerFilter.Text == "Filter Instances" and Searched)
+	rconsoleprint(IsSearching)
+	rconsoleprint(explorerFilter.Text)
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
 	elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
