@@ -3107,13 +3107,16 @@ Connect(UserInputService.InputBegan, function(p1)
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
 	end
+	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
+        DestroyRightClick()
+    end
 end)
 
 Connect(UserInputService.InputEnded, function(p1)
-	local A = p1.KeyCode
-	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
-		HoldingCtrl = false
-	end
+    local A = p1.KeyCode
+    if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
+        HoldingCtrl = false
+    end
 end)
 
 while not RbxApi do
