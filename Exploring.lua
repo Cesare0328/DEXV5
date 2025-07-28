@@ -66,7 +66,7 @@ local SetOption_Bindable = WaitForChild(Bindables, "SetOption", 300)
 local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
-local Searched = false
+local InitialSearched = false
 local NilInstances = {}
 local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
@@ -1941,7 +1941,7 @@ function rightClickMenu(sObj)
 		'Save to File',
 		'Copy Path'
 	}
-	local IsSearching = explorerFilter.Text ~= "" or (explorerFilter.Text ~= "Filter Instances" and Searched)
+	local IsSearching = explorerFilter.Text ~= "" and (explorerFilter.Text == "Filter Instances" and InitialSearched == true)
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
 	end
@@ -3133,7 +3133,7 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
-		Searched = true
+		InitialSearched = true
 		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
             if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
