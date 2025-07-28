@@ -1964,7 +1964,6 @@ function rightClickMenu(sObj)
 	elseif IsA(sObj, "ProximityPrompt") then
 		table_insert(actions, 8, "Fire ProximityPrompt")
 	end
-	end
 	if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
 		table_insert(actions, 8, "Save Script")
