@@ -267,7 +267,7 @@ end
 local function createMapSetting(p1, p2, p3)
 	local A = p1.Change
 	local function B(on)
-		TweenPosition(A.Bar, on and UDim2_new(0, 32, 0, -2) or UDim2_new(0, 32, 0, -2), Enum.EasingDirection.Out,  Enum.EasingStyle.Quart, .25, true)
+		TweenPosition(A.Bar, on and UDim2_new(0, 32, 0, -2) or UDim2_new(0, -2, 0, -2), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .25, true)
 		TweenSize(A.OnBar, on and UDim2_new(0, 40, 0, 15) or UDim2_new(0, 0, 0, 15), Enum.EasingDirection.Out,  Enum.EasingStyle.Quart, .25, true)
 		p1.Status.Text = on and "On" or "Off"
 		SaveMapSettings[p2] = on and true or false
