@@ -1948,7 +1948,7 @@ function rightClickMenu(sObj)
 	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
 	elseif explorerFilter.Text ~= "" and (explorerFilter.Text ~= "Filter Instances" and Searched) then
-		table_insert(actions, 8, "Clear Search and Jump to")
+		table_insert(actions, 9, "Clear Search and Jump to")
 	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
 	elseif IsA(sObj, "TouchTransmitter") then
