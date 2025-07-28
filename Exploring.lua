@@ -1920,7 +1920,7 @@ local function canViewServerScript(scriptObj)
 			return true
 		end
 	end
-	local sourceAssetId = tonumber(gethiddenproperty(scriptObj, "SourceAssetId"))
+	local sourceAssetId = gethiddenproperty(scriptObj, "SourceAssetId") 
 	if sourceAssetId and sourceAssetId ~= -1 then
 		return true
 	end
@@ -1941,7 +1941,7 @@ function rightClickMenu(sObj)
 		'Save to File',
 		'Copy Path'
 	}
-	local IsSearching = explorerFilter.Text ~= "" or (explorerFilter.Text == "Filter Instances" and Searched == true)
+	local IsSearching = explorerFilter.Text ~= "" or (explorerFilter.Text ~= "Filter Instances" and Searched)
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
 	end
