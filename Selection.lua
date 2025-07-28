@@ -134,7 +134,7 @@ end
 local SaveMapSettings = {
 	SaveScripts = true,
 	ScriptCache = true,
-	CloseRobloxAfterSave = false
+	CloseRobloxAfterSave = true
 }
 
 local Settings = {
