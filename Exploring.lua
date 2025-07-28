@@ -66,7 +66,7 @@ local SetOption_Bindable = WaitForChild(Bindables, "SetOption", 300)
 local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
-local InitialSearched = false
+local Searched = false
 local NilInstances = {}
 local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
@@ -1920,7 +1920,7 @@ local function canViewServerScript(scriptObj)
 			return true
 		end
 	end
-	local sourceAssetId = gethiddenproperty(scriptObj, "SourceAssetId") 
+	local sourceAssetId = tonumber(gethiddenproperty(scriptObj, "SourceAssetId"))
 	if sourceAssetId and sourceAssetId ~= -1 then
 		return true
 	end
@@ -1941,30 +1941,24 @@ function rightClickMenu(sObj)
 		'Save to File',
 		'Copy Path'
 	}
-	local IsSearching = explorerFilter.Text ~= "" and (explorerFilter.Text == "Filter Instances" and InitialSearched == true)
+	local IsSearching = explorerFilter.Text ~= ""
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
-	end
-	if IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
+	elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
 		table_insert(actions, 10, "Call Remote")
-	end
-	if IsA(sObj, "BasePart") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
+	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
-	elseif IsA(sObj, "Model") then
-		table_insert(actions, 7, "Ungroup")
-		table_insert(actions, 8, "Teleport to")
-	end
-	if IsSearching then
-		table_insert(actions, 1, "Clear Search and Jump to")
-	end
-	if IsA(sObj, "ClickDetector") then
+	elseif IsSearching then
+		table_insert(actions, 8, "Clear Search and Jump to")
+	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
 	elseif IsA(sObj, "TouchTransmitter") then
 		table_insert(actions, 8, "Fire TouchTransmitter")
 	elseif IsA(sObj, "ProximityPrompt") then
 		table_insert(actions, 8, "Fire ProximityPrompt")
-	end
-	if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
+	elseif IsA(sObj, "Model") then
+		table_insert(actions, 7, "Ungroup")
+	elseif IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
 		table_insert(actions, 8, "Save Script")
 	end
@@ -3133,7 +3127,7 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
-		InitialSearched = true
+		Searched = true
 		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
             if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
