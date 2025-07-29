@@ -3120,8 +3120,11 @@ Connect(UserInputService.InputBegan, function(p1)
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
 	end
-	if p1.UserInputType == Enum.UserInputType.MouseButton1 and not ContextMenuHovered then
-        DestroyRightClick()
+	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
+		if not ContextMenuHovered then
+        	DestroyRightClick()
+		end
+		--if theres any other uses in the future
     end
 end)
 
@@ -3139,6 +3142,20 @@ end
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
+		Searched = true
+		rawUpdateList()
+		if explorerFilter.Text == "" and #Selection:Get() == 1 then
+            if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+				local TargetIndex = findObjectIndex(Selection:Get()[1])
+                local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+                scrollBar:ScrollTo(ScrollIndex)
+			end
+		end
+	end
+end)
+
+Connect(explorerFilter:GetPropertyChangedSignal("Text"), function(p1)
+	if p1 == "" and not explorerFilter.Focused then --incase player clicks away ^
 		Searched = true
 		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
