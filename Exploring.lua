@@ -67,7 +67,7 @@ local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
-local ContextMenuHover = false
+local ContextMenuHovered = false
 local NilInstances = {}
 local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
@@ -1233,6 +1233,12 @@ function CreateRightClickMenu(choices, currentChoice, readOnly, onClick)
 			option.Parent = menu
 		end
 	end
+	frame.MouseEnter:Connect(function()
+	    ContextMenuHovered = true
+	end)
+	frame.MouseLeave:Connect(function()
+	    ContextMenuHovered = false
+	end)
 	showMenu()
 	return frame
 end
@@ -2953,12 +2959,7 @@ do
 	Connect(game.DescendantRemoving, removeObject)
 	Connect(DexOutput.DescendantAdded, addObject)
 	Connect(DexOutput.DescendantRemoving, removeObject)
-    Connect(currentRightClickMenu.MouseEnter, function()
-	    ContextMenuHover = true
-	end)
-	Connect(currentRightClickMenu.MouseLeave, function()
-	    ContextMenuHover = false
-	end)
+
 	if NilStorageEnabled then
 		Connect(NilStorage.DescendantAdded,addObject)
 		Connect(NilStorage.DescendantRemoving,removeObject)
@@ -3113,7 +3114,7 @@ Connect(UserInputService.InputBegan, function(p1)
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
 	end
-	if p1.UserInputType == Enum.UserInputType.MouseButton1 and not ContextMenuHover then
+	if p1.UserInputType == Enum.UserInputType.MouseButton1 and not ContextMenuHovered then
         DestroyRightClick()
     end
 end)
