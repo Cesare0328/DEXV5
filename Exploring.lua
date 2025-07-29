@@ -3149,11 +3149,7 @@ Connect(explorerFilter.FocusLost, function(p1)
 end)
 
 Connect(explorerFilter:GetPropertyChangedSignal("Focused"), function(p1)
-if p1 then
-	rconsolewarn("focused")
-else
-	rconsolewarn("unfocused")
-end
+rconsolewarn(explorerFilter.Focused)
 end)
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
 	CurrentInsertObjectWindow.Visible = false
