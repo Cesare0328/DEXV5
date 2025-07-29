@@ -1752,14 +1752,30 @@ function PromptRemoteCaller(inst)
 	end)
 end
 
-function DestroyRightClick()
-	if currentRightClickMenu then
-		Destroy(currentRightClickMenu)
-		currentRightClickMenu = nil
-	end
-	if CurrentInsertObjectWindow and CurrentInsertObjectWindow.Visible then
-		CurrentInsertObjectWindow.Visible = false
-	end
+function DestroyRightClick(checkDistance)
+    if currentRightClickMenu then
+        if checkDistance then
+            local mouseX, mouseY = Mouse.X, Mouse.Y
+            local menuX, menuY = currentRightClickMenu.AbsolutePosition.X, currentRightClickMenu.AbsolutePosition.Y
+            local menuWidth, menuHeight = currentRightClickMenu.AbsoluteSize.X, currentRightClickMenu.AbsoluteSize.Y
+            
+            local isMouseOver = mouseX >= menuX and mouseX <= menuX + menuWidth and mouseY >= menuY and mouseY <= menuY + menuHeight
+            
+            if not isMouseOver then
+                Destroy(currentRightClickMenu)
+                currentRightClickMenu = nil
+            else
+                return
+            end
+        else
+            Destroy(currentRightClickMenu)
+            currentRightClickMenu = nil
+        end
+    end
+    
+    if CurrentInsertObjectWindow and CurrentInsertObjectWindow.Visible then
+        CurrentInsertObjectWindow.Visible = false
+    end
 end
 
 local tabChar = string_rep(" ", 4)
@@ -3108,7 +3124,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		HoldingCtrl = true
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
-        --DestroyRightClick()
+        DestroyRightClick()
     end
 end)
 
