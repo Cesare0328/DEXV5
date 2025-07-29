@@ -3155,7 +3155,8 @@ Connect(explorerFilter.FocusLost, function(p1)
 end)
 
 Connect(explorerFilter:GetPropertyChangedSignal("Text"), function(p1)
-	if p1 == "" and not explorerFilter.Focused then --incase player clicks away ^
+	if p1 == "" then
+		repeat task.wait() until explorerFilter.Focused --incase player clicks away ^
 		Searched = true
 		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
