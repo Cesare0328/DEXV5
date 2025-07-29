@@ -2223,18 +2223,15 @@ function rightClickMenu(sObj)
 				writefile(game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'.lua', decompile(Selected))
 			end
 		elseif option == 'Refresh Instances' then
-    		ClearAllChildren(sObj)
-    		if sObj == NilStorageMain then
-        		for i, v in ipairs(getnilinstances()) do
-            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and not OriginalToClone[v] then
-                		pcall(function()
-                    		local Cloned = Clone(v)
-                    		NilInstances[Cloned] = v
-							OriginalToClone[v] = Cloned
-                    		Cloned.Parent = NilStorageMain
-                		end)
-            		end
-        		end
+			ClearAllChildren(sObj)
+			if sObj == NilStorageMain then
+				for i, v in ipairs(getnilinstances()) do
+					if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain then
+						pcall(function()
+							Clone(v).Parent = NilStorageMain
+						end)
+					end
+				end
 			elseif sObj == RunningScriptsStorageMain then
 				if not GetSetting_Bindable:Invoke("RSSIncludeRL") then
 					for i,v in ipairs(getscripts()) do
