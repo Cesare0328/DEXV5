@@ -3124,7 +3124,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		if explorerFilter.Text == "" and #Selection:Get() == 1 then
+		if explorerFilter.Text == "" and #Selection:Get() == 1 and not explorerFilter.Focused then
 			Searched = true
 		    rawUpdateList()
             if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
