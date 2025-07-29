@@ -1941,14 +1941,13 @@ function rightClickMenu(sObj)
 		'Save to File',
 		'Copy Path'
 	}
-	local IsSearching = explorerFilter.Text ~= ""
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
 	elseif IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
 		table_insert(actions, 10, "Call Remote")
 	elseif IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
-	elseif IsSearching then
+	elseif explorerFilter.Text ~= "" and (explorerFilter.Text == "Filter Instances" and Searched) then
 		table_insert(actions, 8, "Clear Search and Jump to")
 	elseif IsA(sObj, "ClickDetector") then
 		table_insert(actions, 8, "Fire ClickDetector")
