@@ -3120,20 +3120,6 @@ Connect(UserInputService.InputBegan, function(p1)
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
 	end
-	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
-		if not ContextMenuHovered then
-        	DestroyRightClick()
-		end
-		if explorerFilter.Text == "" and #Selection:Get() == 1 and not explorerFilter.Focused then
-			Searched = true
-		    rawUpdateList()
-            if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
-				local TargetIndex = findObjectIndex(Selection:Get()[1])
-                local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-                scrollBar:ScrollTo(ScrollIndex)
-			end
-		end
-    end
 end)
 
 Connect(UserInputService.InputEnded, function(p1)
@@ -3162,6 +3148,13 @@ Connect(explorerFilter.FocusLost, function(p1)
 	end
 end)
 
+Connect(explorerFilter:GetPropertyChangedSignal("Focused"), function(p1)
+if p1 then
+	rconsolewarn("focused")
+else
+	rconsolewarn("unfocused")
+end
+end)
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
 	CurrentInsertObjectWindow.Visible = false
 	for _, ArrayItem in ipairs(Selection:Get()) do
