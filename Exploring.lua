@@ -67,6 +67,7 @@ local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
+local ContextMenuHover = false
 local NilInstances = {}
 local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
@@ -1752,30 +1753,14 @@ function PromptRemoteCaller(inst)
 	end)
 end
 
-function DestroyRightClick(checkDistance)
-    if currentRightClickMenu then
-        if checkDistance then
-            local mouseX, mouseY = Mouse.X, Mouse.Y
-            local menuX, menuY = currentRightClickMenu.AbsolutePosition.X, currentRightClickMenu.AbsolutePosition.Y
-            local menuWidth, menuHeight = currentRightClickMenu.AbsoluteSize.X, currentRightClickMenu.AbsoluteSize.Y
-            
-            local isMouseOver = mouseX >= menuX and mouseX <= menuX + menuWidth and mouseY >= menuY and mouseY <= menuY + menuHeight
-            
-            if not isMouseOver then
-                Destroy(currentRightClickMenu)
-                currentRightClickMenu = nil
-            else
-                return
-            end
-        else
-            Destroy(currentRightClickMenu)
-            currentRightClickMenu = nil
-        end
-    end
-    
-    if CurrentInsertObjectWindow and CurrentInsertObjectWindow.Visible then
-        CurrentInsertObjectWindow.Visible = false
-    end
+function DestroyRightClick()
+	if currentRightClickMenu then
+		Destroy(currentRightClickMenu)
+		currentRightClickMenu = nil
+	end
+	if CurrentInsertObjectWindow and CurrentInsertObjectWindow.Visible then
+		CurrentInsertObjectWindow.Visible = false
+	end
 end
 
 local tabChar = string_rep(" ", 4)
@@ -2968,7 +2953,12 @@ do
 	Connect(game.DescendantRemoving, removeObject)
 	Connect(DexOutput.DescendantAdded, addObject)
 	Connect(DexOutput.DescendantRemoving, removeObject)
-
+    Connect(currentRightClickMenu.MouseEnter, function()
+	    ContextMenuHover = true
+	end)
+	Connect(currentRightClickMenu.MouseLeave, function()
+	    ContextMenuHover = false
+	end)
 	if NilStorageEnabled then
 		Connect(NilStorage.DescendantAdded,addObject)
 		Connect(NilStorage.DescendantRemoving,removeObject)
@@ -3123,7 +3113,7 @@ Connect(UserInputService.InputBegan, function(p1)
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
 	end
-	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
+	if p1.UserInputType == Enum.UserInputType.MouseButton1 and not ContextMenuHover then
         DestroyRightClick()
     end
 end)
