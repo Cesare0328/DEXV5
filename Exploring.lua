@@ -3141,17 +3141,15 @@ while not RbxApi do
 end
 
 Connect(explorerFilter.FocusLost, function(p1)
-	--if p1 then
-		Searched = true
-		rawUpdateList()
-		if explorerFilter.Text == "" and #Selection:Get() == 1 then
-            if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
-				local TargetIndex = findObjectIndex(Selection:Get()[1])
-                local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-                scrollBar:ScrollTo(ScrollIndex)
-			end
+	Searched = true
+	rawUpdateList()
+	if explorerFilter.Text == "" and #Selection:Get() == 1 then
+        if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+			local TargetIndex = findObjectIndex(Selection:Get()[1])
+            local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+            scrollBar:ScrollTo(ScrollIndex)
 		end
-	--end
+	end
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
