@@ -412,7 +412,7 @@ function Property:get(p1, p2, Value)
 	elseif Value == nil then
 		ValueType = Api.Dump.Properties[p1.ClassName][p2]
 	end
-	if type(ValueType) ~= "string" then
+	if typeof(ValueType) ~= "string" then
 		ValueType = "string"
 		Value = ""
 	end
