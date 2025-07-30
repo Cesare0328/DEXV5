@@ -3139,13 +3139,13 @@ Connect(UserInputService.InputBegan, function(p1)
         if explorerFilter.Focused and not IsMouseOnDex then
             if explorerFilter.Text == "" then
                 explorerFilter:ReleaseFocus()
-                --rawUpdateList()
+                rawUpdateList()
 
-                --if #Selection:Get() == 1 and GetSetting_Bindable:Invoke("SkipToAfterSearch") then
-                    --local TargetIndex = findObjectIndex(Selection:Get()[1])
-                    --local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-                    --scrollBar:ScrollTo(ScrollIndex)
-                --end
+                if #Selection:Get() == 1 and GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+                    local TargetIndex = findObjectIndex(Selection:Get()[1])
+                    local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+                    scrollBar:ScrollTo(ScrollIndex)
+                end
             end
         end
     end
