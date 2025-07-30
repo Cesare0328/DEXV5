@@ -253,7 +253,7 @@ do
 	local iconMap = 'rbxasset://textures/ClassImages.png'
 
 	function Icon(IconFrame,index)
-		local mapSize = Vector2_new(1920,16)
+		local mapSize = Vector2_new(2352,16)
 		local iconSize = 16
 		local class = 'Frame'
 		if typeof(IconFrame) == 'string' then
