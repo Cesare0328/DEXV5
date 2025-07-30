@@ -3136,7 +3136,7 @@ Connect(UserInputService.InputBegan, function(p1)
             end
         end
 
-        if explorerFilter.Focused and not IsMouseOnDex then
+        if explorerFilter.Focused and not IsMouseOnDex and not SearchMouseHovered then
             if explorerFilter.Text == "" then
                 explorerFilter:ReleaseFocus()
                 rawUpdateList()
