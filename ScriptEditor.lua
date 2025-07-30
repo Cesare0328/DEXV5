@@ -1464,7 +1464,6 @@ local function openScript(o)
             		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
         		end
     		end
-		end
         elseif IsA(o, "Script") then
             local passed = false
             local linkedSource = o.LinkedSource
