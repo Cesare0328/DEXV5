@@ -3126,7 +3126,14 @@ Connect(UserInputService.InputBegan, function(p1)
         	DestroyRightClick()
 		end
 		if explorerFilter.Text == "" and not SearchMouseHovered then
-			explorerFilter:ReleaseFocus()
+			rawUpdateList()
+			if explorerFilter.Text == "" and #Selection:Get() == 1 then
+            	if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+					local TargetIndex = findObjectIndex(Selection:Get()[1])
+                	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+                	scrollBar:ScrollTo(ScrollIndex)
+				end
+			end
 		end
     end
 end)
