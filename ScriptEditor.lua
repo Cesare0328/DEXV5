@@ -134,11 +134,11 @@ local Place = {
 local Lexer do
 	local lua_builtin = {}
 	for Key, T in next, getrenv() do
-		if type(Key) == "string" then
+		if typeof(Key) == "string" then
 			table_insert(lua_builtin, Key)
-			if type(T) == "table" then
+			if typeof(T) == "table" then
 				for T_Key, _ in next, T do
-					if type(T_Key) == "string" then
+					if typeof(T_Key) == "string" then
 						table_insert(lua_builtin, Key.."."..T_Key)
 					end
 				end
@@ -589,7 +589,7 @@ function EditorLib.Initialize(Frame, Options)
 	Options.FontSize = tonumber(Options.FontSize or Options.TextSize) or 14
 	Options.CaretFocusedOpacity = tonumber(Options.CaretOpacity and Options.CaretOpacity.Focused or Options.CaretFocusedOpacity) or 1
 	Options.CaretUnfocusedOpacity = tonumber(Options.CaretOpacity and Options.CaretOpacity.Unfocused or Options.CaretUnfocusedOpacity) or 0
-	Options.Theme = type(Options.Theme) == "string" and Options.Theme or "Plain"
+	Options.Theme = typeof(Options.Theme) == "string" and Options.Theme or "Plain"
 	local SizeDot = GetTextSize(TextService, ".", Options.FontSize, Options.Font, Vector2_new(1000, 1000))
 	local SizeM = GetTextSize(TextService, "m", Options.FontSize, Options.Font, Vector2_new(1000, 1000))
 	local SizeAV = GetTextSize(TextService, "AV", Options.FontSize, Options.Font, Vector2_new(1000, 1000))
@@ -1090,7 +1090,7 @@ function EditorLib.Initialize(Frame, Options)
 	--[[Connect(PlayerMouse.Move, function()
 		if BeginSelect then
 			local Index = GetIndexAtMouse()
-			if type(BeginSelect) == "number" then
+			if typeof(BeginSelect) == "number" then
 				BeginSelect = {BeginSelect, BeginSelect}
 			end
 			local Selection = Editor.Selection
