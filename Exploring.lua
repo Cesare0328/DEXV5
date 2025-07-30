@@ -3125,17 +3125,29 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		if explorerFilter.Text == "" and not SearchMouseHovered and explorerFilter.Focused then
-			explorerFilter:ReleaseFocus()
-			rawUpdateList()
-			if explorerFilter.Text == "" and #Selection:Get() == 1 then
-            	if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
-					local TargetIndex = findObjectIndex(Selection:Get()[1])
-                	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-                	scrollBar:ScrollTo(ScrollIndex)
-				end
-			end
-		end
+		local MousePos = Vector2.new(input.Position.X, input.Position.Y)
+        local Obj = GuiService:GetGuiObjectsAtPosition(MousePos.X, MousePos.Y)
+        local IsMouseOnDex = false
+
+        for _, v in ipairs(Obj) do
+            if v:IsDescendantOf(Dex) then
+                IsMouseOnDex = true
+                break
+            end
+        end
+
+        if explorerFilter.Focused and not IsMouseOnDex then
+            if explorerFilter.Text == "" then
+                explorerFilter:ReleaseFocus()
+                --rawUpdateList()
+
+                --if #Selection:Get() == 1 and GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+                    --local TargetIndex = findObjectIndex(Selection:Get()[1])
+                    --local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+                    --scrollBar:ScrollTo(ScrollIndex)
+                --end
+            end
+        end
     end
 end)
 
