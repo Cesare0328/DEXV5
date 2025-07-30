@@ -937,7 +937,7 @@ local headerFrame = Create('Frame',{
 })
 
 local explorerFilter = 	Create('TextBox',{
-	["Placeholder Text"] = "Filter Instances",
+	PlaceholderText = "Filter Instances",
 	BackgroundTransparency = .8,
 	TextColor3 = GuiColor.Text,
 	TextXAlignment = 'Left',
