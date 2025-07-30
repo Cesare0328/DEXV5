@@ -29,7 +29,7 @@ local math_huge = math.huge
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local GuiService = game:GetService("GuiService")
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 -- < Class Aliases > --
 local IsA = game.IsA
@@ -3126,7 +3126,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-        local Obj = GuiService:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)
+        local Obj = CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)
         local IsMouseOnDex = false
 
         for _, v in ipairs(Obj) do
