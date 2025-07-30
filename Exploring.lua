@@ -3120,6 +3120,14 @@ Connect(UserInputService.InputBegan, function(p1)
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
 	end
+	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
+		if not ContextMenuHovered then
+        	DestroyRightClick()
+		end
+		if explorerFilter.Text == "" then
+			explorerFilter:ReleaseFocus()
+		end
+    end
 end)
 
 Connect(UserInputService.InputEnded, function(p1)
