@@ -1927,7 +1927,7 @@ local function canViewServerScript(scriptObj)
 			return true
 		end
 	end
-	local sourceAssetId = tonumber(gethiddenproperty(scriptObj, "SourceAssetId"))
+	local sourceAssetId = tonumber(scriptObj.SourceAssetId)
 	if sourceAssetId and sourceAssetId ~= -1 then
 		return true
 	end
