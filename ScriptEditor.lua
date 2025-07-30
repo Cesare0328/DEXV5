@@ -1438,28 +1438,33 @@ local function openScript(o)
             path = table.concat(pathParts, "")
         end
 		
-        local decompiled
-        if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
-            decompiled = decompile(o)
-            if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
-                if #o.Source > 0 then
-                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, o.Source)
-                elseif #o.Source <= 0 then
-                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
-                end
-            elseif #decompiled <= 0 then
-                decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
-            else
-				local lines = {}
-                for line in decompiled:gmatch("[^\r\n]+") do
-                    table.insert(lines, line)
-                end
-                if #lines > 0 and lines[1]:match("^%s*%-%-") then
-                    table.remove(lines, 1)
-                    decompiled = table.concat(lines, "\n")
-                end
-                decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
-            end
+		local decompiled
+		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
+    		if string.len(getscriptbytecode(o)) == 0 then
+        		decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
+    		else
+        		decompiled = decompile(o)
+        		if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
+            		if #o.Source > 0 then
+                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, o.Source)
+            		elseif #o.Source <= 0 then
+                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+            		end
+        		elseif #decompiled <= 0 then
+            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+        		else
+            		local lines = {}
+            		for line in decompiled:gmatch("[^\r\n]+") do
+                		table.insert(lines, line)
+            		end
+            		if #lines > 0 and lines[1]:match("^%s*%-%-") then
+                		table.remove(lines, 1)
+                		decompiled = table.concat(lines, "\n")
+            		end
+            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+        		end
+    		end
+		end
         elseif IsA(o, "Script") then
             local passed = false
             local linkedSource = o.LinkedSource
