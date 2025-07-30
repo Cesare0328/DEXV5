@@ -938,6 +938,7 @@ local headerFrame = Create('Frame',{
 
 local explorerFilter = 	Create('TextBox',{
 	PlaceholderText = "Filter Instances",
+	Text = "Filter Instances"
 	BackgroundTransparency = .8,
 	TextColor3 = GuiColor.Text,
 	TextXAlignment = 'Left',
@@ -1957,7 +1958,7 @@ function rightClickMenu(sObj)
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
 	end
-    if explorerFilter.Text ~= "" or (explorerFilter.Text == "Filter Instances" and Searched) then
+    if explorerFilter.Text ~= "" or (explorerFilter.Text ~= "Filter Instances" and Searched) then
 		table_insert(actions, 1, "Clear Search and Jump to")
 	end
     if IsA(sObj, "ClickDetector") then
