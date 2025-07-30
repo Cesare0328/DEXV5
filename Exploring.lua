@@ -165,9 +165,9 @@ for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata
 end
 
 local function Create(p1, p2)
-	local A = type(p1) == 'string' and Instance_new(p1) or p1
+	local A = typeof(p1) == 'string' and Instance_new(p1) or p1
 	for B, C in next, p2 do
-		if type(B) == 'number' then
+		if typeof(B) == 'number' then
 			C.Parent = A
 		else
 			A[B] = C
@@ -256,7 +256,7 @@ do
 		local mapSize = Vector2_new(1920,16)
 		local iconSize = 16
 		local class = 'Frame'
-		if type(IconFrame) == 'string' then
+		if typeof(IconFrame) == 'string' then
 			class = IconFrame
 			IconFrame = nil
 		end
@@ -283,7 +283,7 @@ end
 
 function SpecialIcon(IconFrame,texture,iconSize)
 	local class = 'Frame'
-	if type(IconFrame) == 'string' then
+	if typeof(IconFrame) == 'string' then
 		class = IconFrame
 		IconFrame = nil
 	end
@@ -1119,7 +1119,7 @@ function CreateInsertObject()
 end
 
 function GetCorrectIcon(Class)
-	if type(Class) == "string" then
+	if typeof(Class) == "string" then
 		if ExplorerIndex[Class] then
 			return ExplorerIndex[Class]
 		end
@@ -1525,7 +1525,7 @@ function CreateCaution(title,msg)
 end
 
 function CreateTableCaution(title,msg)
-	if type(msg) ~= "table" then
+	if typeof(msg) ~= "table" then
 		return CreateCaution(title, tostring(msg))
 	end
 	local newCaution = Clone(TableCautionWindow)
@@ -1790,14 +1790,14 @@ local function getSmaller(a, b, notLast)
 end
 
 local function parseData(obj, numTabs, isKey, overflow, noTables, forceDict)
-	local objType, objStr = type(obj), tostring(obj)
+	local objType, objStr = typeof(obj), tostring(obj)
 	if objType == "table" then
 		if noTables then return objStr end
 		local isCyclic, out, nextIndex, isDict, hasTables, data = overflow[obj], {}, 1, false, false, {}
 		overflow[obj] = true
 
 		for key, val in next, obj do
-			if not hasTables and type(val) == "table" then
+			if not hasTables and typeof(val) == "table" then
 				hasTables = true
 			end
 
@@ -1813,7 +1813,7 @@ local function parseData(obj, numTabs, isKey, overflow, noTables, forceDict)
 		if isDict or hasTables or forceDict then
 			table_insert(out, (isCyclic and "Cyclic " or "") .. "{")
 			table_sort(data, function(a, b)
-				local aType, bType = type(a[2]), type(b[2])
+				local aType, bType = typeof(a[2]), typeof(b[2])
 				if bType == "string" and aType ~= "string" then
 					return false
 				end
@@ -1825,11 +1825,11 @@ local function parseData(obj, numTabs, isKey, overflow, noTables, forceDict)
 				local nowKey, nowVal = arr[1], arr[2]
 				local parseKey, parseVal = parseData(nowKey, numTabs+1, true, overflow, isCyclic), parseData(nowVal, numTabs+1, false, overflow, isCyclic)
 				if isDict then
-					local nowValType, preStr, postStr = type(nowVal), "", ""
-					if i > 1 and (nowValType == "table" or type(data[i-1][2]) ~= nowValType) then
+					local nowValType, preStr, postStr = typeof(nowVal), "", ""
+					if i > 1 and (nowValType == "table" or typeof(data[i-1][2]) ~= nowValType) then
 						preStr = "\n"
 					end
-					if i < #data and nowValType == "table" and type(data[i+1][2]) ~= "table" and type(data[i+1][2]) == nowValType then
+					if i < #data and nowValType == "table" and typeof(data[i+1][2]) ~= "table" and typeof(data[i+1][2]) == nowValType then
 						postStr = "\n"
 					end
 					table_insert(out, preStr .. string_rep(tabChar, numTabs+1) .. parseKey .. " = " .. parseVal .. ";" .. postStr)
