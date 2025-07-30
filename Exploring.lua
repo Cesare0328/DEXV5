@@ -68,6 +68,7 @@ local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
+local SearchMouseHovered = false
 local NilInstances = {}
 local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
@@ -3124,7 +3125,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		if explorerFilter.Text == "" then
+		if explorerFilter.Text == "" and not SearchMouseHovered then
 			explorerFilter:ReleaseFocus()
 		end
     end
@@ -3141,6 +3142,14 @@ while not RbxApi do
 	RbxApi = GetApi_Bindable:Invoke()
 	task.wait()
 end
+
+Connect(explorerFilter.MouseEnter, function()
+SearchMouseHovered = true
+end)
+
+Connect(explorerFilter.MouseLeave, function()
+SearchMouseHovered = false
+end)
 
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
