@@ -441,9 +441,9 @@ end
 local MAP_ID = 418720155
 -- Gui Controls --
 local function Create(ty,data)
-	local obj = type(ty) == 'string' and Instance_new(ty) or ty
+	local obj = typeof(ty) == 'string' and Instance_new(ty) or ty
 	for k, v in next, data do
-		if type(k) == 'number' then
+		if typeof(k) == 'number' then
 			v.Parent = obj
 		else
 			obj[k] = v
@@ -471,7 +471,7 @@ do
 
 		local class = 'Frame'
 
-		if type(IconFrame) == 'string' then
+		if typeof(IconFrame) == 'string' then
 			class = IconFrame
 			IconFrame = nil
 		end
@@ -1235,7 +1235,7 @@ local function GetControl(object, propertyData, readOnly)
 		control = Controls[propertyType](object, propertyData, readOnly)
 	elseif RbxApiPropertyData then
 		local ControlType = Controls[RbxApiPropertyData.ValueType.Name] or Controls.default
-		control = ControlType(object, propertyData, readOnly)
+		control = Controltypeof(object, propertyData, readOnly)
 	else
 		control = Controls.default(object, propertyData, readOnly)
 	end
