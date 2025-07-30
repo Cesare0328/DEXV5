@@ -70,6 +70,7 @@ local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
 local SearchMouseHovered = false
+local IsSearchbarFocused = false
 local NilInstances = {}
 local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
@@ -3136,7 +3137,7 @@ Connect(UserInputService.InputBegan, function(p1)
             end
         end
 
-        if explorerFilter.Focused and not IsMouseOnDex and not SearchMouseHovered then
+        if IsSearchbarFocused and not IsMouseOnDex and not SearchMouseHovered then
             if explorerFilter.Text == "" then
                 explorerFilter:ReleaseFocus()
                 rawUpdateList()
@@ -3171,8 +3172,13 @@ Connect(explorerFilter.MouseLeave, function()
 SearchMouseHovered = false
 end)
 
+Connect(explorerFilter.Focused, function()
+IsSearchbarFocused = true 
+end)
+
 Connect(explorerFilter.FocusLost, function(p1)
 	if p1 then
+		IsSearchbarFocused = false
 		Searched = true
 		rawUpdateList()
 		if explorerFilter.Text == "" and #Selection:Get() == 1 then
