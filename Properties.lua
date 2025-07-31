@@ -168,7 +168,7 @@ local function getRbxApi()
 		for i, name in pairs(gottenprops) do
 			if not prop then continue end
         		if name == prop.Name then
-            		table.remove(gottenprops, tonumber(i))
+            		gottenprops[i] = nil
         		end
     		end
 		end
