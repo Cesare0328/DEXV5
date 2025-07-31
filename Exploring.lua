@@ -30,6 +30,8 @@ local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+-- < Specials > --
+local checkrbxlocked = Specials.checkrbxlocked
 -- < Class Aliases > --
 local IsA = game.IsA
 local ClearAllChildren = game.ClearAllChildren
@@ -2452,16 +2454,20 @@ do
 						if Option.Selectable then
     						local list = Selection.List
     						for i = 1,#list do
-        						list[i].Parent = parentObj
-        						if NilInstances[list[i]] then
-           							NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
-        						end
+								if not checkrbxlocked(list[i]) then
+        							list[i].Parent = parentObj
+        							if NilInstances[list[i]] then
+           								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
+        							end
+								end
     						end
 						else
-    						object.Parent = parentObj
-    						if NilInstances[object] then
-        						NilInstances[object].Parent = NilInstances[parentObj] or parentObj
-    						end
+							if not checkrbxlocked(object) then
+    							object.Parent = parentObj
+    							if NilInstances[object] then
+        							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
+    							end
+							end
 						end
 						rawUpdateList()
 					end
@@ -2870,7 +2876,7 @@ local function addObject(object,noupdate)
 		return
 	end
 
-	if object.Name == "Instance" and object.Parent == game and object.className then
+	if object.Name == "Instance" and object.Parent == game and object.className and GetSetting_Bindable:Invoke("UseRealclassName") then
 		object.Name = object.className
 	end
 	
