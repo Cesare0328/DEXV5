@@ -30,6 +30,20 @@ local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+-- < Bindables > --
+local Bindables = WaitForChild(script.Parent.Parent, "Bindables", 300)
+local GetSpecials_Bindable = WaitForChild(Bindables, "GetSpecials", 300)
+local GetSetting_Bindable = WaitForChild(Bindables, "GetSetting", 300)
+local GetOption_Bindable = WaitForChild(Bindables, "GetOption", 300)
+local GetAwaiting_Bindable = WaitForChild(Bindables, "GetAwaiting", 300)
+local GetSelection_Bindable = WaitForChild(Bindables, "GetSelection", 300)
+local GetApi_Bindable = WaitForChild(Bindables, "GetApi", 300)
+local GetPrint_Bindable = WaitForChild(Bindables, "GetPrint", 300)
+local OpenScript_Bindable = WaitForChild(Bindables, "OpenScript", 300)
+local SelectionChanged_Bindable = WaitForChild(Bindables, "SelectionChanged", 300)
+local SetAwaiting_Bindable = WaitForChild(Bindables, "SetAwaiting", 300)
+local SetOption_Bindable = WaitForChild(Bindables, "SetOption", 300)
+local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 -- < Specials > --
 local Specials = GetSpecials_Bindable:Invoke()
 local checkrbxlocked = Specials.checkrbxlocked
@@ -54,19 +68,6 @@ local Wait, Connect, Disconnect = (function()
 end)()
 -- < Upvalues > --
 local Stepped = RunService.Stepped
-local Bindables = WaitForChild(script.Parent.Parent, "Bindables", 300)
-local GetSpecials_Bindable = WaitForChild(Bindables, "GetSpecials", 300)
-local GetSetting_Bindable = WaitForChild(Bindables, "GetSetting", 300)
-local GetOption_Bindable = WaitForChild(Bindables, "GetOption", 300)
-local GetAwaiting_Bindable = WaitForChild(Bindables, "GetAwaiting", 300)
-local GetSelection_Bindable = WaitForChild(Bindables, "GetSelection", 300)
-local GetApi_Bindable = WaitForChild(Bindables, "GetApi", 300)
-local GetPrint_Bindable = WaitForChild(Bindables, "GetPrint", 300)
-local OpenScript_Bindable = WaitForChild(Bindables, "OpenScript", 300)
-local SelectionChanged_Bindable = WaitForChild(Bindables, "SelectionChanged", 300)
-local SetAwaiting_Bindable = WaitForChild(Bindables, "SetAwaiting", 300)
-local SetOption_Bindable = WaitForChild(Bindables, "SetOption", 300)
-local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
