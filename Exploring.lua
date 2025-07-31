@@ -1958,7 +1958,7 @@ function rightClickMenu(sObj)
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
 	end
-    if filteringInstances() then
+    if filteringInstances() and Searched then
 		table_insert(actions, 1, "Clear Search and Jump to")
 	end
     if IsA(sObj, "ClickDetector") then
