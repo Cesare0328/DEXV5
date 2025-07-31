@@ -2873,7 +2873,7 @@ local function addObject(object,noupdate)
 	if object.Name == "Instance" and object.Parent == game and object.className then
 		object.Name = object.className
 	end
-	if object.Name == "Instance" and object.className and not ExplorerIndex[object.className] and GetSetting_Bindable:Invoke("UseRealclassName") then
+	if object.Name == "Instance" and object.className and GetSetting_Bindable:Invoke("UseRealclassName") then
 		object.Name = object.className
 	end
 	if script then
