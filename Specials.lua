@@ -443,8 +443,14 @@ function Class:finish()
 end
 -- < Source > --
 local Specials = {
-	checkrbxlocked = function()
-		return false
+	checkrbxlocked = function(p1)
+    	local success, err = pcall(function()
+        	p1.Parent = p1
+    	end)
+    	if not success and type(err) == "string" and err:find("locked", 1, true) then
+        	return true
+    	end
+    return false
 	end,
 	fireclickdetector = fireclickdetector,
 	firetouchinterest = firetouchinterest,
