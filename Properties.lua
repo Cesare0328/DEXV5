@@ -164,10 +164,9 @@ local function getRbxApi()
 		}
 		local gottenprops = getpropertylist(classInstance)
 
-    	for _, prop in ipairs(Properties) do
+    	for _, prop in pairs(Properties) do
         	for i = #gottenprops, 1, -1 do
             	local name = gottenprops[i]
-				rconsolewarn(name)
             	if name == prop.Name then
                 	table.remove(gottenprops, i)
             	end
