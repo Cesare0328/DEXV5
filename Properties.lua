@@ -163,15 +163,15 @@ local function getRbxApi()
 			}
 		}
 		local gottenprops = getpropertylist(classInstance)
-    
-    	for _, prop in pairs(Properties) do
-        	for i = #gottenprops, 1, -1 do
-            	local name = gottenprops[i]
-            	if name == prop.Name then
-                	table.remove(gottenprops, i)
-            	end
-        	end
-    	end
+
+		for key, prop in ipairs(Properties) do
+		for i, name in pairs(gottenprops) do
+			if not prop then continue end
+        		if name == prop.Name then
+            		table.remove(gottenprops, tonumber(i))
+        		end
+    		end
+		end
 		for Property, is_scriptable in next, gottenprops do
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
