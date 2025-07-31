@@ -132,7 +132,7 @@ local function getRbxApi()
 			{
 				ValueType = "Vector3",
 				CurrentValue = Vector3.zero,
-				Name = "siz",
+				Name = "Size",
 				Readable = "Size",
 				Tags = {},
 				Class = "BasePart"
@@ -140,7 +140,7 @@ local function getRbxApi()
 			{
 				ValueType = "Enum",
 				CurrentValue = Enum.PartType.Block,
-				Name = "shap",
+				Name = "Shape",
 				Readable = "Shape",
 				Tags = {},
 				Class = "BasePart"
