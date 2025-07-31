@@ -2869,6 +2869,10 @@ local function addObject(object,noupdate)
 	if object.Parent == game and InstanceBlacklist[object.ClassName] or object.ClassName == '' then
 		return
 	end
+	
+	if object.Name == "Instance" and object.Parent == game and object.className then
+		object.Name = object.className
+	end
 
 	if script then
 		local s = pcall(check, object)
