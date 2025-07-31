@@ -144,6 +144,7 @@ local Settings = {
 	SelectUngrouped = true,
 	SkipToAfterSearch = true,
 	UseInstanceBlacklist = true,
+	UseRealclassName = false,
 	RSSIncludeRL = false
 }
 
@@ -221,6 +222,7 @@ createSetting("Clear property value on focus", "ClearProps", Settings.ClearProps
 createSetting("Select ungrouped models" , "SelectUngrouped", Settings.SelectUngrouped)
 createSetting("Jump to selected Object after Search Exit", "SkipToAfterSearch", Settings.SkipToAfterSearch)
 createSetting("Hide unnecessary services (requires restart)", "UseInstanceBlacklist", Settings.UseInstanceBlacklist)
+createSetting("Show true names for Instances named as Instance", "UseRealclassName", Settings.UseRealclassName)
 createSetting("Script Storage includes RobloxLocked scripts", "RSSIncludeRL", Settings.RSSIncludeRL)
 
 local function getSelection()
