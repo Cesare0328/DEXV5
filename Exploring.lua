@@ -31,6 +31,7 @@ local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 -- < Specials > --
+local Specials = GetSpecials_Bindable:Invoke()
 local checkrbxlocked = Specials.checkrbxlocked
 -- < Class Aliases > --
 local IsA = game.IsA
