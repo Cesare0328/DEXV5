@@ -67,7 +67,6 @@ local SelectionChanged_Bindable = WaitForChild(Bindables, "SelectionChanged", 30
 local SetAwaiting_Bindable = WaitForChild(Bindables, "SetAwaiting", 300)
 local SetOption_Bindable = WaitForChild(Bindables, "SetOption", 300)
 local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
-local Specials = GetSpecials_Bindable:Invoke()
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
