@@ -2441,56 +2441,46 @@ do
 		end
 
 		conUp = Connect(mouseDrag.MouseButton1Up, function()
-   		cancelReparentDrag()
-   		if dragged then
-       		if parentIndex then
-           		local actualParentIndex = parentIndex + scrollBar.ScrollIndex
-           		local parentNode = TreeList[actualParentIndex]
-           		if parentNode then
-               		parentNode.Expanded = true
-               		local parentObj = parentNode.Object
-               
-               		if Option.Selectable then
-                   		local list = Selection.List
-                   		local canReparent = false
-                   
-                   		for i = 1, #list do
-                       		if not checkrbxlocked(list[i]) then
-                           		canReparent = true
-                           		break
-                       		end
-                   		end
-                   
-                   		if canReparent then
-                       		for i = 1, #list do
-                           		if not checkrbxlocked(list[i]) then
-                               		list[i].Parent = parentObj
-                               		if NilInstances[list[i]] then
-                                   		NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
-                               		end
-                           		end
-                       		end
-                       		rawUpdateList()
-                   		end
-               		else
-                   		if not checkrbxlocked(object) then
-                       		object.Parent = parentObj
-                       		if NilInstances[object] then
-                           		NilInstances[object].Parent = NilInstances[parentObj] or parentObj
-                       		end
-                       		rawUpdateList()
-                   		end
-               		end
-           		end
-       		end
-   		else
-       		if not wasSelected and Option.Selectable then
-           		Selection:Set({object})
-       		elseif wasSelected then
-           		Selection:Set({})
-       		end
-   		end
-   		cancelReparentDrag()
+			cancelReparentDrag()
+			if dragged then
+				if parentIndex then
+					local actualParentIndex = parentIndex + scrollBar.ScrollIndex
+					local parentNode = TreeList[actualParentIndex]
+					if parentNode then
+						parentNode.Expanded = true
+						local parentObj = parentNode.Object
+						local function parent(a,b)
+							a.Parent = b
+						end
+						if Option.Selectable then
+    						local list = Selection.List
+    						for i = 1,#list do
+								if checkrbxlocked(list[i]) then
+        							list[i].Parent = parentObj
+        							if NilInstances[list[i]] then
+           								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
+        							end
+								end
+    						end
+						else
+							if checkrbxlocked(object) then
+    							object.Parent = parentObj
+    							if NilInstances[object] then
+        							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
+    							end
+							end
+						end
+						rawUpdateList()
+					end
+				end
+			else
+				if not wasSelected and Option.Selectable then 
+					Selection:Set({object})
+				elseif wasSelected then
+					Selection:Set({})
+				end
+			end
+			cancelReparentDrag()
 		end)
 		conUp2 = Connect(mouseDrag.MouseButton2Down, function()
 			cancelReparentDrag()
