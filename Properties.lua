@@ -172,6 +172,7 @@ local function getRbxApi()
         		end
     		end
 		end
+		end
 		for Property, is_scriptable in next, gottenprops do
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
