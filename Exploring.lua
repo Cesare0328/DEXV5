@@ -2455,7 +2455,6 @@ do
 						if Option.Selectable then
     						local list = Selection.List
     						for i = 1,#list do
-								warn(checkrbxlocked(list[i]))
 								if not checkrbxlocked(list[i]) then
         							list[i].Parent = parentObj
         							if NilInstances[list[i]] then
@@ -2464,6 +2463,8 @@ do
 								end
     						end
 						else
+							warn(object.Name)
+							warn(checkrbxlocked(object))
 							if not checkrbxlocked(object) then
     							object.Parent = parentObj
     							if NilInstances[object] then
