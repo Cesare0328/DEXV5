@@ -2447,7 +2447,6 @@ do
 					local actualParentIndex = parentIndex + scrollBar.ScrollIndex
 					local parentNode = TreeList[actualParentIndex]
 					if parentNode then
-						parentNode.Expanded = true
 						local parentObj = parentNode.Object
 						local function parent(a,b)
 							a.Parent = b
@@ -2460,16 +2459,16 @@ do
         							if NilInstances[list[i]] and not checkrbxlocked(NilInstances[list[i]]) then
            								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
         							end
+								parentNode.Expanded = true
 								end
     						end
 						else
-							warn(object.Name)
-							warn(checkrbxlocked(object))
 							if not checkrbxlocked(object) then
     							object.Parent = parentObj
     							if NilInstances[object] and not checkrbxlocked(NilInstances[object]) then
         							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
     							end
+							parentNode.Expanded = true
 							end
 						end
 						rawUpdateList()
