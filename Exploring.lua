@@ -2456,7 +2456,7 @@ do
     						for i = 1,#list do
 								if not checkrbxlocked(list[i]) then
         							list[i].Parent = parentObj
-        							if NilInstances[list[i]] and not checkrbxlocked(NilInstances[list[i]]) then
+        							if NilInstances[list[i]] and (not checkrbxlocked(NilInstances[list[i]]) or not checkrbxlocked(OriginalToClone[list[i]])) then
            								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
         							end
 								parentNode.Expanded = true
@@ -2465,7 +2465,7 @@ do
 						else
 							if not checkrbxlocked(object) then
     							object.Parent = parentObj
-    							if NilInstances[object] and not checkrbxlocked(NilInstances[object]) then
+    							if NilInstances[object] and (not checkrbxlocked(NilInstances[object]) or not checkrbxlocked(OriginalToClone[object])) then
         							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
     							end
 							parentNode.Expanded = true
