@@ -2457,7 +2457,7 @@ do
     						for i = 1,#list do
 								if not checkrbxlocked(list[i]) then
         							list[i].Parent = parentObj
-        							if NilInstances[list[i]] then
+        							if NilInstances[list[i]] and not not checkrbxlocked(NilInstances[list[i]]) then
            								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
         							end
 								end
@@ -2467,7 +2467,7 @@ do
 							warn(checkrbxlocked(object))
 							if not checkrbxlocked(object) then
     							object.Parent = parentObj
-    							if NilInstances[object] then
+    							if NilInstances[object] and not not checkrbxlocked(NilInstances[object]) then
         							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
     							end
 							end
