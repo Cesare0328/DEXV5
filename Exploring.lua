@@ -2244,7 +2244,8 @@ function rightClickMenu(sObj)
     		if sObj == NilStorageMain then
         		for i, v in ipairs(getnilinstances()) do
             		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and not OriginalToClone[v] then
-                		pcall(function()
+                		v.Archivable = true
+						pcall(function()
                     		local Cloned = Clone(v)
                     		NilInstances[Cloned] = v
 							OriginalToClone[v] = Cloned
@@ -2454,18 +2455,18 @@ do
 						if Option.Selectable then
     						local list = Selection.List
     						for i = 1,#list do
-								if not checkrbxlocked(list[i]) then
+								if not checkrbxlocked(list[i]) or (NilInstances[list[i]] and not checkrbxlocked(NilInstances[list[i]])) then
         							list[i].Parent = parentObj
-        							if NilInstances[list[i]] and (not checkrbxlocked(NilInstances[list[i]]) or not checkrbxlocked(OriginalToClone[list[i]])) then
+        							if NilInstances[list[i]] then
            								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
         							end
 								parentNode.Expanded = true
 								end
     						end
 						else
-							if not checkrbxlocked(object) then
+							if not checkrbxlocked(object) or (NilInstances[object] and not checkrbxlocked(NilInstances[object])) then
     							object.Parent = parentObj
-    							if NilInstances[object] and (not checkrbxlocked(NilInstances[object]) or not checkrbxlocked(OriginalToClone[object])) then
+    							if NilInstances[object] then
         							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
     							end
 							parentNode.Expanded = true
