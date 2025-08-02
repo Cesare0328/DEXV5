@@ -884,8 +884,8 @@ if NilStorageEnabled then
 		v.Archivable = true
 		pcall(function()
 			Cloned = Clone(v)
-		    NilInstances[Cloned] = v
-			OriginalToClone[v] = Cloned
+		    NilInstances[v] = Cloned
+			OriginalToClone[Cloned] = v
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
 		end)
@@ -2456,9 +2456,9 @@ do
     						local list = Selection.List
     						for i = 1,#list do
 								if not checkrbxlocked(list[i]) or (NilInstances[list[i]] and not checkrbxlocked(NilInstances[list[i]])) then
-        							list[i].Parent = parentObj
+        							list[i].Parent = parentObj --here
         							if NilInstances[list[i]] then
-           								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj
+           								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj --here
         							end
 								parentNode.Expanded = true
 								end
