@@ -1,1592 +1,2267 @@
 -- < Fix for module threads not being supported since synapse x > --
-local script = getgenv().Dex:WaitForChild("ScriptEditor"):WaitForChild("ScriptEditor")
+local script = getgenv().Dex:WaitForChild("PropertiesFrame"):WaitForChild("Properties")
 -- < Aliases > --
-local Vector2_zero = Vector2.zero
-local Vector2_new = Vector2.new
+local math_floor = math.floor
+local math_ceil = math.ceil
+local math_max = math.max
+local string_len = string.len
+local string_sub = string.sub
+local string_gsub = string.gsub
+local string_split = string.split
+local string_format = string.format
+local string_find = string.find
+local string_lower = string.lower
+local table_concat = table.concat
+local table_insert = table.insert
+local table_sort = table.sort
+local Instance_new = Instance.new
 local Color3_fromRGB = Color3.fromRGB
 local Color3_new = Color3.new
-local table_insert = table.insert
-local table_remove = table.remove
-local table_concat = table.concat
-local table_clear = table.clear
-local min, max, floor, ceil, random = math.min, math.max, math.floor, math.ceil, math.random
-local sub, gsub, match, gmatch, find, rep, format, lower = string.sub, string.gsub, string.match, string.gmatch, string.find, string.rep, string.format, string.lower
-local udim2 = UDim2.new
-local newInst = Instance.new
+local UDim2_new = UDim2.new
+local Vector3_new = Vector3.new
+local Vector2_new = Vector2.new
+local NumberRange_new = NumberRange.new
+local BrickColor_palette = BrickColor.palette
 local wait = task.wait
 -- < Services > --
+local CollectionService = cloneref(game:GetService("CollectionService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
-local InsertService = cloneref(game:GetService("InsertService"))
-local TweenService = cloneref(game:GetService("TweenService"))
-local TextService = cloneref(game:GetService("TextService"))
-local RunService = cloneref(game:GetService("RunService"))
+local ContentProvider = cloneref(game:GetService("ContentProvider"))
+local HttpService = cloneref(game:GetService("HttpService"))
 local Players = cloneref(game:GetService("Players"))
--- < Class Aliases > --
-local IsA = Players.IsA
-local WaitForChild = Players.WaitForChild
-local FindFirstChild = Players.FindFirstChild
-local GetPropertyChangedSignal = Players.GetPropertyChangedSignal
-local ClearAllChildren = Players.ClearAllChildren
-local FindFirstChildOfClass = Players.FindFirstChildOfClass
-local IsMouseButtonPressed = UserInputService.IsMouseButtonPressed
-local GetFocusedTextBox = UserInputService.GetFocusedTextBox
-local GetTextSize = TextService.GetTextSize
-local LoadLocalAsset = InsertService.LoadLocalAsset
-local Connect, Wait = (function()
-	local A = Players.Changed
-	return A.Connect, A.Wait
-end)()
 -- < Bindables > --
-local Bindables = WaitForChild(script.Parent.Parent, "Bindables", 300)
-local OpenScript_Bindable = WaitForChild(Bindables, "OpenScript", 300)
--- < Upvalues > --
-local cache, dragger, CurrentScript = {}, {}, nil
-local editor = script.Parent
-local TopBar = WaitForChild(editor, "TopBar")
-local OtherFrame = WaitForChild(TopBar, "Other")
-local SaveScript = WaitForChild(OtherFrame, 'SaveScript')
-local CopyScript = WaitForChild(OtherFrame, 'CopyScript')
-local ClearScript = WaitForChild(OtherFrame, 'ClearScript')
-local DebugScript = WaitForChild(OtherFrame, 'DebugScript')
-local FileName = WaitForChild(OtherFrame, 'FileName')
-local CloseEditor = WaitForChild(TopBar, "Close")
-local Title	= WaitForChild(TopBar, "Title")
-local LocalPlayer = Players.LocalPlayer
-local PlayerMouse = LocalPlayer:GetMouse()
-local Heartbeat = RunService.Heartbeat
-local MinSize = editor.Editor.Size
-local ResizeEdgeSize = 0.1
-local IsResizing = false
-local ResizeDirection = ""
-local StartMousePos = Vector2.new(0, 0)
-local StartFrameSize = UDim2.new(0, 0, 0, 0)
-local StartFramePos = UDim2.new(0, 0, 0, 0)
-local StartEditorSize = UDim2.new(0, 0, 0, 0)
-
+local Bindables = script.Parent.Parent:WaitForChild("Bindables", 300)
+local GetApi_Bindable = Bindables:WaitForChild("GetApi", 300)
+local GetSpecials_Bindable = Bindables:WaitForChild("GetSpecials", 300)
+local GetSelection_Bindable = Bindables:WaitForChild("GetSelection", 300)
+local GetSetting_Bindable = Bindables:WaitForChild("GetSetting", 300)
+local GetAwaiting_Bindable = Bindables:WaitForChild("GetAwaiting", 300)
+local SelectionChanged_Bindable = Bindables:WaitForChild("SelectionChanged", 300)
+local SetAwaiting_Bindable = Bindables:WaitForChild("SetAwaiting", 300)
+local GetPrint_Bindable = Bindables:WaitForChild("GetPrint", 300)
+-- < Specials > --
+local Specials = GetSpecials_Bindable:Invoke()
+local checkrbxlocked = Specials.checkrbxlocked
+local getpropertylist = Specials.getpropertylist
 -- < Source > --
-do
-	function dragger.new(frame)
-		frame.Draggable = false
-		local s, event = pcall(function()
-			return frame.MouseEnter
-		end)
-		if s then
-			frame.Active = true
-			Connect(event, function()
-				local input = Connect(frame.InputBegan, function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						local objectPosition = Vector2_new(PlayerMouse.X - frame.AbsolutePosition.X, PlayerMouse.Y - frame.AbsolutePosition.Y)
-						while IsMouseButtonPressed(UserInputService, Enum.UserInputType.MouseButton1) do
-							task.wait(0)
-							pcall(function()
-								frame:TweenPosition(udim2(0, PlayerMouse.X - objectPosition.X + (frame.Size.X.Offset * frame.AnchorPoint.X), 0, PlayerMouse.Y - objectPosition.Y + (frame.Size.Y.Offset * frame.AnchorPoint.Y)), 'Out', 'Quad', .1, true)
-							end)
-						end
-					end
-				end)
-				local leave
-				leave = Connect(frame.MouseLeave, function()
-					input:Disconnect()
-					leave:Disconnect()
-					input = nil
-					leave = nil
-				end)
-			end)
-		end
-	end
-end
+local Gui = script.Parent.Parent
+local PropertiesFrame = script.Parent
+local ExplorerFrame = Gui:WaitForChild("ExplorerPanel")
+local print = GetPrint_Bindable:Invoke()
+-- RbxApi Stuff
+local maxChunkSize = 100 * 1000
 
-dragger.new(editor)
-
-local newline, tab = "\n", "\t"
-local TabText = rep(" ", 4)
-local SplitCacheResult, SplitCacheStr, SplitCacheDel
-local function Split(str, del)
-	if SplitCacheStr == str and SplitCacheDel == del then
-		return SplitCacheResult
-	end
-	local res = {}
-	if #del == 0 then
-		for i in gmatch(str, ".") do
-			table_insert(res, i)
-		end
+local function getCurrentApiJson()
+	local jsonStr
+	local success = pcall(function()
+		jsonStr = game:HttpGet("https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/API-DUMP.JSON", true)
+	end)
+	if success then
+		return jsonStr
 	else
-		local i,Si,si = 0, 1, nil
-		str ..= del
-		while i do
-			si, Si, i = i, find(str, del, i + 1, true)
-			if i == nil then
-				return res
-			end
-			table_insert(res, sub(str, si + 1, Si - 1))
-		end
+		print("[DEX] Json loading failed!")
 	end
-	SplitCacheResult, SplitCacheStr, SplitCacheDel = res, str, del
-	return res
 end
 
-local Place = {
-	new = function(X, Y)
-		return {X = X, Y = Y}
+local function splitStringIntoChunks(jsonStr)
+	local t = {}
+	for i = 1, math_ceil(string_len(jsonStr)/maxChunkSize) do
+		table_insert(t, string_sub(jsonStr, (i - 1) * maxChunkSize + 1, i * maxChunkSize))
 	end
-}
+	return t
+end
 
-local Lexer do
-	local lua_builtin = {}
-	for Key, T in next, getrenv() do
-		if typeof(Key) == "string" then
-			table_insert(lua_builtin, Key)
-			if typeof(T) == "table" then
-				for T_Key, _ in next, T do
-					if typeof(T_Key) == "string" then
-						table_insert(lua_builtin, Key.."."..T_Key)
-					end
-				end
-			end
-		end
-	end
-	local Keywords = {
-		["and"] = true,
-		["break"] = true,
-		["do"] = true,
-		["else"] = true,
-		["elseif"] = true,
-		["end"] = true,
-		["false"] = true,
-		["for"] = true,
-		["function"] = true,
-		["if"] = true,
-		["in"] = true,
-		["local"] = true,
-		["nil"] = true,
-		["not"] = true,
-		["true"] = true,
-		["or"] = true,
-		["repeat"] = true,
-		["continue"] = true,
-		["return"] = true,
-		["then"] = true,
-		["until"] = true,
-		["while"] = true,
-		["self"] = true
-	}
-	local Tokens = {
-		Comment = 1,
-		Keyword = 2,
-		Number = 3,
-		Operator = 4,
-		String = 5,
-		Identifier = 6,
-		Builtin = 7,
-		Symbol = 19400
-	}
-	local Stream 
-	do
-		function Stream(Input, FileName)
-			local Index, Line, Column = 1,1,0
-			FileName = FileName or "{none}"
-			local cols = {}
-			return {
-				Back = function()
-					Index -= 1
-					local Char = sub(Input, Index, Index)
-					if Char == newline then
-						Line -= 1
-						Column = table_remove(cols, #cols)
-					else
-						Column -= 1
-					end
-				end,
-				Next = function()
-					local Char = sub(Input, Index, Index)
-					Index += 1
-					if Char == newline then
-						Line += 1
-						table_insert(cols, Column)
-						Column = 0
-					else
-						Column += 1
-					end
-					return Char, {
-						Index = Index,
-						Line = Line,
-						Column = Column,
-						File = FileName
-					}
-				end,
-				Peek = function(length)
-					return sub(Input, Index, Index + (length or 1) - 1)
-				end,
-				EOF = function()
-					return Index > #Input
-				end,
-				Fault = function(Error)
-					error(Error .. " (col " .. Column .. ", ln " .. Line .. ", file " .. FileName .. ")", 0)
-				end
-			}
+local apiChunks = splitStringIntoChunks(getCurrentApiJson())
+
+local function getRbxApi()
+	local function GetApiRemoteFunction(index)
+		if (apiChunks[index]) then 
+			return apiChunks[index], #apiChunks
+		else
+			return
 		end
 	end
 
-	local idenCheck, numCheck, opCheck = "abcdefghijklmnopqrstuvwxyz_", "0123456789", "+-*/%^#~=<>:,."
-	local blank, dot, equal, openbrak, closebrak, backslash, dash, quote, apos = "", ".", "=", "[", "]", "\\", "-", "\"", "'"
-	function Lexer(Code)
-		local Input = Stream(Code)
-		local Current, LastToken, self
-		local Clone = function(Table)
-			local R = {}
-			local Table_mt = getrawmetatable(Table)
-			for K, V in next, Table do
-				R[K] = V
-			end
-			if Table_mt then
-				setrawmetatable(R, Table_mt)
-			end
-			return R
+	local function getApiJson()
+		local apiTable = {}
+		local firstPage, pageCount = GetApiRemoteFunction(1)
+		table_insert(apiTable, firstPage)
+		for i = 2, pageCount do
+			local page = GetApiRemoteFunction(i)
+			table_insert(apiTable, page)
 		end
-		for Key, Value in next, Clone(Tokens) do
-			Tokens[Value] = Key
-		end
-		local function Check(Value, Type, Start)
-			if Type == Tokens.Identifier then
-				return find(idenCheck, lower(Value), 1, true) ~= nil or not Start and find(numCheck, Value, 1, true) ~= nil
-			elseif Type == Tokens.Keyword then
-				return (Keywords[Value]) and true or false
-			elseif Type == Tokens.Number then
-				if Value == "." and not Start then
-					return true
-				end
-				return find(numCheck, Value, 1, true) ~= nil
-			elseif Type == Tokens.Operator then
-				return find(opCheck, Value, 1, true) ~= nil
-			end
-		end
-		local function Next()
-			if Current ~= nil then
-				local Token = Current
-				Current = nil
-				return Token
-			end
-			if Input.EOF() then
-				return nil
-			end
-			local Char, DebugInfo = Input.Next()
-			local Result = {
-				Type = Tokens.Symbol
-			}
-			local sValue = Char
-			for i = 0, 256 do
-				local open = openbrak .. rep(equal, i) .. openbrak
-				if Char .. Input.Peek(#open - 1) == open then
-					self.StringDepth = i + 1
-					break
-				end
-			end
-			local resulting = false
-			if 0 < self.StringDepth then
-				local closer = closebrak .. rep(equal, self.StringDepth - 1) .. closebrak
-				Input.Back()
-				local Value = blank
-				while not Input.EOF() and Input.Peek(#closer) ~= closer do
-					Char, DebugInfo = Input.Next()
-					Value ..= Char
-				end
-				if Input.Peek(#closer) == closer then
-					for i = 1, #closer do
-						Value ..= Input.Next()
-					end
-					self.StringDepth = 0
-				end
-				Result.Value = Value
-				Result.Type = Tokens.String
-				resulting = true
-			elseif 0 < self.CommentDepth then
-				local closer = closebrak .. rep(equal, self.CommentDepth - 1) .. closebrak
-				Input.Back()
-				local Value = blank
-				while not Input.EOF() and Input.Peek(#closer) ~= closer do
-					Char, DebugInfo = Input.Next()
-					Value ..= Char
-				end
-				if Input.Peek(#closer) == closer then
-					for i = 1, #closer do
-						Value ..= Input.Next()
-					end
-					self.CommentDepth = 0
-				end
-				Result.Value = Value
-				Result.Type = Tokens.Comment
-				resulting = true
-			end
-			local skip = 1
-			for i = 1, #lua_builtin do
-				local k = lua_builtin[i]
-				if Input.Peek(#k - 1) == sub(k, 2) and Char == sub(k, 1, 1) and skip < #k then
-					Result.Type = Tokens.Builtin
-					Result.Value = k
-					skip = #k
-					resulting = true
-				end
-			end
-			for i = 1, skip - 1 do
-				Char, DebugInfo = Input.Next()
-			end
-			if resulting then
-			elseif Check(Char, Tokens.Identifier, true) then
-				local Value = Char
-				while Check(Input.Peek(), Tokens.Identifier) and not Input.EOF() do
-					Value ..= Input.Next()
-				end
-				Result.Type = Check(Value, Tokens.Keyword) and Tokens.Keyword or Tokens.Identifier
-				Result.Value = Value
-			elseif Char == dash and Input.Peek() == dash then
-				local Value = Char .. Input.Next()
-				for i = 0, 256 do
-					local open = openbrak .. rep(equal, i) .. openbrak
-					if Input.Peek(#open) == open then
-						self.CommentDepth = i + 1
-						break
-					end
-				end
-				if 0 < self.CommentDepth then
-					local closer = closebrak .. rep(equal, self.CommentDepth - 1) .. closebrak
-					while not Input.EOF() and Input.Peek(#closer) ~= closer do
-						Char, DebugInfo = Input.Next()
-						Value ..= Char
-					end
-					if Input.Peek(#closer) == closer then
-						for i = 1, #closer do
-							Value ..= Input.Next()
-						end
-						self.CommentDepth = 0
-					end
-				else
-					while not Input.EOF() and not find(newline, Char, 1, true) do
-						Char, DebugInfo = Input.Next()
-						Value ..= Char
-					end
-				end
-				Result.Value = Value
-				Result.Type = Tokens.Comment
-			elseif Check(Char, Tokens.Number, true) or Char == dot and Check(Input.Peek(), Tokens.Number, true) then
-				local Value = Char
-				while Check(Input.Peek(), Tokens.Number) and not Input.EOF() do
-					Value ..= Input.Next()
-				end
-				Result.Value = Value
-				Result.Type = Tokens.Number
-			elseif Char == quote then
-				local Escaped = false
-				local String = blank
-				Result.Value = quote
-				while not Input.EOF() do
-					local Char = Input.Next()
-					Result.Value ..= Char
-					if Escaped then
-						String ..= Char
-						Escaped = false
-					elseif Char == backslash then
-						Escaped = true
-					elseif Char == quote or Char == newline then
-						break
-					else
-						String ..= Char
-					end
-				end
-				Result.Type = Tokens.String
-			elseif Char == apos then
-				local Escaped = false
-				local String = blank
-				Result.Value = apos
-				while not Input.EOF() do
-					local Char = Input.Next()
-					Result.Value ..= Char
-					if Escaped then
-						String ..= Char
-						Escaped = false
-					elseif Char == backslash then
-						Escaped = true
-					elseif Char == apos or Char == newline then
-						break
-					else
-						String ..= Char
-					end
-				end
-				Result.Type = Tokens.String
-			elseif Check(Char, Tokens.Operator) then
-				Result.Value = Char
-				Result.Type = Tokens.Operator
-			else
-				Result.Value = Char
-			end
-			Result.TypeName = Tokens[Result.Type]
-			LastToken = Result
-			return Result
-		end
-		local function Peek()
-			local Result = Next()
-			Current = Result
-			return Result
-		end
-		self = {
-			Next = Next,
-			Peek = Peek,
-			EOF = function()
-				return Peek() == nil
-			end,
-			GetLast = function()
-				return LastToken
-			end,
-			CommentDepth = 0,
-			StringDepth = 0
+		return table_concat(apiTable)
+	end
+
+	local json = getApiJson()
+	local apiDump = HttpService:JSONDecode(json)
+
+	local Classes = {
+		boolean = {},
+		BrickColor = {},
+		Color3 = {},
+		default = {}
+	}
+
+	local function sortAlphabetic(t, property)
+		table_sort(t,function(x,y)
+			return tostring(x[property]) < tostring(y[property])
+		end)
+	end
+
+	local function getProperties(classInstance, ClassName, RbxApi)
+		local Blacklist = {
+			Attributes = true, -- added custom tab for attributes
+			Tags = true -- added custom tab for tags
 		}
-		return self
-	end
-end
-function GetResizeDirection(MousePos)
-    local FramePos = editor.Editor.AbsolutePosition
-    local FrameSize = editor.Editor.AbsoluteSize
-    local IsRightEdge = MousePos.X >= FramePos.X + FrameSize.X - ResizeEdgeSize
-    local IsBottomEdge = MousePos.Y >= FramePos.Y + FrameSize.Y - ResizeEdgeSize
-
-    if IsRightEdge and IsBottomEdge then return "southeast"
-    elseif IsRightEdge then return "east"
-    elseif IsBottomEdge then return "south"
-    end
-    return ""
-end
-
-function PerformResize(MousePos)
-    local Delta = MousePos - StartMousePos
-    local NewSize = StartFrameSize
-    local NewEditorSize = StartEditorSize
-
-    if ResizeDirection:find("east") then
-        local NewWidth = math.max(MinSize.X.Offset, StartFrameSize.X.Offset + Delta.X)
-        NewSize = UDim2.new(0, NewWidth, StartFrameSize.Y.Scale, StartFrameSize.Y.Offset)
-        NewEditorSize = UDim2.new(0, StartEditorSize.X.Offset + (NewWidth - StartFrameSize.X.Offset), 
-            StartEditorSize.Y.Scale, StartEditorSize.Y.Offset)
-    end
-
-    if ResizeDirection:find("south") then
-        NewSize = UDim2.new(NewSize.X.Scale, NewSize.X.Offset, 0, 
-            math.max(MinSize.Y.Offset, StartFrameSize.Y.Offset + Delta.Y))
-    end
-
-    editor.Editor.Size = NewSize
-    editor.Editor.Position = StartFramePos
-    editor.Size = NewEditorSize
-end
-function Place.fromIndex(CodeEditor, Index)
-	local cache = CodeEditor.PlaceCache
-	local fromCache = {}
-	if cache.fromIndex then
-		fromCache = cache.fromIndex
-	else
-		cache.fromIndex = fromCache
-	end
-	if fromCache[Index] then
-	end
-	local Content = CodeEditor.Content
-	local ContentUpto = sub(Content, 1, Index)
-	if Index == 0 then
-		return Place.new(0, 0)
-	end
-	local Lines = Split(ContentUpto, newline)
-	local res = Place.new(#gsub(Lines[#Lines], tab, TabText), #Lines - 1)
-	fromCache[Index] = res
-	return res
-end
-function Place.toIndex(CodeEditor, Place)
-	local cache = CodeEditor.PlaceCache
-	local toCache = {}
-	if cache.toIndex then
-		toCache = cache.toIndex
-	else
-		cache.toIndex = toCache
-	end
-	local Content = CodeEditor.Content
-	if Place.X == 0 and Place.Y == 0 then
-		return 0
-	end
-	local Lines = CodeEditor.Lines
-	local Index = 0
-	for I = 1, Place.Y do
-		Index += #Lines[I] + 1
-	end
-	local line = Lines[Place.Y + 1]
-	local roundedX = Place.X
-	local ix = 0
-	for i = 1, #line do
-		local c = sub(line, i, i)
-		local pix = ix
-		if c == tab then
-			ix += #TabText
-		else
-			ix += 1
-		end
-		if Place.X == ix then
-			roundedX = i
-		elseif pix < Place.X and ix > Place.X then
-			if Place.X - pix < ix - Place.X then
-				roundedX = i - 1
-			else
-				roundedX = i
-			end
-		end
-	end
-	local res = Index + min(#line, roundedX)
-	toCache[Place.X .. "-$-" .. Place.Y] = res
-	return res
-end
-local Selection = {}
-local Side = {Left = 1, Right = 2}
-function Selection.new(Start, End, CaretSide)
-	return {
-		Start = Start,
-		End = End,
-		Side = CaretSide
-	}
-end
-local Themes = {
-	Plain = {
-		LineSelection = Color3_fromRGB(46, 46, 46),
-		Background = Color3_fromRGB(45, 45, 45),
-		Comment = Color3_fromRGB(150, 150, 150),
-		Keyword = Color3_fromRGB(204, 153, 204),
-		Builtin = Color3_fromRGB(102, 153, 204),
-		Number = Color3_fromRGB(250, 145, 85),
-		Operator = Color3_fromRGB(102, 204, 204),
-		String = Color3_fromRGB(153, 204, 153),
-		Text = Color3_fromRGB(204, 204, 204),
-		SelectionBackground = Color3_fromRGB(150, 150, 150),
-		SelectionColor = Color3_fromRGB(),
-		SelectionGentle = Color3_fromRGB(65, 65, 65)
-	}
-}
-
-local EditorLib = {
-	["Place"] = Place,
-	["Selection"] = Selection,
-	NewTheme = function(Name, Theme)
-		Themes[Name] = Theme
-	end
-}
-
-local TextCursor = {
-	Image = "rbxassetid://1188942192",
-	HotspotX = 3,
-	HotspotY = 8,
-	Size = udim2(0, 7, 0, 17)
-}
-function EditorLib.Initialize(Frame, Options)
-	local themestuff = {}
-	local function ThemeSet(obj, prop, val)
-		themestuff[obj] = themestuff[obj] or {}
-		themestuff[obj][prop] = val
-	end
-	local baseZIndex = Frame.ZIndex
-	Options.CaretBlinkingRate = tonumber(Options.CaretBlinkingRate) or .25
-	Options.FontSize = tonumber(Options.FontSize or Options.TextSize) or 14
-	Options.CaretFocusedOpacity = tonumber(Options.CaretOpacity and Options.CaretOpacity.Focused or Options.CaretFocusedOpacity) or 1
-	Options.CaretUnfocusedOpacity = tonumber(Options.CaretOpacity and Options.CaretOpacity.Unfocused or Options.CaretUnfocusedOpacity) or 0
-	Options.Theme = typeof(Options.Theme) == "string" and Options.Theme or "Plain"
-	local SizeDot = GetTextSize(TextService, ".", Options.FontSize, Options.Font, Vector2_new(1000, 1000))
-	local SizeM = GetTextSize(TextService, "m", Options.FontSize, Options.Font, Vector2_new(1000, 1000))
-	local SizeAV = GetTextSize(TextService, "AV", Options.FontSize, Options.Font, Vector2_new(1000, 1000))
-	local Editor = {
-		Content = "",
-		Lines = {""},
-		Focused = false,
-		PlaceCache = {},
-		Selection = Selection.new(0, 0, Side.Left),
-		LastKeyCode = false,
-		UndoStack = {},
-		RedoStack = {}
-	}
-	Editor.StartingSelection = Editor.Selection
-	local CharWidth = SizeM.X
-	local CharHeight = SizeM.Y + 4
-	if (SizeDot.X ~= SizeM.X or SizeDot.Y ~= SizeM.Y) and SizeAV.X ~= SizeM.X + SizeDot.X then
-		return error("CodeEditor requires a monospace font with no currying", 2)
-	end
-	local ContentChangedEvent = newInst("BindableEvent")
-	local FocusLostEvent = newInst("BindableEvent")
-	local PlayerGui = FindFirstChildOfClass(LocalPlayer, "PlayerGui")
-	local Container = newInst("Frame")
-	Container.Name = "Container"
-	Container.BorderSizePixel = 0
-	Container.BackgroundColor3 = Themes[Options.Theme].Background
-	ThemeSet(Container, "BackgroundColor3", "Background")
-	Container.Size = udim2(1, 0, 1, 0)
-	Container.ClipsDescendants = true
-	local GutterSize = CharWidth * 4
-	local TextArea = newInst("ScrollingFrame")
-	TextArea.Name = "TextArea"
-	TextArea.BackgroundTransparency = 1
-	TextArea.BorderSizePixel = 0
-	TextArea.Size = udim2(1, -GutterSize, 1, 0)
-	TextArea.Position = udim2(0, GutterSize, 0, 0)
-	TextArea.ScrollBarThickness = 10
-	TextArea.ScrollBarImageTransparency = 0
-	TextArea.ScrollBarImageColor3 = Color3_fromRGB(20, 20, 20)
-	TextArea.BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
-	TextArea.TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
-	TextArea.ZIndex = 3
-	local Gutter = newInst("Frame")
-	Gutter.Name = "Gutter"
-	Gutter.ZIndex = baseZIndex
-	Gutter.BorderSizePixel = 0
-	Gutter.BackgroundTransparency = .96
-	Gutter.Size = udim2(0, GutterSize - 5, 1.5, 0)
-	local GoodMouseDetector = newInst("TextButton")
-	GoodMouseDetector.Text = [[]]
-	GoodMouseDetector.BackgroundTransparency = 1
-	GoodMouseDetector.Size = udim2(1, 0, 1, 0)
-	GoodMouseDetector.Position = udim2()
-	GoodMouseDetector.Visible = false
-	local Scroll = newInst("TextButton")
-	Scroll.Name = "VertScroll"
-	Scroll.Size = udim2(0, 10, 1, 0)
-	Scroll.Position = udim2(1, -10, 0, 0)
-	Scroll.BackgroundTransparency = 1
-	Scroll.Text = ""
-	Scroll.ZIndex = 1000
-	Scroll.Parent = Container
-	local ScrollBar = newInst("TextButton")
-	ScrollBar.Name = "ScrollBar"
-	ScrollBar.Size = udim2(1, 0, 0, 36)
-	ScrollBar.Position = udim2()
-	ScrollBar.Text = ""
-	ScrollBar.BackgroundColor3 = Themes[Options.Theme].ScrollBar or Color3_fromRGB(120, 120, 120)
-	ScrollBar.BackgroundTransparency = .75
-	ScrollBar.BorderSizePixel = 0
-	ScrollBar.AutoButtonColor = false
-	ScrollBar.ZIndex = 3 + baseZIndex
-	ScrollBar.Parent = Scroll
-	local CaretIndicator = newInst("Frame")
-	CaretIndicator.Name = "CaretIndicator"
-	CaretIndicator.Size = udim2(1, 0, 0, 2)
-	CaretIndicator.Position = udim2()
-	CaretIndicator.BorderSizePixel = 0
-	CaretIndicator.BackgroundColor3 = Themes[Options.Theme].Text
-	ThemeSet(CaretIndicator, "BackgroundColor3", "Text")
-	CaretIndicator.BackgroundTransparency = .29803921568627456
-	CaretIndicator.ZIndex = 4 + baseZIndex
-	CaretIndicator.Parent = Scroll
-	local MarkersFolder = newInst("Folder", Scroll)
-	local markers = {}
-	local updateMarkers
-
-	do
-		local lerp = function(a, b, r)
-			return a + r * (b - a)
-		end
-		function updateMarkers()
-			ClearAllChildren(MarkersFolder)
-			local Theme = Themes[Options.Theme]
-			local Background = Theme.Background
-			local Text = Theme.Text
-			local ra = Background.r
-			local ga = Background.g
-			local ba = Background.b
-			local rb = Text.r
-			local gb = Text.g
-			local bb = Text.b
-			local r = lerp(ra, rb, .2980392156862745)
-			local g = lerp(ga, gb, .2980392156862745)
-			local b = lerp(ba, bb, .2980392156862745)
-			local color = Color3_new(r, g, b)
-			for i, v in ipairs(markers) do
-				local Marker = newInst("Frame")
-				Marker.BorderSizePixel = 0
-				Marker.BackgroundColor3 = color
-				Marker.Size = udim2(0, 4, 0, 6)
-				Marker.Position = udim2(0, 4, v * CharHeight / TextArea.CanvasSize.Y.Offset, 0)
-				Marker.ZIndex = 4 + baseZIndex
-				Marker.Parent = MarkersFolder
-			end
-		end
-	end
-	do
-		Connect(TextArea.Changed, function(property)
-			if property == "CanvasSize" or property == "CanvasPosition" then
-				Gutter.Position = udim2(0, 0, 0, -TextArea.CanvasPosition.Y)
-			end
-		end)
-	end
-	local Theme = Themes[Options.Theme]
-	local ScrollBorder = newInst("Frame")
-	ScrollBorder.Name = "ScrollBorder"
-	ScrollBorder.Position = udim2(0, -1, 0, 0)
-	ScrollBorder.Size = udim2(0, 1, 1, 0)
-	ScrollBorder.BorderSizePixel = 0
-	ScrollBorder.BackgroundColor3 = Color3_fromRGB(34, 34, 34)
-	ScrollBorder.Parent = Scroll
-	do
-		Connect(TextArea.Changed, function(property)
-			if property == "CanvasSize" or property == "CanvasPosition" then
-				local percent = TextArea.AbsoluteWindowSize.X / TextArea.CanvasSize.X.Offset
-				ScrollBar.Size = udim2(percent, 0, 1, 0)
-				local max = max(TextArea.CanvasSize.X.Offset - TextArea.AbsoluteWindowSize.X, 0)
-				ScrollBar.Position = udim2(0, (max == 0 and 0 or TextArea.CanvasPosition.X / max) * (Scroll.AbsoluteSize.X - ScrollBar.AbsoluteSize.X), 0, 0)
-				Scroll.Visible = false
-			end
-		end)
-	end
-	local LineSelection = newInst("Frame")
-	LineSelection.Name = "LineSelection"
-	LineSelection.BackgroundColor3 = Theme.Background
-	ThemeSet(LineSelection, "BackgroundColor3", "Background")
-	LineSelection.BorderSizePixel = 2
-	LineSelection.BorderColor3 = Theme.LineSelection
-	ThemeSet(LineSelection, "BorderColor3", "LineSelection")
-	LineSelection.Size = udim2(1, -4, 0, CharHeight - 4)
-	LineSelection.Position = udim2(0, 2, 0, 2)
-	LineSelection.ZIndex = -1 + baseZIndex
-	LineSelection.Visible = false
-	LineSelection.Parent = TextArea
-
-	local ErrorHighlighter = newInst("Frame")
-	ErrorHighlighter.Name = "ErrorHighlighter"
-	ErrorHighlighter.BackgroundColor3 = Color3_fromRGB(255, 0, 0)
-	ErrorHighlighter.BackgroundTransparency = .9
-	ErrorHighlighter.BorderSizePixel = 0
-	ErrorHighlighter.Size = udim2(1, -4, 0, CharHeight - 4)
-	ErrorHighlighter.Position = udim2(0, 2, 0, 2)
-	ErrorHighlighter.ZIndex = 5 + baseZIndex
-	ErrorHighlighter.Visible = false
-	ErrorHighlighter.Parent = TextArea
-
-	local ErrorMessage = newInst("TextLabel")
-	ErrorMessage.Name = "ErrorMessage"
-	ErrorMessage.BackgroundColor3 = Theme.Background:Lerp(Color3_new(1, 1, 1), .1)
-	ErrorMessage.TextColor3 = Color3_fromRGB(255, 152, 152)
-	ErrorMessage.BorderSizePixel = 0
-	ErrorMessage.Visible = false
-	ErrorMessage.Size = udim2(0, 150, 0, CharHeight - 4)
-	ErrorMessage.Position = udim2(0, 2, 0, 2)
-	ErrorMessage.ZIndex = 6 + baseZIndex
-	ErrorMessage.Parent = Container
-
-	local Tokens = newInst("Frame")
-	Tokens.BackgroundTransparency = 1
-	Tokens.Name = "Tokens"
-	Tokens.Parent = TextArea
-
-	local Selection = newInst("Frame")
-	Selection.BackgroundTransparency = 1
-	Selection.Name = "Selection"
-	Selection.ZIndex = baseZIndex
-	Selection.Parent = TextArea
-
-	local TextBox = newInst("TextBox")
-	TextBox.BackgroundTransparency = 1
-	TextBox.Size = udim2(0, 0, 0, 0)
-	TextBox.Position = udim2(-1, 0, -1, 0)
-	TextBox.Text = ""
-	TextBox.ShowNativeInput = false
-	TextBox.MultiLine = true
-	TextBox.ClearTextOnFocus = true
-
-	local Caret = newInst("Frame")
-	Caret.Name = "Caret"
-	Caret.BorderSizePixel = 0
-	Caret.BackgroundColor3 = Theme.Text
-	ThemeSet(Caret, "BackgroundColor3", "Text")
-	Caret.Size = udim2(0, 2, 0, CharHeight)
-	Caret.Position = udim2(0, 0, 0, 0)
-	Caret.ZIndex = 100
-	Caret.Visible = false
-
-	local selectedword = nil
-	local tokens = {}
-
-	local function NewToken(Content, Color, Position, Parent)
-		local Token = newInst("TextLabel")
-		Token.BorderSizePixel = 0
-		Token.TextColor3 = Theme[Color]
-		Token.BackgroundTransparency = (Content == selectedword) and 0 or 1
-		Token.BackgroundColor3 = Theme.SelectionGentle
-		Token.Size = udim2(0, CharWidth * #Content, 0, CharHeight)
-		Token.Position = udim2(0, Position.X * CharWidth, 0, Position.Y * CharHeight)
-		Token.Font = Options.Font
-		Token.TextSize = Options.FontSize
-		Token.Text = Content
-		Token.TextXAlignment = "Left"
-		Token.ZIndex = baseZIndex
-		Token.Parent = Parent
-		table_insert(tokens, Token)
-	end
-
-	local function updateselected()
-		for _, v in ipairs(tokens) do
-			v.BackgroundTransparency = (v.Text == selectedword) and 0 or 1
-		end
-		table_clear(markers)
-		if selectedword and selectedword ~= "" and selectedword ~= tab then
-			for LineNumber = 1, #Editor.Lines do
-				local line = Editor.Lines[LineNumber]
-				local Dnable = "[^A-Za-z0-9_]"
-				local has = false
-				if sub(line, 1, #selectedword) == selectedword then
-					has = true
-				elseif sub(line, #line - #selectedword + 1) == selectedword then
-					has = true
-				elseif match(line, Dnable .. gsub(selectedword, "%W", "%%%1") .. Dnable) then
-					has = true
-				end
-				if has then
-					table_insert(markers, LineNumber - 1)
-				end
-			end
-		end
-		updateMarkers()
-	end
-	local DrawnLines = {}
-	local depth, sdepth = {}, {}
-	local function DrawTokens()
-		local LineBegin = floor(TextArea.CanvasPosition.Y / CharHeight)
-		local LineEnd = ceil((TextArea.CanvasPosition.Y + TextArea.AbsoluteWindowSize.Y) / CharHeight)
-		LineEnd = min(LineEnd, #Editor.Lines)
-		for LineNumber = 1, LineBegin - 1 do
-			if not depth[LineNumber] then
-				local line = Editor.Lines[LineNumber] or ""
-				if match(line, "%[%=+%[") or match(line, "%]%=+%]") then
-					local LexerStream = Lexer(line)
-					LexerStream.CommentDepth = depth[LineNumber - 1] or 0
-					LexerStream.StringDepth = sdepth[LineNumber - 1] or 0
-					while not LexerStream.EOF() do
-						LexerStream.Next()
-					end
-					sdepth[LineNumber] = LexerStream.StringDepth
-					depth[LineNumber] = LexerStream.CommentDepth
-				else
-					sdepth[LineNumber] = sdepth[LineNumber - 1] or 0
-					depth[LineNumber] = depth[LineNumber - 1] or 0
-				end
-			end
-		end
-		for LineNumber = LineBegin, LineEnd do
-			if not DrawnLines[LineNumber] then
-				DrawnLines[LineNumber] = true
-				local X, Y = 0, LineNumber - 1
-				local LineLabel = newInst("TextLabel")
-				LineLabel.BorderSizePixel = 0
-				LineLabel.TextColor3 = Color3_fromRGB(144, 145, 139)
-				LineLabel.BackgroundTransparency = 1
-				LineLabel.Size = udim2(1, 0, 0, CharHeight)
-				LineLabel.Position = udim2(0, 0, 0, Y * CharHeight)
-				LineLabel.Font = Options.Font
-				LineLabel.TextSize = Options.FontSize
-				LineLabel.TextXAlignment = Enum.TextXAlignment.Right
-				LineLabel.Text = LineNumber
-				LineLabel.ZIndex = baseZIndex
-				LineLabel.Parent = Gutter
-				if Editor.Lines[Y + 1] then
-					local LexerStream = Lexer(Editor.Lines[Y + 1])
-					LexerStream.CommentDepth = depth[LineNumber - 1] or 0
-					LexerStream.StringDepth = sdepth[LineNumber - 1] or 0
-					while not LexerStream.EOF() do
-						local Token = LexerStream.Next()
-						local Value = Token.Value
-						local TokenType = Token.TypeName
-						if find(" \t\r\n", Value, 1, true) == nil then
-							NewToken(gsub(Value, tab, TabText), (TokenType == "Identifier" or TokenType == "Symbol") and "Text" or TokenType, Place.new(X, Y), Tokens)
-						end
-						X += #gsub(Value, tab, TabText)
-					end
-					depth[LineNumber] = LexerStream.CommentDepth
-					sdepth[LineNumber] = LexerStream.StringDepth
-				end
-			end
-		end
-	end
-	Connect(TextArea.Changed, function(Property)
-		if Property == "CanvasPosition" or Property == "AbsoluteWindowSize" then
-			DrawTokens()
-		end
-	end)
-	local function ClearTokensAndSelection()
-		table_clear(depth)
-		ClearAllChildren(Tokens)
-		ClearAllChildren(Selection)
-		ClearAllChildren(Gutter)
-	end
-	local function Write(Content, Start, End)
-		local InBetween = sub(Editor.Content, Start + 1, End)
-		local NoLN = find(InBetween, newline, 1, true) == nil and find(Content, newline, 1, true) == nil
-		local StartPlace, EndPlace
-		if NoLN then
-			StartPlace, EndPlace = Place.fromIndex(Editor, Start), Place.fromIndex(Editor, End)
-		end
-		Editor.Content = sub(Editor.Content, 1, Start) .. Content .. sub(Editor.Content, End + 1)
-		ContentChangedEvent:Fire(Editor.Content)
-		table_clear(Editor.PlaceCache)
-		local CanvasWidth = TextArea.CanvasSize.X.Offset - 14
-		Editor.Lines = Split(Editor.Content, newline)
-		for _, Res in ipairs(Editor.Lines) do
-			local width = #gsub(Res, tab, TabText) * CharWidth
-			CanvasWidth = CanvasWidth < width and width or CanvasWidth
-		end
-		ClearTokensAndSelection()
-		TextArea.CanvasSize = udim2(0, 3000, 0, select(2, gsub(Editor.Content, newline, "")) * CharHeight + TextArea.AbsoluteWindowSize.Y)
-		table_clear(DrawnLines)
-		DrawTokens()
-	end
-	local function SetContent(Content)
-		Editor.Content = Content
-		ContentChangedEvent:Fire(Editor.Content)
-		table_clear(Editor.PlaceCache)
-		Editor.Lines = Split(Editor.Content, newline)
-		ClearTokensAndSelection()
-		local CanvasWidth = TextArea.CanvasSize.X.Offset - 14
-		for _, Res in ipairs(Editor.Lines) do
-			local A = #Res
-			CanvasWidth = CanvasWidth < A and A * CharWidth or CanvasWidth
-		end
-		TextArea.CanvasSize = udim2(0, 3000, 0, select(2, gsub(Editor.Content, newline, "")) * CharHeight + TextArea.AbsoluteWindowSize.Y)
-		table_clear(DrawnLines)
-		DrawTokens()
-	end
-	local function UpdateSelection()
-		ClearAllChildren(Selection)
-		Selection.ZIndex = (Themes[Options.Theme].SelectionColor) and 2 or 1 + baseZIndex
-		Tokens.ZIndex = (Themes[Options.Theme].SelectionColor) and 1 or 2 + baseZIndex
-		if Editor.Selection.Start == Editor.Selection.End then
-			LineSelection.Visible = true
-			LineSelection.Position = udim2(0, 2, 0, CharHeight * Place.fromIndex(Editor, Editor.Selection.Start).Y + 2)
-		else
-			LineSelection.Visible = false
-		end
-		local Index = 0
-		local Start = #gsub(sub(Editor.Content, 1, Editor.Selection.Start), tab, TabText)
-		local End = #gsub(sub(Editor.Content, 1, Editor.Selection.End), tab, TabText)
-		for LineNumber, Line in ipairs(Editor.Lines) do
-			Line = gsub(Line, tab, TabText)
-			local StartX = Start - Index
-			local EndX = End - Index
-			local Y = LineNumber - 1
-			local GoesOverLine = false
-			local SLine = #Line
-			StartX = StartX < 0 and 0 or StartX
-			if EndX > SLine then
-				GoesOverLine = true
-				EndX = SLine
-			end
-			local Width = EndX - StartX
-			if GoesOverLine then
-				Width += .5
-			end
-			if Width > 0 then
-				local color = Themes[Options.Theme].SelectionColor
-				local SelectionSegment = newInst(color and "TextLabel" or "Frame")
-				SelectionSegment.BorderSizePixel = 0
-				if color then
-					SelectionSegment.TextColor3 = color
-					SelectionSegment.Font = Options.Font
-					SelectionSegment.TextSize = Options.FontSize
-					SelectionSegment.Text = sub(Line, StartX + 1, EndX)
-					SelectionSegment.TextXAlignment = "Left"
-					SelectionSegment.ZIndex = baseZIndex
-				end
-				SelectionSegment.BackgroundColor3 = Themes[Options.Theme].SelectionBackground
-				SelectionSegment.Size = udim2(0, CharWidth * Width, 0, CharHeight)
-				SelectionSegment.Position = udim2(0, StartX * CharWidth, 0, Y * CharHeight)
-				SelectionSegment.Parent = Selection
-			end
-			Index += SLine + 1
-		end
-		local NewY = Caret.Position.Y.Offset
-		local MinBoundsY = TextArea.CanvasPosition.Y
-		local MaxBoundsY = MinBoundsY + TextArea.AbsoluteWindowSize.Y - CharHeight
-		if NewY < MinBoundsY then
-			TextArea.CanvasPosition = Vector2_new(0, NewY)
-		end
-		if NewY > MaxBoundsY then
-			TextArea.CanvasPosition = Vector2_new(0, NewY - TextArea.AbsoluteWindowSize.Y + CharHeight)
-		end
-	end
-	TextBox.Parent = TextArea
-	Caret.Parent = TextArea
-	TextArea.Parent = Container
-	Gutter.Parent = Container
-	Container.Parent = Frame
-	local function updateCaret(CaretPlace)
-		Caret.Position = udim2(0, CaretPlace.X * CharWidth, 0, CaretPlace.Y * CharHeight)
-		CaretIndicator.Position = udim2(0, 0, CaretPlace.Y * CharHeight / TextArea.CanvasSize.Y.Offset, -1)
-	end
-	local PressedKey, WorkingKey, LeftShift, RightShift, Shift, LeftCtrl, RightCtrl, Ctrl
-	local MovementTimeout = tick()
-	local BeginSelect, MoveCaret
-	local function SetVisibility(Visible)
-		Editor.Visible = Visible
-	end
-	local function selectWord()
-		local Index = (Editor.Selection.Side == Side.Right) and Editor.Selection.End or Editor.Selection.Start
-		local code = Editor.Content
-		local left = max(Index - 1, 0)
-		local right = min(Index + 1, #code)
-		local Dable = "[A-Za-z0-9_]"
-		while left ~= 0 and match(sub(code, left + 1, left + 1), Dable) do
-			left -= 1
-		end
-		while right ~= #code and match(sub(code, right, right), Dable) do
-			right += 1
-		end
-		if not match(sub(code, left + 1, left + 1), Dable) then
-			left += 1
-		end
-		if not match(sub(code, right, right), Dable) then
-			right -= 1
-		end
-		if left < right then
-			Editor.Selection.Start = left
-			Editor.Selection.End = right
-		else
-			Editor.Selection.Start = Index
-			Editor.Selection.End = Index
-		end
-	end
-	local lastClick, lastCaretPos = 0, 0
-	local function PushToUndoStack()
-		table_insert(Editor.UndoStack, {
-			Content = Editor.Content,
-			Selection = {
-				Start = Editor.Selection.Start,
-				End = Editor.Selection.End,
-				Side = Editor.Selection.Side
+		local Binary = {
+			Tags = true,
+			AttributesSerialize = true,
+			AttributesReplicate = true,
+			SmoothGrid = true,
+			PhysicsGrid = true,
+			MaterialColors = true,
+			RawJoinData = true,
+			LODData = true,
+			ChildData = true,
+			MeshData = true,
+			ModelMeshData = true,
+			PhysicsData = true
+		}
+		local Properties = {
+			{
+				ValueType = "Vector3",
+				CurrentValue = Vector3.zero,
+				Name = "Size",
+				Readable = "Size",
+				Tags = {},
+				Class = "BasePart"
 			},
-			LastKeyCode = false
-		})
-		if #Editor.RedoStack > 0 then
-			table_clear(Editor.RedoStack)
-		end
-	end
-	local function Undo()
-		local UndoStack = Editor.UndoStack
-		local S = #UndoStack
-		if S > 1 then
-			local Thing = UndoStack[S - 1]
-			for Key, Value in next, Thing do
-				Editor[Key] = Value
-			end
-			Editor.SetContent(Thing.Content)
-			table_insert(Editor.RedoStack, table_remove(UndoStack, S))
-		end
-	end
-	local function Redo()
-		local RedoStack = Editor.RedoStack
-		local S = #RedoStack
-		if S > 0 then
-			local Thing = RedoStack[S]
-			for Key, Value in next, Thing do
-				Editor[Key] = Value
-			end
-			Editor.SetContent(Thing.Content)
-			table_insert(Editor.UndoStack, Thing)
-			table_remove(RedoStack, S)
-		end
-	end
-	--[[Connect(PlayerMouse.Move, function()
-		if BeginSelect then
-			local Index = GetIndexAtMouse()
-			if typeof(BeginSelect) == "number" then
-				BeginSelect = {BeginSelect, BeginSelect}
-			end
-			local Selection = Editor.Selection
-			Selection.Start = min(BeginSelect[1], Index)
-			Selection.End = max(BeginSelect[2], Index)
-			if Selection.Start ~= Selection.End then
-				Selection.Side = Selection.Start == Index and Side.Left or Side.Right
-			end
-			if BeginSelect[3] then
-				selectWord()
-				Selection.Start = min(BeginSelect[1], Selection.Start)
-				Selection.End = max(BeginSelect[2], Selection.End)
-			end
-			updateCaret(Place.fromIndex(Editor, Selection.Side == Side.Right and Selection.End or Selection.Start))
-			UpdateSelection()
-		end
-	end)]]
-	Connect(TextBox.Focused, function()
-		Editor.Focused = true
-	end)
-	Connect(TextBox.FocusLost, function()
-		Editor.Focused = false
-		FocusLostEvent:Fire()
-		PressedKey = nil
-		WorkingKey = nil
-	end)
-	function MoveCaret(Amount)
-		local Direction = Amount < 0 and -1 or 1
-		if Amount < 0 then
-			Amount = -Amount
-		end
-		for Index = 1, Amount do
-			if Direction == -1 then
-				local Start = Editor.Selection.Start
-				local End = Editor.Selection.End
-				if Shift then
-					if Start == End then
-						if Start > 0 then
-							Editor.Selection.Start = Start - 1
-							Editor.Selection.Side = Side.Left
-						end
-					elseif Editor.Selection.Side == Side.Left then
-						if Start > 0 then
-							Editor.Selection.Start = Start - 1
-						end
-					elseif Editor.Selection.Side == Side.Right then
-						Editor.Selection.End = End - 1
-					end
-				elseif Start ~= End then
-					Editor.Selection.End = Start
-				elseif Start > 0 then
-					Editor.Selection.Start = Start - 1
-					Editor.Selection.End = End - 1
-				end
-			elseif Direction == 1 then
-				local Start = Editor.Selection.Start
-				local End = Editor.Selection.End
-				if Shift then
-					if Start == End then
-						if Start < #Editor.Content then
-							Editor.Selection.End = End + 1
-							Editor.Selection.Side = Side.Right
-						end
-					elseif Editor.Selection.Side == Side.Left then
-						Editor.Selection.Start = Start + 1
-					elseif Editor.Selection.Side == Side.Right and End < #Editor.Content then
-						Editor.Selection.End = End + 1
-					end
-				elseif Start ~= End then
-					Editor.Selection.Start = End
-				elseif Start < #Editor.Content then
-					Editor.Selection.Start = Start + 1
-					Editor.Selection.End = End + 1
-				end
-			end
-		end
-	end
-	local LastKeyCode
-	local function ProcessInput(Type, Data)
-		MovementTimeout = tick() + .25
-		if Type == "Control+Key" then
-			LastKeyCode = nil
-		elseif Type == "KeyPress" then
-			local Dat = Data
-			if Dat == Enum.KeyCode.Up then
-				Dat = Enum.KeyCode.Down
-			end
-			if LastKeyCode ~= Dat then
-				Editor.StartingSelection.Start = Editor.Selection.Start
-				Editor.StartingSelection.End = Editor.Selection.End
-				Editor.StartingSelection.Side = Editor.Selection.Side
-			end
-			LastKeyCode = Dat
-		elseif Type == "StringInput" then
-			local Start = Editor.Selection.Start
-			local End = Editor.Selection.End
-			if Data == newline then
-				local CaretPlaceInd = Editor.Selection.Start
-				if Editor.Selection.Side == Side.Right then
-					CaretPlaceInd = Editor.Selection.End
-				end
-				local CaretPlace = Place.fromIndex(Editor, CaretPlaceInd)
-				local CaretLine = Editor.Lines
-				CaretLine = CaretLine[CaretPlace.Y + 1]
-				CaretLine = sub(CaretLine, 1, CaretPlace.X)
-				local TabAmount = 0
-				while sub(CaretLine, TabAmount + 1, TabAmount + 1) == tab do
-					TabAmount += 1
-				end
-				Data ..= rep(tab, TabAmount)
-				local SpTabAmount = 0
-				while sub(CaretLine, SpTabAmount + 1, SpTabAmount + 1) == " " do
-					SpTabAmount += 1
-				end
-				Data ..= gsub(rep(" ", SpTabAmount), TabText, tab)
-				Write(Data, Start, End)
-				Editor.Selection.Start = Start + #Data
-				Editor.Selection.End = Editor.Selection.Start
-				PushToUndoStack()
-			elseif Data == tab and Editor.Selection.Start ~= Editor.Selection.End then
-				local lstart = Place.fromIndex(Editor, Editor.Selection.Start)
-				local lend = Place.fromIndex(Editor, Editor.Selection.End)
-				local changes = 0
-				local change1 = 0
-				for i = lstart.Y + 1, lend.Y + 1 do
-					local line = Editor.Lines[i]
-					local change = 0
-					if Shift then
-						if sub(line, 1, 1) == tab then
-							line = sub(line, 2)
-							change = -1
-						end
-					else
-						line = tab .. line
-						change = 1
-					end
-					changes += change
-					if i == lstart.Y + 1 then
-						change1 = change
-					end
-					Editor.Lines[i] = line
-				end
-				SetContent(table_concat(Editor.Lines, newline))
-				Editor.Selection.Start += change1
-				Editor.Selection.End += changes
-				PushToUndoStack()
-			else
-				Write(Data, Start, End)
-				Editor.Selection.Start = Start + #Data
-				Editor.Selection.End = Editor.Selection.Start
-				PushToUndoStack()
-			end
-		end
-		local CaretPlaceInd = (Editor.Selection.Side == Side.Right) and Editor.Selection.End or Editor.Selection.Start
-		local CaretPlace = Place.fromIndex(Editor, CaretPlaceInd)
-		updateCaret(CaretPlace)
-		UpdateSelection()
-	end
-	Connect(GetPropertyChangedSignal(TextBox, "Text"), function()
-		if TextBox.Text ~= "" then
-			ProcessInput("StringInput", (gsub(TextBox.Text, "\r", "")))
-			TextBox.Text = ""
-		end
-	end)
-	Connect(UserInputService.InputBegan, function(Input)
-		if GetFocusedTextBox(UserInputService) == TextBox and Input.UserInputType ~= Enum.UserInputType.MouseButton1 then
-			local KeyCode = Input.KeyCode
-			if KeyCode == Enum.KeyCode.LeftShift then
-				LeftShift = true
-				Shift = true
-			elseif KeyCode == Enum.KeyCode.RightShift then
-				RightShift = true
-				Shift = true
-			elseif KeyCode == Enum.KeyCode.LeftControl then
-				LeftCtrl = true
-				Ctrl = true
-			elseif KeyCode == Enum.KeyCode.RightControl then
-				RightCtrl = true
-				Ctrl = true
-			else
-				PressedKey = KeyCode
-				ProcessInput(not (not Ctrl or Shift) and "Control+Key" or "KeyPress", KeyCode)
-				local UniqueID = newproxy()
-				WorkingKey = UniqueID
-				task.wait(.25)
-				if WorkingKey == UniqueID then
-					WorkingKey = true
-				end
-			end
-		end
-		if Input.UserInputType == Enum.UserInputType.MouseButton1 and editor.Visible then
-        	local MousePos = UserInputService:GetMouseLocation()
-        	local Direction = GetResizeDirection(MousePos)
-        
-        	if Direction ~= "" then
-            	IsResizing = true
-            	ResizeDirection = Direction
-            	StartMousePos = MousePos
-            	StartFrameSize = editor.Editor.Size
-            	StartFramePos = editor.Editor.Position
-            	StartEditorSize = editor.Size
-        	end
-    	end
-	end)
-	Connect(UserInputService.InputEnded, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1 and editor.Visible then
-			BeginSelect = nil
-			IsResizing = false
-            ResizeDirection = ""
-		end
-		if Input.KeyCode == Enum.KeyCode.LeftShift then
-			LeftShift = false
-		end
-		if Input.KeyCode == Enum.KeyCode.RightShift then
-			RightShift = false
-		end
-		if Input.KeyCode == Enum.KeyCode.LeftControl then
-			LeftCtrl = false
-		end
-		if Input.KeyCode == Enum.KeyCode.RightControl then
-			RightCtrl = false
-		end
-		Shift = LeftShift or RightShift
-		Ctrl = LeftCtrl or RightCtrl
-		if PressedKey == Input.KeyCode then
-			PressedKey = nil
-			WorkingKey = nil
-		end
-	end)
-	Connect(UserInputService.InputChanged, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseMovement and IsResizing and editor.Visible then
-        	PerformResize(UserInputService:GetMouseLocation())
-    	end
-	end)
-	local Count = 0
-	Connect(Heartbeat, function()
-		if Count == 0 and WorkingKey == true then
-			ProcessInput(not (not Ctrl or Shift) and "Control+Key" or "KeyPress", PressedKey)
-		end
-		Count = (Count + 1) % 2
-	end)
-	Editor.Write = Write
-	Editor.SetContent = SetContent
-	Editor.SetVisibility = SetVisibility
-	Editor.PushToUndoStack = PushToUndoStack
-	Editor.Undo = Undo
-	Editor.Redo = Redo
-	function Editor.UpdateTheme(theme)
-		for obj, v in next, themestuff do
-			for key, value in next, v do
-				obj[key] = Themes[theme][value]
-			end
-		end
-		Options.Theme = theme
-		ClearTokensAndSelection()
-		updateMarkers()
-	end
-	function Editor.HighlightError(Visible, Line, Msg)
-		if Visible then
-			ErrorHighlighter.Position = udim2(0, 2, 0, CharHeight * Line + 2 - CharHeight)
-			ErrorMessage.Text = "Line " .. Line .. " - " .. Msg
-			ErrorMessage.Size = udim2(0, ErrorMessage.TextBounds.X + 15, 0, ErrorMessage.TextBounds.Y + 8)
-		else
-			ErrorMessage.Visible = false
-		end
-		ErrorHighlighter.Visible = Visible
-	end
-	Editor.ContentChanged = ContentChangedEvent.Event
-	Editor.FocusLost = FocusLostEvent.Event
-	TextArea.CanvasPosition = Vector2_zero
-	return Editor, TextBox, ClearTokensAndSelection, TextArea
-end
+			{
+				ValueType = "Enum",
+				CurrentValue = Enum.PartType.Block,
+				Name = "Shape",
+				Readable = "Shape",
+				Tags = {},
+				Class = "BasePart"
+			},
+			{
+				ValueType = "boolean",
+				CurrentValue = false,
+				Name = "RobloxLocked",
+				Special = checkrbxlocked,
+				Tags = {"readonly"},
+				Class = "Instance"
+			},
+			{
+				ValueType = "string",
+				CurrentValue = "",
+				Name = "PhysicalConfigData",
+				Special = getpcdprop,
+				Tags = {"readonly"},
+				Class = "TriangleMeshPart"
+			}
+		}
+		local gottenprops = getpropertylist(classInstance)
 
-local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstChild(editor, "Editor"), {
-	Font = Enum.Font.Code,
-	TextSize = 16,
-	Language = "Luau",
-	CaretBlinkingRate = .5
-})
-
-local function DebugScriptAt(o)
-    if typeof(o) ~= "Instance" then return "Need Instance" end
-    local env
-    local c = o.ClassName
-    if c == "LocalScript" or c == "Script" then
-        if not getsenv then return "no getsenv" end
-        env = getsenv(o)
-    elseif c == "ModuleScript" then
-        local ok, m = pcall(require, o)
-        if not ok then return "require failed: " .. tostring(m) end
-        env = m
-    else return "bad class: " .. c end
-    if type(env) ~= "table" then return "env not table" end
-
-    local f, t = {}, {}
-    for k, v in pairs(env) do
-        local n = tostring(k)
-        if type(v) == "function" then f[n] = v
-        elseif type(v) == "table" then
-            local c = 0
-            for _ in pairs(v) do c = c + 1 end
-            t[n] = c
-        end
-    end
-
-    local out = { "SCRIPT PATH : " .. o:GetFullName() }
-    local tmp = {}
-    for n in pairs(f) do tmp[#tmp + 1] = n end
-    out[#out + 1] = "FUNCTIONS : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
-    wipe(tmp)
-    for n, c in pairs(t) do tmp[#tmp + 1] = n .. "[" .. c .. "]" end
-    out[#out + 1] = "TABLES : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
-
-    if next(f) then
-        out[#out + 1] = "\n--FUNCTIONS--"
-        for n, fn in pairs(f) do
-            out[#out + 1] = "\nFUNCTION " .. n .. " :"
-            if getupvalues then
-                local ups = {}
-                for i, _ in pairs(getupvalues(fn) or {}) do
-                    local _, v = pcall(getupvalue, fn, i)
-                    if v ~= nil then ups[#ups + 1] = tostring(v) end
-                end
-                if #ups > 0 then out[#out + 1] = "UPVALUES :\n" .. table.concat(ups, ", ") end
-            end
-            if getconstants then
-                local cons = {}
-                for _, v in pairs(getconstants(fn) or {}) do cons[#cons + 1] = tostring(v) end
-                if #cons > 0 then out[#out + 1] = "CONSTANTS :\n" .. table.concat(cons, ", ") end
-            end
-        end
-    end
-
-    if next(t) then
-        out[#out + 1] = "\n--TABLES--"
-        for n, c in pairs(t) do out[#out + 1] = "TABLE " .. n .. " : " .. c .. " entries" end
-    end
-
-    return table.concat(out, "\n")
-end
-
-local function openScript(o)
-	CurrentScript = o
-    EditorGrid.Text = ""
-    local Triggers = {'--This script could not be decompiled due to it having no bytecode', '"--This script could not be decompiled due to it having no bytecode"'}
-    local id = o:GetDebugId()
-    if cache[id] then
-        ScriptEditor.SetContent(cache[id])
-    else
-        local guid = tostring(gethiddenproperty(o,"ScriptGuid")) or "{Couldn't grab GUID}"
-    	local path
-    	if not o:IsDescendantOf(game) then
-        	local ancestors = {}
-        	local current = o
-        	while current do
-            	table.insert(ancestors, 1, current.Name)
-            	current = current.Parent
-        	end
-        	if ancestors[1] == "Dex Internal Storage" then
-            	table.remove(ancestors, 1)
-        	end
-        	if ancestors[1] == "Nil Instances" then
-            	table.remove(ancestors, 1)
-        	end
-
-        	if #ancestors > 0 then
-            	local pathParts = {"getnilinstances()"}
-            	for i = 1, #ancestors do
-                	local name = ancestors[i]
-					if name:match("^[%a_][%w_]*$") then
-    					table.insert(pathParts, "." .. name)
-					else
-    					local escapedName = name:gsub('"', '\\"')
-    					table.insert(pathParts, "[\"" .. escapedName .. "\"]")
-					end
-            	end
-            	path = table.concat(pathParts, "")
-        	else
-            	path = "getnilinstances()"
-        	end
-		else
-            local ancestors = {}
-            local current = o
-            while current.Parent ~= game do
-                table.insert(ancestors, 1, current.Name)
-                current = current.Parent
-            end
-                
-            local ServiceName = current.ClassName
-                
-            local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
-            for i = 1, #ancestors do
-                local name = ancestors[i]
-                if name:match("^[%a_][%w_]*$") then
-                    table.insert(pathParts, "." .. name)
-                else
-                    local escapedName = name:gsub('"', '\\"')
-                    table.insert(pathParts, "[\"" .. escapedName .. "\"]")
-                end
-            end
-                
-            path = table.concat(pathParts, "")
-        end
-		
-		local decompiled
-		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
-    		if string.len(getscriptbytecode(o)) == 0 then
-        		decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
-    		else
-        		decompiled = decompile(o)
-        		if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
-            		if #o.Source > 0 then
-                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, o.Source)
-            		elseif #o.Source <= 0 then
-                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
-            		end
-        		elseif #decompiled <= 0 then
-            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
-        		else
-            		local lines = {}
-            		for line in decompiled:gmatch("[^\r\n]+") do
-                		table.insert(lines, line)
-            		end
-            		if #lines > 0 and lines[1]:match("^%s*%-%-") then
-                		table.remove(lines, 1)
-                		decompiled = table.concat(lines, "\n")
-            		end
-            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+		for key, prop in ipairs(Properties) do
+		for i, name in pairs(gottenprops) do
+			if not prop then continue end
+        		if name == prop.Name then
+            		gottenprops[i] = nil
         		end
     		end
-        elseif IsA(o, "Script") then
-            local passed = false
-            local linkedSource = o.LinkedSource
-            if linkedSource and #linkedSource >= 1 then
-                local result = tonumber(string.match(linkedSource, "(%d+)"))
-                if result then
-                    result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
-                    passed = true
-                end
-            end
-            if not passed then
-                local sourceAssetId = tonumber(gethiddenproperty(o, "SourceAssetId"))
-                if sourceAssetId and sourceAssetId ~= -1 then
-                    local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
-                    if asset then
-                        local source = asset.Source
-                        if source and #source > 0 then
-                            decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
-                            passed = true
-                        end
-                    end
-                end
-            end
-        end
-        cache[id] = decompiled
-        task.wait(0)
-        ScriptEditor.SetContent(cache[id])
-    end
-    Title.Text = "[Script Viewer] Viewing: " .. o.Name
+		end
+		for _, Property in pairs(gottenprops) do
+			local Tags = {}
+			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
+			local Value_Type = type(Value)
+			if not Success then
+				Value = ""
+			end
+			local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
+			if PropertyData and PropertyData.Tags then
+				Tags = PropertyData.Tags
+			end
+			table_insert(Properties, {
+        		ValueType = Value_Type,
+        		CurrentValue = Value,
+        		Name = Property,
+        		Binary = Binary[Property] and true,
+        		Tags = Tags,
+        		Class = ClassName
+    		})
+		end
+		for prop,_ in pairs(Blacklist) do
+			for index, data in pairs(Properties) do
+				if data.Name == prop then
+					table.remove(Properties, index)
+				end
+			end
+		end
+		sortAlphabetic(Properties, "Name")
+		return Properties
+	end
+
+	for _, Class in next, apiDump.Classes do
+		Classes[Class.Name] = {}
+		for _, Member in next, Class.Members do
+			if Member.MemberType == "Property" then
+				Classes[Class.Name][Member.Name] = Member
+			end
+		end
+		for _, Member in next, apiDump.Classes[1].Members do
+			if Member.MemberType == "Property" then
+				Classes[Class.Name][Member.Name] = Member
+			end
+		end
+	end
+
+	return {
+		Classes = Classes,
+		GetProperties = getProperties,
+		InstanceClasses = apiDump.Classes
+	}
+end
+-- Modules
+local Permissions, RbxApi = {
+	CanEdit = true
+}, getRbxApi()
+-- Styles
+local Styles = {
+	Font = Enum.Font.Arial,
+	Margin = 5,
+	Black = Color3_fromRGB(0,0,5),
+	Black2 = Color3_fromRGB(24,24,29),
+	White = Color3_fromRGB(244,244,249),
+	White2 = Color3_fromRGB(200,200,205),
+	Hover = Color3_fromRGB(2,128,149),
+	Hover2 = Color3_fromRGB(5,102,146)
+}
+
+local Row = {
+	Font = Styles.Font,
+	FontSize = Enum.FontSize.Size12,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextColor = Styles.White,
+	TextColorOver = Styles.White2,
+	TextLockedColor = Color3_fromRGB(155, 155, 160),
+	Height = 24,
+	BorderColor = Color3_fromRGB(54, 54, 55),
+	BackgroundColor = Styles.Black2,
+	BackgroundColorAlternate = Color3_fromRGB(32, 32, 37),
+	BackgroundColorMouseover = Color3_fromRGB(40, 40, 45),
+	TitleMarginLeft = 15
+}
+
+local DropDown = {
+	Font = Styles.Font,
+	FontSize = Enum.FontSize.Size14,
+	TextColor = Color3_fromRGB(255, 255, 255),
+	TextColorOver = Styles.White2,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	Height = 16,
+	BackColor = Styles.Black2,
+	BackColorOver = Styles.Hover2,
+	BorderColor = Color3_fromRGB(45, 45, 50),
+	BorderSizePixel = 2,
+	ArrowColor = Color3_fromRGB(80, 80, 83),
+	ArrowColorOver = Styles.Hover
+}
+
+local BrickColors = {
+	BoxSize = 13,
+	BorderSizePixel = 1,
+	BorderColor = Color3_fromRGB(53, 53, 55),
+	FrameColor = Color3_fromRGB(53, 53, 55),
+	Size = 20,
+	Padding = 4,
+	ColorsPerRow = 8,
+	OuterBorder = 1,
+	OuterBorderColor = Styles.Black
+}
+
+task.wait(1)
+
+local ContentUrl = "rbxassetid://"
+
+local propertiesSearch = PropertiesFrame.Header.TextBox
+
+local AwaitingObjectValue = false
+local AwaitingObjectObj, AwaitingObjectProp
+
+function searchingProperties()
+	return (propertiesSearch.Text ~= "" and propertiesSearch.Text ~= "Filter Properties") and true or false
 end
 
-Connect(OpenScript_Bindable.Event, function(object)
-	script.Parent.Visible = true
-	openScript(object)
+local function GetSelection()
+	local selection = GetSelection_Bindable:Invoke()
+	return (#selection == 0) and {} or selection
+end
+-- Number
+local function Round(number, decimalPlaces)
+	return tonumber(string_format("%." .. (decimalPlaces or 0) .. "f", number))
+end
+-- Data Type Handling
+local function ToString(value, type)
+	if type == "float" then
+		return tostring(Round(value,2))
+	elseif type == "Content" then
+		return (string_find(value,"/asset")) and string_sub(value, string_find(value, "=") + 1) or tostring(value)
+	elseif type == "Vector2" then
+		return string_format("%g, %g", value.X, value.Y)
+	elseif type == "Vector3" then
+		return string_format("%g, %g, %g",value.X,value.Y,value.Z)
+	elseif type == "Color3" then
+		return string_format("%d, %d, %d", value.R * 255, value.G * 255, value.B * 255)
+	elseif type == "UDim2" then
+		return string_format("{%d, %d}, {%d, %d}", value.X.Scale, value.X.Offset, value.Y.Scale, value.Y.Offset)
+	else
+		return tostring(value)
+	end
+end
+
+local function ToValue(value,type)
+	if type == "EnumItem" then
+		local HasEnum = string_split(value, ".")[1] == "Enum"
+		if HasEnum then
+			return Enum[string_split(value, ".")[2]][string_split(value, ".")[3]]
+		end
+		if #string_split(value, ".") == 1 then
+			return tostring(value)
+		end
+	elseif type == "Vector2" then
+		local list = string_split(value,",")
+		if #list < 2 then return nil end
+		return Vector2_new(tonumber(list[1]) or 0, tonumber(list[2]) or 0)
+	elseif type == "Vector3" then
+		local list = string_split(value,",")
+		if #list < 3 then return nil end
+		return Vector3_new(tonumber(list[1]) or 0, tonumber(list[2]) or 0, tonumber(list[3]) or 0)
+	elseif type == "Color3" then
+		local list = string_split(value,",")
+		if #list < 3 then return nil end
+		return Color3_fromRGB(tonumber(list[1]) or 0, tonumber(list[2]) or 0, tonumber(list[3]) or 0)
+	elseif type == "UDim2" then
+		local list = string_split(string_gsub(string_gsub(value, "{", ""),"}",""),",")
+		if #list < 4 then return nil end
+		return UDim2_new(tonumber(list[1]) or 0, tonumber(list[2]) or 0, tonumber(list[3]) or 0, tonumber(list[4]) or 0)
+	elseif type == "Content" then
+		if tonumber(value) ~= nil then
+			value = ContentUrl .. value
+		end
+		return value
+	elseif type == "float" or type == "int" or type == "double" or type == "number" then
+		return tonumber(value)
+	elseif type == "string" then
+		return value
+	elseif type == "NumberRange" then
+		local list = string_split(value,",")
+		if #list == 1 then
+			if tonumber(list[1]) == nil then return nil end
+			return NumberRange_new(tonumber(list[1]) or 0)
+		end
+		if #list < 2 then return nil end
+		return NumberRange_new(tonumber(list[1]) or 0, tonumber(list[2]) or 0)
+	else
+		return nil
+	end
+end
+-- Tables
+local function CopyTable(T)
+	local t2 = {}
+	local T_mt = getrawmetatable(T)
+	for k,v in next, T do
+		t2[k] = v
+	end
+	if T_mt then
+		setrawmetatable(t2, T_mt)
+	end
+	return t2
+end
+
+local function SortTable(T)
+	table_sort(T, function(x,y) 
+		return tostring(x.Name) < tostring(y.Name)
+	end)
+end
+-- Spritesheet
+local Sprite = {
+	Width = 13,
+	Height = 13
+}
+
+local Spritesheet = {
+	Image = "rbxassetid://128896947",
+	Height = 256,
+	Width = 256
+}
+
+local Images = {
+	"unchecked",
+	"checked",
+	"unchecked_over",
+	"checked_over",
+	"unchecked_disabled",
+	"checked_disabled"
+}
+
+local function SpritePosition(spriteName)
+	local x, y = 0, 0
+	for _,v in ipairs(Images) do
+		if (v == spriteName) then
+			return {x, y}
+		end
+		x += Sprite.Height
+		if (x + Sprite.Width) > Spritesheet.Width then
+			x = 0
+			y += Sprite.Height
+		end
+	end
+end
+
+local function GetCheckboxImageName(checked, readOnly, mouseover)
+	if checked then
+		if readOnly then
+			return "checked_disabled"
+		elseif mouseover then
+			return "checked_over"
+		else
+			return "checked"
+		end
+	else
+		if readOnly then
+			return "unchecked_disabled"
+		elseif mouseover then
+			return "unchecked_over"
+		else
+			return "unchecked"
+		end
+	end
+end
+
+local MAP_ID = 418720155
+-- Gui Controls --
+local function Create(ty,data)
+	local obj = type(ty) == 'string' and Instance_new(ty) or ty
+	for k, v in next, data do
+		if type(k) == 'number' then
+			v.Parent = obj
+		else
+			obj[k] = v
+		end
+	end
+	return obj
+end
+
+local Icon
+
+do
+	local iconMap = 'rbxassetid://' .. MAP_ID
+
+	ContentProvider:Preload(iconMap)
+
+	local function iconDehash(h)
+		return math_floor(h/14%14), math_floor(h%14)
+	end
+
+	function Icon(IconFrame,index)
+		local row,col = iconDehash(index)
+		local mapSize = Vector2_new(256,256)
+		local pad,border = 2,1
+		local iconSize = 16
+
+		local class = 'Frame'
+
+		if type(IconFrame) == 'string' then
+			class = IconFrame
+			IconFrame = nil
+		end
+
+		if not IconFrame then
+			IconFrame = Create(class,{
+				Name = "Icon",
+				BackgroundTransparency = 1,
+				ClipsDescendants = true,
+				Create('ImageLabel',{
+					Name = "IconMap",
+					Active = false,
+					BackgroundTransparency = 1,
+					Image = iconMap,
+					Size = UDim2_new(mapSize.X / iconSize, 0, mapSize.Y / iconSize, 0)
+				})
+			})
+		end
+		IconFrame.IconMap.Position = UDim2_new(-col - (pad*(col+1) + border)/iconSize,0,-row - (pad*(row+1) + border)/iconSize,0)
+		return IconFrame
+	end
+end
+
+local function CreateCell(fullSize)
+	local tableCell = Instance_new("Frame")
+	tableCell.Size = UDim2_new(fullSize and 1 or .5, -1, 1, 0)
+	tableCell.BackgroundColor3 = Row.BackgroundColor
+	tableCell.BorderColor3 = Row.BorderColor
+	return tableCell
+end
+
+local function CreateLabel(readOnly)
+	local label = Instance_new("TextLabel")
+	label.Font = Row.Font
+	label.FontSize = Row.FontSize
+	label.TextColor3 = readOnly and Row.TextLockedColor or Row.TextColor
+	label.TextXAlignment = Row.TextXAlignment
+	label.BackgroundTransparency = 1
+	return label
+end
+
+local function CreateTextButton(readOnly, onClick)
+	local button = Instance_new("TextButton")
+	button.Font = Row.Font
+	button.Active = true
+	button.FontSize = Row.FontSize
+	button.TextColor3 = (readOnly) and Row.TextLockedColor or Row.TextColor
+	button.TextXAlignment = Row.TextXAlignment
+	button.BackgroundTransparency = 1
+	if not readOnly then
+		button.Activated:Connect(onClick)
+	end
+	return button
+end
+
+local function CreateObject(readOnly)
+	local button = Instance_new("TextButton")
+	button.Font = Row.Font
+	button.Active = true
+	button.FontSize = Row.FontSize
+	button.TextColor3 = readOnly and Row.TextLockedColor or Row.TextColor
+	button.TextXAlignment = Row.TextXAlignment
+	button.BackgroundTransparency = 1
+	local cancel = Create(Icon('ImageButton', 177),{
+		Name = "Cancel",
+		Visible = false,
+		Position = UDim2_new(1,-20,0,0),
+		Size = UDim2_new(0,20,0,20),
+		Parent = button
+	})
+	return button
+end
+
+local function CreateTextBox(readOnly)
+	if readOnly then
+		return CreateLabel(readOnly)
+	else
+		local box = Instance_new("TextBox")
+		box.ClearTextOnFocus = GetSetting_Bindable:Invoke("ClearProps")
+		box.Font = Row.Font
+		box.FontSize = Row.FontSize
+		box.TextXAlignment = Row.TextXAlignment
+		box.BackgroundTransparency = 1
+		box.TextColor3 = Row.TextColor
+		return box
+	end
+end
+
+local function CreateDropDownItem(text, onClick)
+	local button = Instance_new("TextButton")
+	button.Font = DropDown.Font
+	button.FontSize = DropDown.FontSize
+	button.TextColor3 = DropDown.TextColor
+	button.TextXAlignment = DropDown.TextXAlignment
+	button.BackgroundColor3 = DropDown.BackColor
+	button.AutoButtonColor = false
+	button.BorderSizePixel = 0
+	button.Active = true
+	button.Text = text
+	button.MouseEnter:Connect(function()
+		button.TextColor3 = DropDown.TextColorOver
+		button.BackgroundColor3 = DropDown.BackColorOver
+	end)
+	button.MouseLeave:Connect(function()
+		button.TextColor3 = DropDown.TextColor
+		button.BackgroundColor3 = DropDown.BackColor
+	end)
+	button.Activated:Connect(function()
+		onClick(text)
+	end)
+	return button
+end
+
+local function CreateDropDown(choices, currentChoice, readOnly, onClick)
+	local frame = Instance_new("Frame")
+	frame.Name = "DropDown"
+	frame.Size = UDim2_new(1, 0, 1, 0)
+	frame.BackgroundTransparency = 1
+	frame.Active = true
+
+	local menu, arrow, expanded, margin = nil, nil, false, DropDown.BorderSizePixel
+
+	local button = Instance_new("TextButton")
+	button.Font = Row.Font
+	button.Active = true
+	button.FontSize = Row.FontSize
+	button.TextXAlignment = Row.TextXAlignment
+	button.BackgroundTransparency = 1
+	button.TextColor3 = readOnly and Row.TextLockedColor or Row.TextColor
+	button.Text = currentChoice
+	button.Size = UDim2_new(1, -2 * Styles.Margin, 1, 0)
+	button.Position = UDim2_new(0, Styles.Margin, 0, 0)
+	button.Parent = frame
+
+	local function showArrow(color)
+		if arrow then
+			arrow:Destroy()
+		end
+
+		local graphicTemplate = Create('Frame',{
+			Name="Graphic",
+			BorderSizePixel = 0,
+			BackgroundColor3 = color
+		})
+
+		local graphicSize = 8
+
+		arrow = ArrowGraphic(graphicSize,'Down',true,graphicTemplate)
+		arrow.Position = UDim2_new(1,-graphicSize * 2,.5,-graphicSize/2)
+		arrow.Parent = frame
+	end
+
+	local function hideMenu()
+		expanded = false
+		showArrow(DropDown.ArrowColor)
+		if menu then
+			menu:Destroy()
+		end
+	end
+
+	local function showMenu()
+		expanded = true
+		menu = Instance_new("Frame")
+		menu.Size = UDim2_new(1, -2 * margin, 0, #choices * DropDown.Height)
+		menu.Position = UDim2_new(0, margin, 0, Row.Height + margin)
+		menu.BackgroundTransparency = 0
+		menu.BackgroundColor3 = DropDown.BackColor
+		menu.BorderColor3 = DropDown.BorderColor
+		menu.BorderSizePixel = DropDown.BorderSizePixel
+		menu.Active = true
+		menu.ZIndex = 5
+		menu.Parent = frame
+
+		local parentFrameHeight = menu.Parent.Parent.Parent.Parent.Size.Y.Offset
+		local rowHeight = menu.Parent.Parent.Parent.Position.Y.Offset
+		if (rowHeight + menu.Size.Y.Offset) > math_max(parentFrameHeight,PropertiesFrame.AbsoluteSize.Y) then
+			menu.Position = UDim2_new(0, margin, 0, -1 * (#choices * DropDown.Height) - margin)
+		end
+
+		local function choice(name)
+			onClick(name)
+			hideMenu()
+		end
+
+		for i,name in next, choices do
+			local option = CreateDropDownItem(name, function()
+				choice(name)
+			end)
+			option.Size = UDim2_new(1, 0, 0, 16)
+			option.Position = UDim2_new(0, 0, 0, (i - 1) * DropDown.Height)
+			option.ZIndex = menu.ZIndex
+			option.Parent = menu
+		end
+	end
+
+	showArrow(DropDown.ArrowColor)
+
+	if not readOnly then
+		button.MouseEnter:Connect(function()
+			button.TextColor3 = Row.TextColor
+			showArrow(DropDown.ArrowColorOver)
+		end)
+		button.MouseLeave:Connect(function()
+			button.TextColor3 = Row.TextColor
+			if not expanded then
+				showArrow(DropDown.ArrowColor)
+			end
+		end)
+		button.Activated:Connect(function()
+			(expanded and hideMenu or showMenu)()
+		end)
+	end
+
+	return frame,button
+end
+
+local function CreateBrickColor(readOnly, onClick)
+	local frame = Instance_new("Frame")
+	frame.Size = UDim2_new(1,0,1,0)
+	frame.BackgroundTransparency = 1
+
+	local colorPalette = Instance_new("Frame")
+	colorPalette.BackgroundTransparency = 0
+	colorPalette.SizeConstraint = Enum.SizeConstraint.RelativeXX
+	colorPalette.Size = UDim2_new(1, -2 * BrickColors.OuterBorder, 1, -2 * BrickColors.OuterBorder)
+	colorPalette.BorderSizePixel = BrickColors.BorderSizePixel
+	colorPalette.BorderColor3 = BrickColors.BorderColor
+	colorPalette.Position = UDim2_new(0, BrickColors.OuterBorder, 0, BrickColors.OuterBorder + Row.Height)
+	colorPalette.ZIndex = 5
+	colorPalette.Visible = false
+	colorPalette.BorderSizePixel = BrickColors.OuterBorder
+	colorPalette.BorderColor3 = BrickColors.OuterBorderColor
+	colorPalette.Parent = frame
+
+	local function show()
+		colorPalette.Visible = true
+	end
+
+	local function hide()
+		colorPalette.Visible = false
+	end
+
+	local function toggle()
+		colorPalette.Visible = not colorPalette.Visible
+	end
+
+	local colorBox = Instance_new("TextButton")
+	colorBox.Position = UDim2_new(0, Styles.Margin, 0, Styles.Margin)
+	colorBox.Active = true
+	colorBox.AutoButtonColor = readOnly and false or true
+	colorBox.Size = UDim2_new(0, BrickColors.BoxSize, 0, BrickColors.BoxSize)
+	colorBox.Text = ""
+	colorBox.Parent = frame
+
+	if not readOnly then
+		colorBox.Activated:Connect(toggle)
+	end
+
+	local spacingBefore = (Styles.Margin * 2) + BrickColors.BoxSize
+
+	local propertyLabel = CreateTextButton(readOnly, function()
+		if not readOnly then
+			toggle()
+		end
+	end)
+	propertyLabel.Size = UDim2_new(1, (-1 * spacingBefore) - Styles.Margin, 1, 0)
+	propertyLabel.Position = UDim2_new(0, spacingBefore, 0, 0)
+	propertyLabel.Parent = frame
+
+	local size = (1 / BrickColors.ColorsPerRow)
+
+	for index = 0, 127 do
+		local brickColor = BrickColor_palette(index)
+
+		local brickColorBox = Instance_new("TextButton")
+		brickColorBox.Text = ""
+		brickColorBox.Active = true
+		brickColorBox.Size = UDim2_new(size,0,size,0)
+		brickColorBox.BackgroundColor3 = brickColor.Color
+		brickColorBox.Position = UDim2_new(size * (index % BrickColors.ColorsPerRow), 0, size * math_floor(index / BrickColors.ColorsPerRow), 0)
+		brickColorBox.ZIndex = colorPalette.ZIndex
+		brickColorBox.Parent = colorPalette
+		brickColorBox.Activated:Connect(function()
+			hide()
+			onClick(brickColor)
+		end)
+	end
+	return frame, propertyLabel, colorBox
+end
+
+local function CreateColor3Control(readOnly, onClick)
+	local frame = Instance_new("Frame")
+	frame.Size = UDim2_new(1,0,1,0)
+	frame.BackgroundTransparency = 1
+
+	local colorBox = Instance_new("TextButton")
+	colorBox.Active = true
+	colorBox.Position = UDim2_new(0, Styles.Margin, 0, Styles.Margin)
+	colorBox.Size = UDim2_new(0, BrickColors.BoxSize, 0, BrickColors.BoxSize)
+	colorBox.Text = ""
+	colorBox.AutoButtonColor = false
+	colorBox.Parent = frame
+
+	local spacingBefore = (Styles.Margin * 2) + BrickColors.BoxSize
+	local box = CreateTextBox(readOnly)
+	box.Size = UDim2_new(1, (-1 * spacingBefore) - Styles.Margin, 1, 0)
+	box.Position = UDim2_new(0, spacingBefore, 0, 0)
+	box.Parent = frame
+
+	return frame,box,colorBox
+end
+
+function CreateCheckbox(value, readOnly, onClick)
+	local checked = value
+	local mouseover = false
+
+	local checkboxFrame = Instance_new("ImageButton")
+	checkboxFrame.Active = true
+	checkboxFrame.Size = UDim2_new(0, Sprite.Width, 0, Sprite.Height)
+	checkboxFrame.BackgroundTransparency = 1
+	checkboxFrame.ClipsDescendants = true
+
+	local spritesheetImage = Instance_new("ImageLabel")
+	spritesheetImage.Name = "SpritesheetImageLabel"
+	spritesheetImage.Size = UDim2_new(0, Spritesheet.Width, 0, Spritesheet.Height)
+	spritesheetImage.Image = Spritesheet.Image
+	spritesheetImage.BackgroundTransparency = 1
+	spritesheetImage.Parent = checkboxFrame
+
+	local function updateSprite()
+		local spriteName = GetCheckboxImageName(checked, readOnly, mouseover)
+		local spritePosition = SpritePosition(spriteName)
+		spritesheetImage.Position = UDim2_new(0, -1 * spritePosition[1], 0, -1 * spritePosition[2])
+	end
+
+	local function setValue(val)
+		checked = val
+		updateSprite()
+	end
+
+	if not readOnly then
+		checkboxFrame.MouseEnter:Connect(function() 
+			mouseover = true 
+			updateSprite() 
+		end)
+		checkboxFrame.MouseLeave:Connect(function() 
+			mouseover = false 
+			updateSprite() 
+		end)
+		checkboxFrame.Activated:Connect(function()
+			onClick(checked)
+		end)
+	end
+
+	updateSprite()
+
+	return checkboxFrame, setValue
+end
+
+local Controls = {}
+
+function Controls.default(object, propertyData, readOnly)
+	local propertyName = propertyData.Name
+	local propertyType = propertyData.ValueType
+
+	local box = CreateTextBox(readOnly)
+	box.Size = UDim2_new(1, -2 * Styles.Margin, 1, 0)
+	box.Position = UDim2_new(0, Styles.Margin, 0, 0)
+
+	local focusLostCon, changedCon, eventCon
+
+	local function update()
+		local success, value
+		if propertyData.Binary then
+			success, value = pcall(readbinarystring, object, propertyName)
+		elseif propertyData.Special then
+			success, value = pcall(propertyData.Special, object, propertyName)
+		else
+			success, value = pcall(gethiddenproperty, object, propertyData.Readable or propertyName)
+		end
+		if success then
+			box.Text = ToString(value, propertyType)
+		else 
+			box.Text = propertyData.TextReplacement or ""
+		end
+	end
+
+	if not readOnly then
+		focusLostCon = box.FocusLost:Connect(function(enterPressed)
+			Set(object, propertyName, ToValue(box.Text, propertyType))
+			update()
+		end)
+	end
+
+	update()
+
+	changedCon = object.Changed:Connect(update)
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		if focusLostCon then
+			focusLostCon:Disconnect()
+		end
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return box
+end
+
+function Controls.boolean(object, propertyData, readOnly)
+	local propertyName = propertyData.Name
+	local checked = propertyData.CurrentValue
+
+	local checkbox, setValue = CreateCheckbox(checked, readOnly, function(value)
+		Set(object, propertyName, not checked)
+	end)
+
+	local changedCon, eventCon
+
+	local function update()
+		local success
+		if propertyData.Special then
+			success, checked = pcall(propertyData.Special, object, propertyName)
+		else
+			success, checked = pcall(gethiddenproperty, object, propertyData.Readable or propertyName)
+		end
+		setValue(checked)
+	end
+
+	checkbox.Position = UDim2_new(0, Styles.Margin, 0, Styles.Margin)
+
+	changedCon = object.Changed:Connect(update)
+
+	update()
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return checkbox
+end
+
+function Controls.BrickColor(object, propertyData, readOnly)
+	local propertyName = propertyData.Name
+
+	local frame, label, brickColorBox = CreateBrickColor(readOnly, function(brickColor)
+		Set(object, propertyName, brickColor)
+	end)
+
+	local changedCon, eventCon
+
+	local function update()
+		local success, value
+		if propertyData.Special then
+			success, value = pcall(propertyData.Special, object, propertyName)
+		else
+			success, value = pcall(gethiddenproperty, object, propertyData.Readable or propertyName)
+		end
+		if success then 
+			brickColorBox.BackgroundColor3 = value.Color
+			label.Text = tostring(value)
+		end
+	end
+
+	update()
+
+	changedCon = object.Changed:Connect(update)
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return frame
+end
+
+function Controls.Color3(object, propertyData, readOnly)
+	local propertyName = propertyData.Name
+
+	local frame, textBox, colorBox = CreateColor3Control(readOnly)
+
+	local focusLostCon, changedCon, eventCon
+
+	local function update()
+		local success, value
+		if propertyData.Special then
+			success, value = pcall(propertyData.Special, object, propertyName)
+		else
+			success, value = pcall(gethiddenproperty, object, propertyData.Readable or propertyName)
+		end
+		if success then 
+			colorBox.BackgroundColor3 = value
+			textBox.Text = ToString(value, "Color3")
+		end
+	end
+
+	focusLostCon = textBox.FocusLost:Connect(function(enterPressed)
+		Set(object, propertyName, ToValue(textBox.Text, "Color3"))
+		update()
+	end)
+
+	changedCon = object.Changed:Connect(update)
+
+	update()
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		focusLostCon:Disconnect()
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		focusLostCon = nil
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return frame
+end
+
+function Controls.Instance(object, propertyData, readOnly)
+	local propertyName = propertyData.Name
+	local propertyType = propertyData.ValueType
+
+	local box = CreateObject(readOnly)
+	local Cancel = box:FindFirstChild("Cancel")
+	box.Size = UDim2_new(1, -2 * Styles.Margin, 1, 0)
+	box.Position = UDim2_new(0, Styles.Margin, 0, 0)
+
+	local boxCon, cancelCon, propCon, eventCon
+
+	local function update()
+		if AwaitingObjectObj == object then
+			if AwaitingObjectValue == true then
+				box.Text = "Select an Instance"
+				return
+			end
+		end
+		local success, value
+		if propertyData.Special then
+			success, value = pcall(propertyData.Special, object, propertyName)
+		else
+			success, value = pcall(gethiddenproperty, object, propertyData.Readable or propertyName)
+		end
+		if success then
+			box.Text = ToString(value, propertyType)
+		end
+	end
+
+	if not readOnly then
+		boxCon = box.Activated:Connect(function()
+			if AwaitingObjectValue then
+				AwaitingObjectValue = false
+				Cancel.Visible = false
+				update()
+				return
+			end
+			Cancel.Visible = true
+			AwaitingObjectValue = true
+			AwaitingObjectObj = object
+			AwaitingObjectProp = propertyData
+			box.Text = "Select an Instance"
+		end)
+		cancelCon = Cancel.Activated:Connect(function()
+			sethiddenproperty(object, propertyName, nil)
+			Cancel.Visible = false
+		end)
+	end
+
+	update()
+
+	local Success, Signal = pcall(game.GetPropertyChangedSignal, object, propertyName)
+
+	if Success then
+		propCon = Signal:Connect(update)
+	else
+		propCon = object.Changed:Connect(function(property)
+			if (property == propertyName) then
+				update()
+			end
+		end)
+	end
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		if boxCon then
+			boxCon:Disconnect()
+			boxCon = nil
+		end
+		if cancelCon then
+			cancelCon:Disconnect()
+			cancelCon = nil
+		end
+		propCon:Disconnect()
+		eventCon:Disconnect()
+		propCon = nil
+		eventCon = nil
+	end)
+
+	return box
+end
+
+local AttributeControls = {}
+
+local GetAttribute = game.GetAttribute
+function AttributeControls.default(object, name, value, valueType, readOnly)
+	local box = CreateTextBox(readOnly)
+	box.Size = UDim2_new(1, -2 * Styles.Margin, 1, 0)
+	box.Position = UDim2_new(0, Styles.Margin, 0, 0)
+
+	local focusLostCon, changedCon, eventCon
+
+	local function update()
+		local success, result = pcall(GetAttribute, object, name)
+		if success then
+			box.Text = ToString(result, valueType)
+		else 
+			box.Text = tostring(value)
+		end
+	end
+
+	if not readOnly then
+		focusLostCon = box.FocusLost:Connect(function(enterPressed)
+			object:SetAttribute(name, ToValue(box.Text, valueType))
+			update()
+		end)
+	end
+
+	update()
+
+	changedCon = object.Changed:Connect(update)
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		if focusLostCon then
+			focusLostCon:Disconnect()
+			focusLostCon = nil
+		end
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return box
+end
+
+function AttributeControls.boolean(object, name, value, valueType, readOnly)
+	local checked = object:GetAttribute(name)
+
+	local checkbox, setValue = CreateCheckbox(checked, readOnly, function(value)
+		object:SetAttribute(name, not checked)
+	end)
+
+	local changedCon, eventCon
+
+	local function update()
+		local success, checked = pcall(GetAttribute, object, name)
+		setValue(checked)
+	end
+
+	checkbox.Position = UDim2_new(0, Styles.Margin, 0, Styles.Margin)
+
+	changedCon = object.Changed:Connect(update)
+
+	update()
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return checkbox
+end
+
+function AttributeControls.BrickColor(object, name, value, valueType, readOnly)
+	local frame, label, brickColorBox = CreateBrickColor(readOnly, function(brickColor)
+		object:SetAttribute(name, brickColor)
+	end)
+
+	local changedCon, eventCon
+
+	local function update()
+		local success, value = pcall(GetAttribute, object, name)
+		if success then 
+			brickColorBox.BackgroundColor3 = value.Color
+			label.Text = tostring(value)
+		end
+	end
+
+	update()
+
+	changedCon = object.Changed:Connect(update)
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return frame
+end
+
+function AttributeControls.Color3(object, name, value, valueType, readOnly)
+	local frame, textBox, colorBox = CreateColor3Control(readOnly)
+
+	local focusLostCon, changedCon, eventCon
+
+	local function update()
+		local success, value = pcall(GetAttribute, object, name)
+		if success then 
+			colorBox.BackgroundColor3 = value
+			textBox.Text = ToString(value, "Color3")
+		end
+	end
+
+	focusLostCon = textBox.FocusLost:Connect(function(enterPressed)
+		object:SetAttribute(name, ToValue(textBox.Text, "Color3"))
+		update()
+	end)
+
+	changedCon = object.Changed:Connect(update)
+
+	update()
+
+	eventCon = SelectionChanged_Bindable.Event:Connect(function()
+		focusLostCon:Disconnect()
+		changedCon:Disconnect()
+		eventCon:Disconnect()
+		focusLostCon = nil
+		changedCon = nil
+		eventCon = nil
+	end)
+
+	return frame
+end
+
+local function GetAttributeControl(object, name, value, valueType, readOnly)
+	local control
+
+	if AttributeControls[valueType] then
+		control = AttributeControls[valueType](object, name, value, valueType, readOnly)
+	else
+		control = AttributeControls.default(object, name, value, valueType, readOnly)
+	end
+
+	return control
+end
+
+local function GetControl(object, propertyData, readOnly)
+	local propertyType = propertyData.ValueType
+	local RbxApiPropertyData = RbxApi.Classes[object.ClassName][propertyData.Name]
+	local control
+
+	if Controls[propertyType] then
+		control = Controls[propertyType](object, propertyData, readOnly)
+	elseif RbxApiPropertyData then
+		local ControlType = Controls[RbxApiPropertyData.ValueType.Name] or Controls.default
+		control = Controls.default(object, propertyData, readOnly)
+	else
+		control = Controls.default(object, propertyData, readOnly)
+	end
+
+	return control
+end
+
+local function CanEditProperty(object, propertyData)
+	if propertyData.Binary then
+		return false
+	end
+	for _, Tag in next, propertyData.Tags do
+		if string_lower(Tag) == "readonly" then
+			return false
+		end
+	end
+	return Permissions.CanEdit
+end
+
+function Set(object, propertyName, value)
+	pcall(sethiddenproperty, object, propertyName, value)
+end
+
+local function CreateTextRow(text, isAlternateRow)
+	local backColor = isAlternateRow and Row.BackgroundColorAlternate or Row.BackgroundColor
+
+	local readOnly = true
+
+	local rowFrame = Instance_new("Frame")
+	rowFrame.Size = UDim2_new(1,0,0,Row.Height)
+	rowFrame.BackgroundTransparency = 1
+	rowFrame.Name = 'Row'
+
+	local labelFrame = CreateCell(true)
+	labelFrame.ClipsDescendants = true
+
+	local label = CreateLabel(readOnly)
+	label.RichText = true
+	label.Text = text
+	label.TextXAlignment = Enum.TextXAlignment.Center
+	label.Size = UDim2_new(1, -1 * Row.TitleMarginLeft, 1, 0)
+	label.Position = UDim2_new(0, Row.TitleMarginLeft, 0, 0)
+	label.Parent = labelFrame
+
+	labelFrame.BackgroundColor3 = backColor
+
+	labelFrame.Parent = rowFrame
+
+	return rowFrame
+end
+
+local function CreateTagRow(object, tag, isAlternateRow)
+	local backColor = isAlternateRow and Row.BackgroundColorAlternate or Row.BackgroundColor
+
+	local readOnly = true
+
+	local rowFrame = Instance_new("Frame")
+	rowFrame.Size = UDim2_new(1,0,0,Row.Height)
+	rowFrame.BackgroundTransparency = 1
+	rowFrame.Name = 'Row'
+
+	local tagLabelFrame = CreateCell(true)
+	tagLabelFrame.ClipsDescendants = true
+
+	local tagLabel = CreateLabel(readOnly)
+	tagLabel.RichText = true
+	tagLabel.Text = tag
+	tagLabel.TextXAlignment = Enum.TextXAlignment.Center
+	tagLabel.Size = UDim2_new(1, -1 * Row.TitleMarginLeft, 1, 0)
+	tagLabel.Position = UDim2_new(0, Row.TitleMarginLeft, 0, 0)
+	tagLabel.Parent = tagLabelFrame
+
+	local cancel = Create(Icon('ImageButton', 177), {
+		Name = "Cancel",
+		Visible = true,
+		Position = UDim2_new(1,-20,0,0),
+		Size = UDim2_new(0,20,0,20),
+		Parent = tagLabel
+	})
+
+	local cancelCon
+
+	cancelCon = cancel.Activated:Connect(function()
+		if cancelCon then
+			cancelCon:Disconnect()
+			cancelCon = nil
+		end
+		CollectionService:RemoveTag(object, tag)
+		cancel.Visible = false
+		tagLabel.Text = "REMOVED"
+	end)
+
+	tagLabelFrame.BackgroundColor3 = backColor
+
+	tagLabelFrame.Parent = rowFrame
+
+	return rowFrame
+end
+
+local function CreateAttributeRow(object, name, value, isAlternateRow)
+	local backColor = isAlternateRow and Row.BackgroundColorAlternate or Row.BackgroundColor
+
+	local fullAttribute
+
+	local rowFrame = Instance_new("Frame")
+	rowFrame.Size = UDim2_new(1,0,0,Row.Height)
+	rowFrame.BackgroundTransparency = 1
+	rowFrame.Name = 'Row'
+
+	local attributeLabelFrame = CreateCell(false)
+	attributeLabelFrame.ClipsDescendants = true
+
+	local attributeLabel = CreateLabel(false)
+	attributeLabel.Text = name
+	attributeLabel.Size = UDim2_new(1, -1 * Row.TitleMarginLeft, 1, 0)
+	attributeLabel.Position = UDim2_new(0, Row.TitleMarginLeft, 0, 0)
+	attributeLabel.Parent = attributeLabelFrame
+
+	attributeLabelFrame.Parent = rowFrame
+
+	local attributeValueFrame = CreateCell(false)
+	attributeValueFrame.Size = UDim2_new(.5, -1, 1, 0)
+	attributeValueFrame.Position = UDim2_new(.5, 0, 0, 0)
+	attributeValueFrame.Parent = rowFrame
+
+	local control = GetAttributeControl(object, name, value, type(value), false)
+	control.Parent = attributeValueFrame
+
+	attributeLabel.MouseEnter:Connect(function()
+		fullAttribute = Instance_new("TextLabel")
+		fullAttribute.BackgroundColor3 = backColor
+		fullAttribute.Text = name
+		fullAttribute.TextColor3 = DropDown.TextColor
+		fullAttribute.Size = UDim2_new(1,-1,1,0)
+		fullAttribute.Position = UDim2_new(0, DropDown.BorderSizePixel,0,0)
+
+		local UICorner = Instance_new("UICorner")
+		UICorner.CornerRadius = UDim.new(0,10)
+		UICorner.Name = ""
+		UICorner.Parent = fullAttribute
+
+		fullAttribute.Parent = rowFrame
+	end)
+
+	attributeLabel.MouseLeave:Connect(function()
+		if fullAttribute then
+			fullAttribute:Destroy()
+		end
+	end)
+
+	rowFrame.MouseEnter:Connect(function()
+		attributeLabelFrame.BackgroundColor3 = Row.BackgroundColorMouseover
+		attributeValueFrame.BackgroundColor3 = Row.BackgroundColorMouseover
+	end)
+
+	rowFrame.MouseLeave:Connect(function()
+		attributeLabelFrame.BackgroundColor3 = backColor
+		attributeValueFrame.BackgroundColor3 = backColor
+	end)
+
+	rowFrame.InputEnded:Connect(function(input)
+		if input.UserInputType.Name == 'MouseButton1' and UserInputService:IsKeyDown('LeftControl') then
+			if	input.Position.X > rowFrame.AbsolutePosition.X and
+				input.Position.Y > rowFrame.AbsolutePosition.Y and
+				input.Position.X < rowFrame.AbsolutePosition.X + rowFrame.AbsoluteSize.X and
+				input.Position.Y < rowFrame.AbsolutePosition.Y + rowFrame.AbsoluteSize.Y then 
+				print(pcall(setclipboard, tostring(object:GetAttribute(name))))
+			end
+		end
+	end)
+
+	attributeLabelFrame.BackgroundColor3 = backColor
+	attributeValueFrame.BackgroundColor3 = backColor
+
+	return rowFrame
+end
+
+local function CreateRow(object, propertyData, isAlternateRow)
+	local propertyName = propertyData.Name
+	local backColor = isAlternateRow and Row.BackgroundColorAlternate or Row.BackgroundColor
+
+	local readOnly, fullProperty = not CanEditProperty(object, propertyData), nil
+
+	local rowFrame = Instance_new("Frame")
+	rowFrame.Size = UDim2_new(1,0,0,Row.Height)
+	rowFrame.BackgroundTransparency = 1
+	rowFrame.Name = 'Row'
+
+	local propertyLabelFrame = CreateCell(false)
+	propertyLabelFrame.ClipsDescendants = true
+
+	local propertyLabel = CreateLabel(readOnly)
+	propertyLabel.Text = propertyName
+	propertyLabel.Size = UDim2_new(1, -1 * Row.TitleMarginLeft, 1, 0)
+	propertyLabel.Position = UDim2_new(0, Row.TitleMarginLeft, 0, 0)
+	propertyLabel.Parent = propertyLabelFrame
+
+	propertyLabelFrame.Parent = rowFrame
+
+	local propertyValueFrame = CreateCell(false)
+	propertyValueFrame.Size = UDim2_new(.5, -1, 1, 0)
+	propertyValueFrame.Position = UDim2_new(.5, 0, 0, 0)
+	propertyValueFrame.Parent = rowFrame
+
+	local control = GetControl(object, propertyData, readOnly)
+	control.Parent = propertyValueFrame
+
+	propertyLabel.MouseEnter:Connect(function()
+		fullProperty = Instance_new("TextLabel")
+		fullProperty.BackgroundColor3 = backColor
+		fullProperty.Text = propertyName
+		fullProperty.TextColor3 = DropDown.TextColor
+		fullProperty.Size = UDim2_new(1,-1,1,0)
+		fullProperty.Position = UDim2_new(0, DropDown.BorderSizePixel,0,0)
+
+		local UICorner = Instance_new("UICorner")
+		UICorner.CornerRadius = UDim.new(0,10)
+		UICorner.Name = ""
+		UICorner.Parent = fullProperty
+
+		fullProperty.Parent = rowFrame
+	end)
+
+	propertyLabel.MouseLeave:Connect(function()
+		if fullProperty then
+			fullProperty:Destroy()
+		end
+	end)
+
+	rowFrame.MouseEnter:Connect(function()
+		propertyLabelFrame.BackgroundColor3 = Row.BackgroundColorMouseover
+		propertyValueFrame.BackgroundColor3 = Row.BackgroundColorMouseover
+	end)
+
+	rowFrame.MouseLeave:Connect(function()
+		propertyLabelFrame.BackgroundColor3 = backColor
+		propertyValueFrame.BackgroundColor3 = backColor
+	end)
+
+	rowFrame.InputEnded:Connect(function(input)
+		if input.UserInputType.Name == 'MouseButton1' and UserInputService:IsKeyDown('LeftControl') then
+			if	input.Position.X > rowFrame.AbsolutePosition.X and
+				input.Position.Y > rowFrame.AbsolutePosition.Y and
+				input.Position.X < rowFrame.AbsolutePosition.X + rowFrame.AbsoluteSize.X and
+				input.Position.Y < rowFrame.AbsolutePosition.Y + rowFrame.AbsoluteSize.Y then 
+				print(pcall(setclipboard, tostring(gethiddenproperty(object, propertyName))))
+			end
+		end
+	end)
+
+	propertyLabelFrame.BackgroundColor3 = backColor
+	propertyValueFrame.BackgroundColor3 = backColor
+
+	return rowFrame
+end
+
+local function ClearPropertiesList()
+	ContentFrame:ClearAllChildren()
+end
+
+local selection = Gui:FindFirstChild("Selection", 1)
+local numRows
+
+local function displayTextRow(text)
+	pcall(function()
+		local a = CreateTextRow(text, ((numRows % 2) == 0))
+		a.Position = UDim2_new(0,0,0,numRows*Row.Height)
+		a.Parent = ContentFrame
+		numRows += 1
+	end)
+end
+
+local function displayTags(tags)
+	for _,data in pairs(tags) do
+		pcall(function()
+			local a = CreateTagRow(data.Object, data.Value, ((numRows % 2) == 0))
+			a.Position = UDim2_new(0,0,0,numRows*Row.Height)
+			a.Parent = ContentFrame
+			numRows += 1
+		end)
+	end
+end
+
+local function displayAttributes(attributes)
+	for name,data in pairs(attributes) do
+		pcall(function()
+			local a = CreateAttributeRow(data.Object, name, data.Value, ((numRows % 2) == 0))
+			a.Position = UDim2_new(0,0,0,numRows*Row.Height)
+			a.Parent = ContentFrame
+			numRows += 1
+		end)
+	end
+end
+
+local function displayProperties(props)
+	for _,v in next, props do
+		pcall(function()
+			local a = CreateRow(v.object, v.propertyData, ((numRows % 2) == 0))
+			a.Position = UDim2_new(0,0,0,numRows*Row.Height)
+			a.Parent = ContentFrame
+			numRows += 1
+		end)
+	end
+end
+
+local function checkForDupe(prop,props)
+	for _,v in next, props do
+		if string_lower(v.propertyData.Name) == string_lower(prop.Name) and v.propertyData.ValueType == prop.ValueType then
+			return true
+		end
+	end
+	return false
+end
+
+local function sortProps(t)
+	table_sort(t, function(x,y) 
+		return tostring(x.propertyData.Name) < tostring(y.propertyData.Name)
+	end)
+end
+
+local function getTableLength(t)
+	local length = 0
+	for _,_ in pairs(t) do
+		length += 1
+	end
+	return length
+end
+
+local function showSelectionData(obj)
+	ClearPropertiesList()
+	local propHolder, foundProps = {}, {}
+	local attributes, tags = {}, {}
+	numRows = 0
+	for _,nextObj in next, (obj or {}) do
+		if not foundProps[nextObj.className] then
+			foundProps[nextObj.className] = true
+			for name, value in pairs(nextObj:GetAttributes()) do
+				attributes[name] = {
+					Object = nextObj,
+					Value = value
+				}
+			end
+			for _, value in pairs(CollectionService:GetTags(nextObj)) do
+				table.insert(tags, {
+					Object = nextObj,
+					Value = value
+				})
+			end
+			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.className, RbxApi)) do
+				if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
+					if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
+						table_insert(propHolder,{
+							propertyData = v, 
+							object = nextObj
+						})
+					end
+				end
+			end
+		end
+	end
+	sortProps(propHolder)
+	displayProperties(propHolder)
+	if getTableLength(attributes) > 0 then
+		displayTextRow("<b> ----- Attributes ----- </b>")
+		displayAttributes(attributes)
+	end
+	if getTableLength(tags) > 0 then
+		displayTextRow("<b> ----- Tags ----- </b>")
+		displayTags(tags)
+	end
+	ContentFrame.Size = UDim2_new(1, 0, 0, numRows * Row.Height)
+	scrollBar.ScrollIndex = 0
+	scrollBar.TotalSpace = numRows * Row.Height
+	scrollBar.Update()
+end
+-----------------------SCROLLBAR STUFF--------------------------
+local ScrollBarWidth = 16
+
+local ScrollStyles = {
+	Background = Color3.fromRGB(37, 37, 42),
+	Border = Color3.fromRGB(20, 20, 25),
+	Selected = Color3.fromRGB(5, 100, 140),
+	BorderSelected = Color3.fromRGB(2, 130, 145),
+	Text = Color3.fromRGB(245, 245, 250),
+	TextDisabled = Color3.fromRGB(188, 188, 193),
+	TextSelected = Color3.fromRGB(255, 255, 255),
+	Button = Color3.fromRGB(31, 31, 36),
+	ButtonBorder = Color3.fromRGB(133, 133, 138),
+	ButtonSelected = Color3.fromRGB(0, 168, 155),
+	Field = Color3.fromRGB(37, 37, 42),
+	FieldBorder = Color3.fromRGB(50, 50, 55),
+	TitleBackground = Color3.fromRGB(11, 11, 16)
+}
+
+local SetZIndex
+do
+	local ZIndexLock = {}
+	function SetZIndex(object,z)
+		if not ZIndexLock[object] then
+			ZIndexLock[object] = true
+			if object:IsA'GuiObject' then
+				object.ZIndex = z
+			end
+			local children = object:GetChildren()
+			for i = 1,#children do
+				SetZIndex(children[i],z)
+			end
+			ZIndexLock[object] = nil
+		end
+	end
+end
+
+local function SetZIndexOnChanged(object)
+	return object:GetPropertyChangedSignal("ZIndex"):Connect(function(p)
+		SetZIndex(object, object.ZIndex)
+	end)
+end
+
+local function GetScreen(screen)
+	if screen == nil then return nil end
+	while not screen:IsA("GuiBase2d") do
+		screen = screen.Parent
+	end
+	return screen
+end
+
+local function ResetButtonColor(button)
+	local active = button.Active
+	button.Active = not active
+	button.Active = active
+end
+
+function ArrowGraphic(size,dir,scaled,template)
+	local Frame = Create('Frame',{
+		Name = "Arrow Graphic",
+		BorderSizePixel = 0,
+		Size = UDim2_new(0,size,0,size),
+		Transparency = 1
+	})
+
+	if not template then
+		template = Instance_new("Frame")
+		template.BorderSizePixel = 0
+	end
+
+	template.BackgroundColor3 = Color3_new(1, 1, 1)
+
+	local transform, scale
+
+	if dir == nil or dir == "Up" then
+		function transform(p,s) return p,s end
+	elseif dir == "Down" then
+		function transform(p,s) return UDim2_new(0,p.X.Offset,0,size-p.Y.Offset-1),s end
+	elseif dir == "Left" then
+		function transform(p,s) return UDim2_new(0,p.Y.Offset,0,p.X.Offset),UDim2_new(0,s.Y.Offset,0,s.X.Offset) end
+	elseif dir == "Right" then
+		function transform(p,s) return UDim2_new(0,size-p.Y.Offset-1,0,p.X.Offset),UDim2_new(0,s.Y.Offset,0,s.X.Offset) end
+	end
+
+	if scaled then
+		function scale(p,s) return UDim2_new(p.X.Offset/size,0,p.Y.Offset/size,0),UDim2_new(s.X.Offset/size,0,s.Y.Offset/size,0) end
+	else
+		function scale(p,s) return p,s end
+	end
+
+	local o = math_floor(size / 4)
+	if size % 2 == 0 then
+		local n = size / 2 - 1
+		for i = 0, n do
+			local t = template:Clone()
+			local p,s = scale(transform(
+				UDim2_new(0,n-i,0,o+i),
+				UDim2_new(0,(i+1)*2,0,1)
+				))
+			t.Position = p
+			t.Size = s
+			t.Parent = Frame
+		end
+	else
+		local n = (size-1)/2
+		for i = 0,n do
+			local t = template:Clone()
+			local p,s = scale(transform(
+				UDim2_new(0,n-i,0,o+i),
+				UDim2_new(0,i*2+1,0,1)
+				))
+			t.Position = p
+			t.Size = s
+			t.Parent = Frame
+		end
+	end
+	if size%4 > 1 then
+		local t = template:Clone()
+		local p,s = scale(transform(
+			UDim2_new(0,0,0,size-o-1),
+			UDim2_new(0,size,0,1)
+			))
+		t.Position = p
+		t.Size = s
+		t.Parent = Frame
+	end
+
+	for _,v in next, Frame:GetChildren() do
+		v.BackgroundColor3 = Color3_new(1, 1, 1)
+	end
+
+	return Frame
+end
+
+function GripGraphic(size,dir,spacing,scaled,template)
+	local Frame = Create('Frame',{
+		Name = "Grip Graphic",
+		BorderSizePixel = 0,
+		Size = UDim2_new(0,size.X,0,size.Y),
+		Transparency = 1
+	})
+
+	if not template then
+		template = Instance_new("Frame")
+		template.BorderSizePixel = 0
+	end
+
+	spacing = spacing or 2
+
+	local scale = scaled and function(p)
+		return UDim2_new(p.X.Offset/size.X,0,p.Y.Offset/size.Y,0)
+	end
+		or function(p)
+		return p
+	end
+
+	if dir == "Vertical" then
+		for i=0, size.X - 1,spacing do
+			local t = template:Clone()
+			t.Size = scale(UDim2_new(0,1,0,size.Y))
+			t.Position = scale(UDim2_new(0,i,0,0))
+			t.Parent = Frame
+		end
+	elseif dir == nil or dir == "Horizontal" then
+		for i=0, size.Y - 1,spacing do
+			local t = template:Clone()
+			t.Size = scale(UDim2_new(0, size.X, 0, 1))
+			t.Position = scale(UDim2_new(0,0,0,i))
+			t.Parent = Frame
+		end
+	end
+
+	return Frame
+end
+
+do
+	local mt = {
+		__index = {
+			GetScrollPercent = function(self)
+				return self.ScrollIndex/(self.TotalSpace-self.VisibleSpace)
+			end,
+			CanScrollDown = function(self)
+				return self.ScrollIndex + self.VisibleSpace < self.TotalSpace
+			end,
+			CanScrollUp = function(self)
+				return self.ScrollIndex > 0
+			end,
+			ScrollDown = function(self)
+				self.ScrollIndex += self.PageIncrement
+				self:Update()
+			end,
+			ScrollUp = function(self)
+				self.ScrollIndex -= self.PageIncrement
+				self:Update()
+			end,
+			ScrollTo = function(self,index)
+				self.ScrollIndex = index
+				self:Update()
+			end,
+			SetScrollPercent = function(self,percent)
+				self.ScrollIndex = math_floor((self.TotalSpace - self.VisibleSpace)*percent + .5)
+				self:Update()
+			end
+		}
+	}
+	mt.__index.CanScrollRight = mt.__index.CanScrollDown
+	mt.__index.CanScrollLeft = mt.__index.CanScrollUp
+	mt.__index.ScrollLeft = mt.__index.ScrollUp
+	mt.__index.ScrollRight = mt.__index.ScrollDown
+
+	function ScrollBar(horizontal)
+		local ScrollFrame = Create('Frame',{
+			Name = "ScrollFrame",
+			Position = horizontal and UDim2_new(0,0,1,-ScrollBarWidth) or UDim2_new(1,-ScrollBarWidth,0,0),
+			Size = horizontal and UDim2_new(1,0,0,ScrollBarWidth) or UDim2_new(0,ScrollBarWidth,1,0),
+			BackgroundTransparency = 1,
+			Create('ImageButton',{
+				Name = "ScrollDown",
+				Position = horizontal and UDim2_new(1,-ScrollBarWidth,0,0) or UDim2_new(0,0,1,-ScrollBarWidth),
+				Size = UDim2_new(0, ScrollBarWidth, 0, ScrollBarWidth),
+				BackgroundColor3 = ScrollStyles.Button,
+				BorderColor3 = ScrollStyles.Border,
+				ImageColor3 = Styles.White
+			}),
+			Create('ImageButton',{
+				Name = "ScrollUp",
+				Size = UDim2_new(0, ScrollBarWidth, 0, ScrollBarWidth),
+				BackgroundColor3 = ScrollStyles.Button,
+				BorderColor3 = ScrollStyles.Border,
+				ImageColor3 = Styles.White
+			}),
+			Create('ImageButton',{
+				Name = "ScrollBar",
+				Size = horizontal and UDim2_new(1,-ScrollBarWidth*2,1,0) or UDim2_new(1,0,1,-ScrollBarWidth*2),
+				Position = horizontal and UDim2_new(0,ScrollBarWidth,0,0) or UDim2_new(0,0,0,ScrollBarWidth),
+				AutoButtonColor = false,
+				BackgroundColor3 = Color3_new(1/4, 1/4, 1/4),
+				BorderColor3 = ScrollStyles.Border,
+				Create('ImageButton',{
+					Name = "ScrollThumb",
+					AutoButtonColor = false,
+					Size = UDim2_new(0, ScrollBarWidth, 0, ScrollBarWidth),
+					BackgroundColor3 = ScrollStyles.Button,
+					BorderColor3 = ScrollStyles.Border,
+					ImageColor3 = Styles.White
+				})
+			})
+		})
+
+		local graphicTemplate = Create('Frame',{
+			Name="Graphic",
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3_new(1, 1, 1)
+		})
+
+		local graphicSize = ScrollBarWidth/2
+
+		local ScrollDownFrame = ScrollFrame.ScrollDown
+		local ScrollDownGraphic = ArrowGraphic(graphicSize,horizontal and 'Right' or 'Down',true,graphicTemplate)
+		ScrollDownGraphic.Position = UDim2_new(.5,-graphicSize/2,.5,-graphicSize/2)
+		ScrollDownGraphic.Parent = ScrollDownFrame
+		local ScrollUpFrame = ScrollFrame.ScrollUp
+		local ScrollUpGraphic = ArrowGraphic(graphicSize,horizontal and 'Left' or 'Up',true,graphicTemplate)
+		ScrollUpGraphic.Position = UDim2_new(.5,-graphicSize/2,.5,-graphicSize/2)
+		ScrollUpGraphic.Parent = ScrollUpFrame
+		local ScrollBarFrame = ScrollFrame.ScrollBar
+		local ScrollThumbFrame = ScrollBarFrame.ScrollThumb
+		do
+			local size = ScrollBarWidth*3/8
+			local Decal = GripGraphic(Vector2_new(size,size),horizontal and 'Vertical' or 'Horizontal',2,graphicTemplate)
+			Decal.Position = UDim2_new(.5,-size/2,.5,-size/2)
+			Decal.Parent = ScrollThumbFrame
+		end
+
+		local MouseDrag = Create('ImageButton',{
+			Name = "MouseDrag",
+			Position = UDim2_new(-.25,0,-.25,0),
+			Size = UDim2_new(1.5,0,1.5,0),
+			Transparency = 1,
+			AutoButtonColor = false,
+			Active = true,
+			ZIndex = 10
+		})
+
+		local Class = setmetatable({
+			GUI = ScrollFrame,
+			ScrollIndex = 0,
+			VisibleSpace = 0,
+			TotalSpace = 0,
+			PageIncrement = 1
+		},mt)
+
+		local UpdateScrollThumb
+		if horizontal then
+			function UpdateScrollThumb()
+				ScrollThumbFrame.Size = UDim2_new(Class.VisibleSpace/Class.TotalSpace,0,0,ScrollBarWidth)
+				if ScrollThumbFrame.AbsoluteSize.X < ScrollBarWidth then
+					ScrollThumbFrame.Size = UDim2_new(0,ScrollBarWidth,0,ScrollBarWidth)
+				end
+				local barSize = ScrollBarFrame.AbsoluteSize.X
+				ScrollThumbFrame.Position = UDim2_new(Class:GetScrollPercent()*(barSize - ScrollThumbFrame.AbsoluteSize.X)/barSize,0,0,0)
+			end
+		else
+			function UpdateScrollThumb()
+				ScrollThumbFrame.Size = UDim2_new(0,ScrollBarWidth,Class.VisibleSpace/Class.TotalSpace,0)
+				if ScrollThumbFrame.AbsoluteSize.Y < ScrollBarWidth then
+					ScrollThumbFrame.Size = UDim2_new(0,ScrollBarWidth,0,ScrollBarWidth)
+				end
+				local barSize = ScrollBarFrame.AbsoluteSize.Y
+				ScrollThumbFrame.Position = UDim2_new(0,0,Class:GetScrollPercent()*(barSize - ScrollThumbFrame.AbsoluteSize.Y)/barSize,0)
+			end
+		end
+
+		local lastDown, lastUp
+		local scrollStyle = {BackgroundColor3=Color3_new(1, 1, 1),BackgroundTransparency=0}
+		local scrollStyle_ds = {BackgroundColor3=Color3_new(1, 1, 1),BackgroundTransparency=.7}
+
+		local function Update()
+			local t,v,s = Class.TotalSpace,Class.VisibleSpace,Class.ScrollIndex
+			if v <= t then
+				if s > 0 then
+					if s + v > t then
+						Class.ScrollIndex = t - v
+					end
+				else
+					Class.ScrollIndex = 0
+				end
+			else
+				Class.ScrollIndex = 0
+			end
+
+			if Class.UpdateCallback then
+				if Class.UpdateCallback(Class) == false then
+					return
+				end
+			end
+
+			local down,up = Class:CanScrollDown(),Class:CanScrollUp()
+			if down ~= lastDown then
+				lastDown = down
+				ScrollDownFrame.Active = down
+				ScrollDownFrame.AutoButtonColor = down
+				local children,style = ScrollDownGraphic:GetChildren(),down and scrollStyle or scrollStyle_ds
+				for i = 1,#children do
+					Create(children[i],style)
+				end
+			end
+			if up ~= lastUp then
+				lastUp = up
+				ScrollUpFrame.Active = up
+				ScrollUpFrame.AutoButtonColor = up
+				local children,style = ScrollUpGraphic:GetChildren(),up and scrollStyle or scrollStyle_ds
+				for i = 1,#children do
+					Create(children[i],style)
+				end
+			end
+			ScrollThumbFrame.Visible = down or up
+			UpdateScrollThumb()
+		end
+		Class.Update = Update
+
+		SetZIndexOnChanged(ScrollFrame)
+
+		local drag
+		local scrollEventID = 0
+		ScrollDownFrame.MouseButton1Down:Connect(function()
+			scrollEventID = tick()
+			local current,up_con = scrollEventID,nil
+			up_con = MouseDrag.MouseButton1Up:Connect(function()
+				scrollEventID = tick()
+				MouseDrag.Parent = nil
+				ResetButtonColor(ScrollDownFrame)
+				up_con:Disconnect()
+				drag = nil
+			end)
+			MouseDrag.Parent = GetScreen(ScrollFrame)
+			Class:ScrollDown()
+			task.wait(.2)
+			while scrollEventID == current do
+				Class:ScrollDown()
+				if not Class:CanScrollDown() then break end
+				task.wait()
+			end
+		end)
+
+		ScrollDownFrame.MouseButton1Up:Connect(function()
+			scrollEventID = tick()
+		end)
+
+		ScrollUpFrame.MouseButton1Down:Connect(function()
+			scrollEventID = tick()
+			local current,up_con = scrollEventID,nil
+			up_con = MouseDrag.MouseButton1Up:Connect(function()
+				scrollEventID = tick()
+				MouseDrag.Parent = nil
+				ResetButtonColor(ScrollUpFrame)
+				up_con:Disconnect()
+				drag = nil
+			end)
+			MouseDrag.Parent = GetScreen(ScrollFrame)
+			Class:ScrollUp()
+			task.wait(.2)
+			while scrollEventID == current do
+				Class:ScrollUp()
+				if not Class:CanScrollUp() then break end
+				task.wait(0)
+			end
+		end)
+
+		ScrollUpFrame.MouseButton1Up:Connect(function()
+			scrollEventID = tick()
+		end)
+
+		if horizontal then
+			ScrollBarFrame.MouseButton1Down:Connect(function(x,y)
+				scrollEventID = tick()
+				local current = scrollEventID
+				local up_con
+				up_con = MouseDrag.MouseButton1Up:Connect(function()
+					scrollEventID = tick()
+					MouseDrag.Parent = nil
+					ResetButtonColor(ScrollUpFrame)
+					up_con:Disconnect()
+					drag = nil
+				end)
+				MouseDrag.Parent = GetScreen(ScrollFrame)
+				if x > ScrollThumbFrame.AbsolutePosition.X then
+					Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
+					task.wait(.2)
+					while scrollEventID == current do
+						if x < ScrollThumbFrame.AbsolutePosition.X + ScrollThumbFrame.AbsoluteSize.X then break end
+						Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
+						task.wait(0)
+					end
+				else
+					Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
+					task.wait(.2)
+					while scrollEventID == current do
+						if x > ScrollThumbFrame.AbsolutePosition.X then break end
+						Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
+						task.wait(0)
+					end
+				end
+			end)
+		else
+			ScrollBarFrame.MouseButton1Down:Connect(function(x,y)
+				scrollEventID = tick()
+				local current = scrollEventID
+				local up_con
+				up_con = MouseDrag.MouseButton1Up:Connect(function()
+					scrollEventID = tick()
+					MouseDrag.Parent = nil
+					ResetButtonColor(ScrollUpFrame)
+					up_con:Disconnect(); drag = nil
+				end)
+				MouseDrag.Parent = GetScreen(ScrollFrame)
+				if y > ScrollThumbFrame.AbsolutePosition.Y then
+					Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
+					task.wait(.2)
+					while scrollEventID == current do
+						if y < ScrollThumbFrame.AbsolutePosition.Y + ScrollThumbFrame.AbsoluteSize.Y then break end
+						Class:ScrollTo(Class.ScrollIndex + Class.VisibleSpace)
+						task.wait(0)
+					end
+				else
+					Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
+					task.wait(.2)
+					while scrollEventID == current do
+						if y > ScrollThumbFrame.AbsolutePosition.Y then break end
+						Class:ScrollTo(Class.ScrollIndex - Class.VisibleSpace)
+						task.wait(0)
+					end
+				end
+			end)
+		end
+
+		if horizontal then
+			ScrollThumbFrame.MouseButton1Down:Connect(function(x,y)
+				scrollEventID = tick()
+				local mouse_offset = x - ScrollThumbFrame.AbsolutePosition.X
+				local drag_con,up_con
+				drag_con = MouseDrag.MouseMoved:Connect(function(x,y)
+					local bar_abs_pos = ScrollBarFrame.AbsolutePosition.X
+					local bar_drag = ScrollBarFrame.AbsoluteSize.X - ScrollThumbFrame.AbsoluteSize.X
+					local bar_abs_one = bar_abs_pos + bar_drag
+					x -= mouse_offset
+					x = x < bar_abs_pos and bar_abs_pos or x > bar_abs_one and bar_abs_one or x
+					x -= bar_abs_pos
+					Class:SetScrollPercent(x/(bar_drag))
+				end)
+				up_con = MouseDrag.MouseButton1Up:Connect(function()
+					scrollEventID = tick()
+					MouseDrag.Parent = nil
+					ResetButtonColor(ScrollThumbFrame)
+					drag_con:Disconnect(); drag_con = nil
+					up_con:Disconnect(); drag = nil
+				end)
+				MouseDrag.Parent = GetScreen(ScrollFrame)
+			end)
+		else
+			ScrollThumbFrame.MouseButton1Down:Connect(function(x,y)
+				scrollEventID = tick()
+				local mouse_offset = y - ScrollThumbFrame.AbsolutePosition.Y
+				local drag_con,up_con
+				drag_con = MouseDrag.MouseMoved:Connect(function(x,y)
+					local bar_abs_pos = ScrollBarFrame.AbsolutePosition.Y
+					local bar_drag = ScrollBarFrame.AbsoluteSize.Y - ScrollThumbFrame.AbsoluteSize.Y
+					local bar_abs_one = bar_abs_pos + bar_drag
+					y -= mouse_offset
+					y = y < bar_abs_pos and bar_abs_pos or y > bar_abs_one and bar_abs_one or y
+					y -= bar_abs_pos
+					Class:SetScrollPercent(y/(bar_drag))
+				end)
+				up_con = MouseDrag.MouseButton1Up:Connect(function()
+					scrollEventID = tick()
+					MouseDrag.Parent = nil
+					ResetButtonColor(ScrollThumbFrame)
+					drag_con:Disconnect(); drag_con = nil
+					up_con:Disconnect(); drag = nil
+				end)
+				MouseDrag.Parent = GetScreen(ScrollFrame)
+			end)
+		end
+
+		function Class:Destroy()
+			ScrollFrame:Destroy()
+			MouseDrag:Destroy()
+			for k in next, Class do
+				Class[k] = nil
+			end
+			setmetatable(Class,nil)
+		end
+		Update()
+		return Class
+	end
+end
+----------------------------------------------------------------
+local MainFrame = Instance_new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2_new(1, MainFrame.AbsoluteSize.X/2 -1 * ScrollBarWidth, 1,0)
+MainFrame.Position = UDim2_new(0, 0, 0, 0)
+MainFrame.BackgroundTransparency = 1
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = PropertiesFrame
+
+ContentFrame = Instance_new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2_new(1, 0, 0, 0)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Parent = MainFrame
+
+scrollBar = ScrollBar(false)
+scrollBar.PageIncrement = 1
+
+Create(scrollBar.GUI,{
+	Position = UDim2_new(1,-ScrollBarWidth,0,0),
+	Size = UDim2_new(0,ScrollBarWidth,1,0),
+	Parent = PropertiesFrame
+})
+
+scrollBarH = ScrollBar(true)
+scrollBarH.PageIncrement = ScrollBarWidth
+Create(scrollBarH.GUI,{
+	Position = UDim2_new(0,0,1,-ScrollBarWidth),
+	Visible = false,
+	Size = UDim2_new(1,-ScrollBarWidth,0,ScrollBarWidth),
+	Parent = PropertiesFrame
+})
+
+do
+	local listEntries,nameConnLookup = {},{}
+
+	function scrollBar.UpdateCallback(self)
+		scrollBar.TotalSpace = ContentFrame.AbsoluteSize.Y
+		scrollBar.VisibleSpace = MainFrame.AbsoluteSize.Y
+		ContentFrame.Position = UDim2_new(ContentFrame.Position.X.Scale,ContentFrame.Position.X.Offset,0,-1*scrollBar.ScrollIndex)
+	end
+
+	function scrollBarH.UpdateCallback(self) end
+
+	MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		scrollBarH.VisibleSpace = math_ceil(MainFrame.AbsoluteSize.X)
+		scrollBarH:Update()
+		scrollBar.VisibleSpace = math_ceil(MainFrame.AbsoluteSize.Y)
+		scrollBar:Update()
+	end)
+
+	local wheelAmount = Row.Height
+
+	PropertiesFrame.MouseWheelForward:Connect(function()
+		if UserInputService:IsKeyDown('LeftShift') then
+			if scrollBarH.VisibleSpace - 1 > wheelAmount then
+				scrollBarH:ScrollTo(scrollBarH.ScrollIndex - wheelAmount)
+			else
+				scrollBarH:ScrollTo(scrollBarH.ScrollIndex - scrollBarH.VisibleSpace)
+			end
+		else
+			if scrollBar.VisibleSpace - 1 > wheelAmount then
+				scrollBar:ScrollTo(scrollBar.ScrollIndex - wheelAmount)
+			else
+				scrollBar:ScrollTo(scrollBar.ScrollIndex - scrollBar.VisibleSpace)
+			end
+		end
+	end)
+
+	PropertiesFrame.MouseWheelBackward:Connect(function()
+		if UserInputService:IsKeyDown('LeftShift') then
+			if scrollBarH.VisibleSpace - 1 > wheelAmount then
+				scrollBarH:ScrollTo(scrollBarH.ScrollIndex + wheelAmount)
+			else
+				scrollBarH:ScrollTo(scrollBarH.ScrollIndex + scrollBarH.VisibleSpace)
+			end
+		else
+			if scrollBar.VisibleSpace - 1 > wheelAmount then
+				scrollBar:ScrollTo(scrollBar.ScrollIndex + wheelAmount)
+			else
+				scrollBar:ScrollTo(scrollBar.ScrollIndex + scrollBar.VisibleSpace)
+			end
+		end
+	end)
+end
+
+scrollBar.VisibleSpace = math_ceil(MainFrame.AbsoluteSize.Y)
+scrollBar:Update()
+
+showSelectionData(GetSelection())
+
+SelectionChanged_Bindable.Event:Connect(function() 
+	showSelectionData(GetSelection())
 end)
 
-Connect(SaveScript.Activated, function()
-	if ScriptEditor.Content ~= "" then
-		local fileName = FileName.Text
-		if fileName == "File Name" or FileName == "" then
-			fileName = "LocalScript_" .. random(1, 5000)
+SetAwaiting_Bindable.Event:Connect(function(obj)
+	if AwaitingObjectValue then
+		AwaitingObjectValue = false
+		local mySel = obj
+		if mySel then
+			pcall(Set, AwaitingObjectObj, AwaitingObjectProp, mySel)
 		end
-		fileName ..= ".lua"
-		writefile(fileName, ScriptEditor.Content)
 	end
 end)
 
-Connect(CopyScript.Activated, function()
-	setclipboard(ScriptEditor.Content)
+propertiesSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	showSelectionData(GetSelection())
 end)
 
-Connect(ClearScript.Activated, function()
-	CurrentScript = nil
-	ScriptEditor.SetContent("")
-	TxtArea.CanvasPosition = Vector2_zero
-	Title.Text = "[Script Viewer]"
-	Clear()
-end)
+function GetApi_Bindable.OnInvoke()
+	return RbxApi
+end
 
-Connect(DebugScript.Activated, function()
-	if not Title.Text:find("Viewing") then return end
-    ScriptEditor.SetContent("")
-	ScriptEditor.SetContent(DebugScriptAt(CurrentScript))
-end)
-
-Connect(CloseEditor.Activated, function()
-	script.Parent.Visible = false
-end)
+function GetAwaiting_Bindable.OnInvoke()
+	return AwaitingObjectValue
+end
