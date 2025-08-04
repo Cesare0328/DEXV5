@@ -214,7 +214,7 @@ local function createSettingTitle(p1)
 end
 
 local function createSetting(p1, p2, p3, p4)
-	if p4 then Titles += 0.75 end 
+	if p4 then Titles += 0.25 end 
 	local A = Clone(SettingTemplate)
 	A.Position = UDim2_new(0, 0, 0, ((#SettingList:GetChildren() - Titles) * 60))
 	A.SName.Text = p1
