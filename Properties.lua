@@ -172,7 +172,6 @@ local function getRbxApi()
         		end
     		end
 		end
-		warn(#Properties)
 		for _, Property in pairs(gottenprops) do
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
@@ -193,7 +192,6 @@ local function getRbxApi()
         		Class = ClassName
     		})
 		end
-		warn(#Properties)
 		for prop,_ in pairs(Blacklist) do
 			for index, data in pairs(Properties) do
 				if data.Name == prop then
@@ -201,9 +199,7 @@ local function getRbxApi()
 				end
 			end
 		end
-		warn(#Properties)
 		sortAlphabetic(Properties, "Name")
-		warn(#Properties)
 		return Properties
 	end
 
@@ -1599,6 +1595,8 @@ local function showSelectionData(obj)
 								object = nextObj
 							})
 						end
+					else
+						print("skipped", v.Name, "reason: class mismatch or dupe")
 					end
 				end)
 			end
