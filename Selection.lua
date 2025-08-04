@@ -519,7 +519,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     table.insert(output, "</Item>")
     return processed
 end
-local function SaveInstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
+local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
     local output = {XmlHeader}
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
