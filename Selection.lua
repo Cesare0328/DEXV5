@@ -640,12 +640,10 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     local success, errorMsg = pcall(Writefile, fileName, xml)
     if success then
         statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
-        print(string.format("✅ Saved instance as %s", fileName))
     else
         statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
-        warn(string.format("❌ Failed to save %s: %s", fileName, errorMsg))
     end
-	Loading.Image = getcustomasset("DEXV5\\Assets\\Finsihed.png")
+	Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
 	task.delay(2, function()
         ScreenGui:Destroy()
     end)
