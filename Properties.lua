@@ -1572,8 +1572,8 @@ local function showSelectionData(obj)
 	local attributes, tags = {}, {}
 	numRows = 0
 	for _,nextObj in next, (obj or {}) do
-		if not foundProps[nextObj.ClassName] then
-			foundProps[nextObj.ClassName] = true
+		if not foundProps[nextObj.className] then
+			foundProps[nextObj.className] = true
 			for name, value in pairs(nextObj:GetAttributes()) do
 				attributes[name] = {
 					Object = nextObj,
@@ -1586,8 +1586,8 @@ local function showSelectionData(obj)
 					Value = value
 				})
 			end
-			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.ClassName, RbxApi)) do
-				warn("checking", v.Name, "class", v.Class, "instance", nextObj.ClassName)
+			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.className, RbxApi)) do
+				warn("checking", v.Name, "class", v.Class, "instance", nextObj.className)
 				if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
 					if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
 						table_insert(propHolder,{
