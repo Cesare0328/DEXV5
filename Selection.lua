@@ -34,7 +34,6 @@ end)()
 local Heartbeat = RunService.Heartbeat
 local SelectionBoxes = {}
 local Gui = script.Parent
-local Titles = 0
 local SelectionBox = WaitForChild(script, "Box", 300)
 local IntroFrame = WaitForChild(Gui, "IntroFrame")
 local SideMenu = WaitForChild(Gui, "SideMenu")
@@ -200,8 +199,8 @@ end
 local function createSettingTitle(p1)
 	local A = Instance.new("TextLabel")
 	A.Name = "SettingLabel"
-	A.Position = UDim2_new(0, 0, 0, #SettingList:GetChildren() * 60)
-	A.Size = UDim2_new(1, 0, 0, 60)
+	A.Position = UDim2_new(0, 0, 0, #SettingList:GetChildren() * 50)
+	A.Size = UDim2_new(1, 0, 0, 50)
 	A.BackgroundTransparency = 1
 	A.Font = Enum.Font.Arial
 	A.TextSize = 18
@@ -214,9 +213,8 @@ local function createSettingTitle(p1)
 end
 
 local function createSetting(p1, p2, p3, p4)
-	if p4 then if Titles > 0 then Titles *= 3 else Titles += 0.25 end end
 	local A = Clone(SettingTemplate)
-	A.Position = UDim2_new(0, 0, 0, ((#SettingList:GetChildren() - Titles) * 60))
+	A.Position = UDim2_new(0, 0, 0, (#SettingList:GetChildren() * or 60))
 	A.SName.Text = p1
 	local B = A.Change
 	local function C(p4)
