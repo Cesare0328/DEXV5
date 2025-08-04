@@ -76,6 +76,22 @@ local Windows = {
 	Remotes = {RemoteDebugWindow},
 	About = {AboutPanel}
 }
+local Writefile = writefile or error("Executor requires writefile function", 0)
+local XmlHeader = [[
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+<External>null</External>
+<External>nil</External>
+]]
+local XmlFooter = "</roblox>"
+local Blacklist = {
+    CoreGui = true,
+    Chat = true,
+    CorePackages = true
+}
+local RefCounter = 0
+local RefCache = {}
 -- < Custom Aliases > --
 local wait = task.wait
 -- < Source > --
@@ -134,7 +150,8 @@ end
 
 local SaveMapSettings = {
 	SaveScripts = true,
-	ScriptCache = true,
+	AvoidPlayerCharacters = true,
+	SaveNilInstances = false,
 	CloseRobloxAfterSave = true
 }
 
@@ -313,12 +330,282 @@ local function createMapSetting(p1, p2, p3)
 	end
 end
 
+local function EscapeXml(value)
+    if value == nil then
+        return "Unnamed"
+    end
+    return tostring(value):gsub("[&<>\"']", {
+        ["&"] = "&amp;",
+        ["<"] = "&lt;",
+        [">"] = "&gt;",
+        ['"'] = "&quot;",
+        ["'"] = "&apos;"
+    })
+end
+local function GetRef(instance)
+    if instance == nil then
+        RefCounter = RefCounter + 1
+        local nilKey = "nil_" .. RefCounter
+        if not RefCache[nilKey] then
+            RefCache[nilKey] = "RBX" .. RefCounter
+        end
+        return RefCache[nilKey]
+    end
+    if not RefCache[instance] then
+        RefCounter = RefCounter + 1
+        RefCache[instance] = "RBX" .. RefCounter
+    end
+    return RefCache[instance]
+end
+local PropertySerializers = {
+    string = function(name, value)
+        return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
+    end,
+    bool = function(name, value)
+        return string.format('<bool name="%s">%s</bool>', name, tostring(value):lower())
+    end,
+    number = function(name, value)
+        return string.format('<float name="%s">%.6f</float>', name, value)
+    end,
+    Vector3 = function(name, value)
+        return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>',
+            name, value.X, value.Y, value.Z)
+    end,
+    CFrame = function(name, value)
+        local c = {value:GetComponents()}
+        return string.format(
+            '<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z>' ..
+            '<R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02>' ..
+            '<R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12>' ..
+            '<R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CoordinateFrame>',
+            name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+    end,
+    Color3 = function(name, value)
+        return string.format('<Color3 name="%s"><R>%.6f</R><G>%.6f</G><B>%.6f</B></Color3>',
+            name, value.R, value.G, value.B)
+    end,
+    BrickColor = function(name, value)
+        return string.format('<BrickColor name="%s">%d</BrickColor>', name, value.Number)
+    end,
+    Instance = function(name, value)
+        return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
+    end
+}
+local function CountInstances(instance, avoidPlayerCharacters)
+    local count = 1
+    if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
+        return 0
+    end
+    if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
+        return 0
+    end
+    for _, child in ipairs(instance:GetChildren()) do
+        count = count + CountInstances(child, avoidPlayerCharacters)
+    end
+    return count
+end
+
+local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+    if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
+        statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
+        return processed
+    end
+
+    if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
+        statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
+        return processed
+    end
+
+    statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
+    processed = processed + 1
+
+    local isLocalPlayer = instance == Players.LocalPlayer
+    local ref = GetRef(instance)
+
+    if isLocalPlayer then
+        table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
+        table.insert(output, string.format('<string name="Name">%s</string>', EscapeXml(instance.Name .. "[LocalPlayer]")))
+    else
+        table.insert(output, string.format('<Item class="%s" referent="%s">', instance.ClassName or "Unknown", ref))
+        table.insert(output, "<Properties>")
+        table.insert(output, PropertySerializers.string("Name", instance.Name or "Unnamed"))
+
+        local properties = {}
+        if instance:IsA("BasePart") then
+            properties = {
+                Position = instance.Position,
+                Size = instance.Size,
+                CFrame = instance.CFrame,
+                Color = instance.Color,
+                BrickColor = instance.BrickColor,
+                Material = tostring(instance.Material),
+                Transparency = instance.Transparency,
+                Reflectance = instance.Reflectance,
+                Anchored = instance.Anchored,
+                CanCollide = instance.CanCollide,
+                CastShadow = instance.CastShadow,
+                Massless = instance.Massless
+            }
+        elseif instance:IsA("Model") then
+            properties = {
+                PrimaryPart = instance.PrimaryPart,
+                WorldPivot = instance.WorldPivot
+            }
+        elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
+            local source = "Decompile failed"
+            local success, result = pcall(function() return decompile(instance) end)
+            if success then
+                local lines = {}
+                for line in result:gmatch("[^\r\n]+") do
+                    table.insert(lines, line)
+                end
+                table.remove(lines, 1)
+                source = table.concat(lines, "\n")
+            end
+            properties = {
+                Source = source,
+                Disabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Disabled or nil
+            }
+        elseif instance:IsA("Decal") then
+            properties = {
+                Texture = instance.Texture,
+                Transparency = instance.Transparency,
+                Face = tostring(instance.Face)
+            }
+        elseif instance:IsA("PointLight") then
+            properties = {
+                Brightness = instance.Brightness,
+                Color = instance.Color,
+                Enabled = instance.Enabled,
+                Range = instance.Range,
+                Shadows = instance.Shadows
+            }
+        elseif instance:IsA("SpotLight") then
+            properties = {
+                Brightness = instance.Brightness,
+                Color = instance.Color,
+                Enabled = instance.Enabled,
+                Range = instance.Range,
+                Shadows = instance.Shadows,
+                Angle = instance.Angle,
+                Face = tostring(instance.Face)
+            }
+        elseif instance:IsA("SurfaceLight") then
+            properties = {
+                Brightness = instance.Brightness,
+                Color = instance.Color,
+                Enabled = instance.Enabled,
+                Range = instance.Range,
+                Shadows = instance.Shadows,
+                Angle = instance.Angle
+            }
+        end
+
+        for propName, propValue in pairs(properties) do
+            local propType = typeof(propValue)
+            local serializer = PropertySerializers[propType]
+            if serializer and propValue ~= nil then
+                table.insert(output, serializer(propName, propValue))
+            end
+        end
+
+        table.insert(output, "</Properties>")
+    end
+
+    for _, child in ipairs(instance:GetChildren()) do
+        processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+    end
+
+    table.insert(output, "</Item>")
+    return processed
+end
+local function SaveInstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
+    local output = {XmlHeader}
+    local totalInstances = 0
+    for _, instance in ipairs(game:GetChildren()) do
+        totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
+    end
+    if saveNilInstances then
+        local nilInstances = getnilinstances() or {}
+        totalInstances = totalInstances + #nilInstances
+    end
+
+    local processedInstances = 0
+    local function statusCallback(processed, total, message)
+        if total and total > 0 then
+            local percentage = (processed / total) * 100
+            print(string.format("[%.2f%%] %s", percentage, message))
+        else
+            print(string.format("[N/A] %s", message))
+        end
+    end
+
+    statusCallback(0, totalInstances, "Starting serialization...")
+
+    for _, instance in ipairs(game:GetChildren()) do
+        if instance == Players then
+            local ref = GetRef(instance)
+            statusCallback(processedInstances, totalInstances, "Processing Players service")
+            table.insert(output, string.format('<Item class="Players" referent="%s">', ref))
+            table.insert(output, "<Properties>")
+            table.insert(output, PropertySerializers.string("Name", instance.Name))
+            table.insert(output, "</Properties>")
+            if Players.LocalPlayer then
+                processedInstances = SerializeInstance(Players.LocalPlayer, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+            end
+            table.insert(output, "</Item>")
+        else
+            processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+        end
+    end
+
+    if saveNilInstances then
+        statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
+        local ref = GetRef(Workspace)
+        table.insert(output, string.format('<Item class="Workspace" referent="%s">', ref))
+        table.insert(output, "<Properties>")
+        table.insert(output, PropertySerializers.string("Name", "Workspace"))
+        table.insert(output, "</Properties>")
+        ref = GetRef("NilInstancesFolder")
+        table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
+        table.insert(output, string.format('<string name="Name">Nil Instances</string>'))
+        local nilInstances = getnilinstances() or {}
+        for _, nilInstance in ipairs(nilInstances) do
+            statusCallback(processedInstances, totalInstances, "Processing nil instance: " .. (nilInstance:GetFullName() or "Unnamed Nil"))
+            processedInstances = processedInstances + 1
+            ref = GetRef(nilInstance)
+            table.insert(output, string.format('<Item class="%s" referent="%s">', nilInstance.ClassName or "Unknown", ref))
+            table.insert(output, "<Properties>")
+            table.insert(output, PropertySerializers.string("Name", nilInstance.Name or "Unnamed"))
+            table.insert(output, "</Properties>")
+            table.insert(output, "</Item>")
+        end
+        table.insert(output, "</Item>")
+        table.insert(output, "</Item>")
+    end
+
+    table.insert(output, XmlFooter)
+    statusCallback(processedInstances, totalInstances, "Serialization complete, writing file...")
+
+    local xml = table.concat(output, "\n")
+    local fileName = string.format("%d.rbxlx", game.PlaceId)
+
+    local success, errorMsg = pcall(Writefile, fileName, xml)
+    if success then
+        statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
+        print(string.format("✅ Saved instance as %s", fileName))
+    else
+        statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
+        warn(string.format("❌ Failed to save %s: %s", fileName, errorMsg))
+    end
+end
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
-createMapSetting(SaveMapSettingFrame.ScriptCache, "ScriptCache", SaveMapSettings.ScriptCache)
+createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacters", SaveMapSettings.AvoidPlayerCharacters)
+createMapSetting(SaveMapSettingFrame.SaveNilInstances, "SaveNilInstances", SaveMapSettings.SaveNilInstances)
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
 
 Connect(SaveMapButton.Activated, function()
-	saveinstance({noscripts = not SaveMapSettings.SaveScripts, scriptcache = SaveMapSettings.ScriptCache, mode = "optimized"})
+	saveinstance(SaveMapSettings.SaveScripts, SaveMapSettings.AvoidPlayerCharacters, SaveMapSettings.SaveNilInstances)
 end)
 
 task.wait(0)
