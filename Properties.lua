@@ -71,6 +71,17 @@ local function splitStringIntoChunks(jsonStr)
 	return t
 end
 
+local function TenebraCacheAssets()
+local Assets = {"Loading.png", "Finished.png"}
+if not isfolder("DEXV5") then makefolder("DEXV5") end
+if not isfolder("DEXV5\\Assets") then makefolder("DEXV5\\Assets") end
+for i,v in pairs(Assets) do
+task.spawn(function()
+    writefile("DEXV5\\Assets\\" .. v, game:HttpGet("https://raw.githubusercontent.com/Cesare0328/Tenebra/main/" .. v, true))
+end)
+end
+end
+
 local apiChunks = splitStringIntoChunks(getCurrentApiJson())
 
 local function getRbxApi()
@@ -2183,6 +2194,21 @@ Create(scrollBarH.GUI,{
 })
 
 do
+	if not isfolder("DEXV5") then
+    	makefolder("DEXV5")
+	end
+	if not isfolder("DEXV5\\Assets") then
+    	makefolder("DEXV5\\Assets")
+	end
+	if not isfolder("DEXV5\\Scripts") then
+    	makefolder("DEXV5\\Scripts")
+	end
+	if not isfolder("DEXV5\\SaveInstances") then
+    	makefolder("DEXV5\\SaveInstances")
+	end
+	task.spawn(function()
+    	TenebraCacheAssets()
+	end)
 	local listEntries,nameConnLookup = {},{}
 
 	function scrollBar.UpdateCallback(self)
