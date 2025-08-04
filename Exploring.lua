@@ -901,7 +901,6 @@ if NilStorageEnabled then
 		Parent = NilStorage
 	})
 	for _, v in next, getnilinstances() do
-		if (not v:IsA("Attachment") and #v:GetChildren() == 0) then
 		local Cloned
 		v.Archivable = true
 		pcall(function()
@@ -910,7 +909,6 @@ if NilStorageEnabled then
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
 		end)
-		end
 	end
 end
 
@@ -1551,7 +1549,6 @@ function CreateCaution(title,msg)
 	Connect(MainWindow.Ok.MouseButton1Up, function()
 		newCaution.Visible = false
 	end)
-	return MainWindow
 end
 
 function CreateTableCaution(title,msg)
@@ -2277,7 +2274,7 @@ function rightClickMenu(sObj)
     		ClearAllChildren(sObj)
     		if sObj == NilStorageMain then
         		for i, v in ipairs(getnilinstances()) do
-            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and not v:IsA("Attachment") then
+            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and (not v:IsA("Attachment") and #v:GetChildren() == 0) then
                 		v.Archivable = true
 						pcall(function()
                     		local Cloned = Clone(v)
