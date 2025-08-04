@@ -1507,6 +1507,9 @@ do
 
 	SetSelection_Bindable.OnInvoke = function(...)
 		Selection:Set(...)
+		local TargetIndex = findObjectIndex(Selection:Get()[1])
+        local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        scrollBar:ScrollTo(ScrollIndex)
 	end
 
 	GetSelection_Bindable.OnInvoke = function()
