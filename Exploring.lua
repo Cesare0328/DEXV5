@@ -53,6 +53,7 @@ end)()
 local Bindables = WaitForChild(script.Parent.Parent, "Bindables", 300)
 local GetSpecials_Bindable = WaitForChild(Bindables, "GetSpecials", 300)
 local GetSetting_Bindable = WaitForChild(Bindables, "GetSetting", 300)
+local SetSetting_Bindable = WaitForChild(Bindables, "SetSetting", 300)
 local GetOption_Bindable = WaitForChild(Bindables, "GetOption", 300)
 local GetAwaiting_Bindable = WaitForChild(Bindables, "GetAwaiting", 300)
 local GetSelection_Bindable = WaitForChild(Bindables, "GetSelection", 300)
@@ -75,6 +76,14 @@ local Mouse = LocalPlayer:GetMouse()
 local Option = {
 	Modifiable = true, -- can modify object parents in the hierarchy
 	Selectable = true -- can select objects
+}
+local SpecialSettingPaths = {
+	["BBoxes"]   = {"Rendering", "ShowBoundingBoxes"},
+	["MRegions"] = {"Physics",   "AreRegionsShown"},
+	["Dcmptions"] = {"Physics",  "ShowDecompositionGeometry"},
+	["SNodes"]   = {"Physics",   "IsTreeShown"},
+	["SMechs"]   = {"Physics",   "AreMechanismsShown"},
+	["AAnims"]   = {"Network",   "ShowActiveAnimationAsset"}
 }
 local GUI_SIZE = 16 -- general size of GUI objects, in pixels
 local ENTRY_PADDING, ENTRY_MARGIN = 1, 1 -- padding between items within each entry and padding between each entry
@@ -104,6 +113,20 @@ end
 
 GetPrint_Bindable.OnInvoke = function() 
 	return print 
+end
+
+SetSetting_Bindable.OnInvoke = function(...)
+	local args = {...}
+	if SpecialSettingPaths[args[1]] then
+		local path = SpecialSettingPaths[args[1]]
+		settings()[path[1]][path[2]] = args[2]
+	end
+end
+
+game.OnClose = function()
+for _, v in pairs(SpecialSettingPaths) do
+	settings()[v[1]][v[2]] = false --Roblox saves them per account
+end
 end
 
 local ENTRY_SIZE = GUI_SIZE + ENTRY_PADDING * 2
