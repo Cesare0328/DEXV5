@@ -444,7 +444,9 @@ end
 -- < Source > --
 local Specials = {
 	checkrbxlocked = function(p1)
+		warn(p1:GetFullName())
 		if not p1.Parent then p1 = NilInstances[p1] end
+		warn(p1:GetFullName())
     	local success, err = pcall(function()
         	p1.Parent = p1
     	end)
