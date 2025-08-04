@@ -71,8 +71,6 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
-local NilInstances = {}
-local OriginalToClone = {}
 local Mouse = LocalPlayer:GetMouse()
 local Option = {
 	Modifiable = true, -- can modify object parents in the hierarchy
@@ -884,8 +882,7 @@ if NilStorageEnabled then
 		v.Archivable = true
 		pcall(function()
 			Cloned = Clone(v)
-		    NilInstances[v] = Cloned
-			OriginalToClone[Cloned] = v
+		    NilInstances[Cloned] = v
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
 		end)
@@ -2243,12 +2240,11 @@ function rightClickMenu(sObj)
     		ClearAllChildren(sObj)
     		if sObj == NilStorageMain then
         		for i, v in ipairs(getnilinstances()) do
-            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and not OriginalToClone[v] then
+            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain then
                 		v.Archivable = true
 						pcall(function()
                     		local Cloned = Clone(v)
                     		NilInstances[Cloned] = v
-							OriginalToClone[v] = Cloned
                     		Cloned.Parent = NilStorageMain
                 		end)
             		end
