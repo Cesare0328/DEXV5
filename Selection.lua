@@ -153,7 +153,7 @@ end
 local SaveMapSettings = {
 	SaveScripts = true,
 	AvoidPlayerCharacters = true,
-	SaveNilInstances = false,
+	SaveNilInstances = true,
 	CloseRobloxAfterSave = true
 }
 
