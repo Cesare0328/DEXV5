@@ -523,7 +523,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 end
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
 	local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Parent = CoreGui
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Parent = ScreenGui
@@ -531,18 +531,18 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     TitleLabel.Name = "Title"
     TitleLabel.Font = Enum.Font.SourceSans
     TitleLabel.Text = "Starting serialization..."
-    TitleLabel.Position = UDim2.new(1, -220, 0, 5)
+    TitleLabel.Position = UDim2.new(1, -220, 0, -45)
     TitleLabel.Size = UDim2.new(0, 180, 0, 30)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.TextSize = 16
     TitleLabel.FontFace.Weight = Enum.FontWeight.Bold
-	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	TitleLabel.TextXAlignment = Enum.TextXAlignment.Right
 
     local Loading = Instance.new("ImageLabel")
     Loading.Parent = ScreenGui
     Loading.Visible = true
-    Loading.Position = UDim2.new(1, -30, 0, 5)
+    Loading.Position = UDim2.new(1, -30, 0, -45)
     Loading.Size = UDim2.new(0, 30, 0, 30)
     Loading.BackgroundTransparency = 1
     Loading.ImageColor3 = Color3.fromRGB(255, 255, 255)
