@@ -175,7 +175,7 @@ local function getRbxApi()
 		for _, Property in pairs(gottenprops) do
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
-			local Value_Type = typeof(Value)
+			local Value_Type = type(Value)
 			if not Success then
 				Value = ""
 			end
