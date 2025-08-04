@@ -184,13 +184,13 @@ local function getRbxApi()
 				Tags = PropertyData.Tags
 			end
 			table_insert(Properties, {
-				ValueType = Value_Type,
-				CurrentValue = Value,
-				Name = gottenprops[Property],
-				Binary = Binary[Property] and true,
-				Tags = Tags,
-				Class = ClassName
-			})
+        		ValueType = Value_Type,
+        		CurrentValue = Value,
+        		Name = Property,
+        		Binary = Binary[Property] and true,
+        		Tags = Tags,
+        		Class = ClassName
+    		})
 		end
 		for prop,_ in pairs(Blacklist) do
 			for index, data in pairs(Properties) do
