@@ -444,10 +444,12 @@ end
 -- < Source > --
 local Specials = {
 	checkrbxlocked = function(p1)
+		if not p1.Parent then warn("NO PARENT OBJ") end
     	local success, err = pcall(function()
         	p1.Parent = p1
     	end)
     	if not success and type(err) == "string" and (err:find("locked", 1, true) or err:find("Cannot change", 1, true)) then
+			warn("RBXLOCKED FOR --> " .. p1.Name)
         	return true
     	end
     return false
