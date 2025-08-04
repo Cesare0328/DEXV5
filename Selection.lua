@@ -14,6 +14,7 @@ local HttpService = cloneref(game:GetService("HttpService"))
 local RunService = cloneref(game:GetService("RunService"))
 local CoreGui = cloneref( game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
+local TweenService = cloneref(game:GetService("TweenService"))
 local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
 -- < Class Aliases > --
 local WaitForChild = RunService.WaitForChild
@@ -530,17 +531,18 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     TitleLabel.Name = "Title"
     TitleLabel.Font = Enum.Font.SourceSans
     TitleLabel.Text = "Starting serialization..."
-    TitleLabel.Position = UDim2.new(0.9, -200, 0.05, 0)
+    TitleLabel.Position = UDim2.new(1, -40, 0, 10)
     TitleLabel.Size = UDim2.new(0, 180, 0, 30)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.TextSize = 16
     TitleLabel.FontFace.Weight = Enum.FontWeight.Bold
+	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
     local Loading = Instance.new("ImageLabel")
     Loading.Parent = ScreenGui
     Loading.Visible = true
-    Loading.Position = UDim2.new(0.9, -220, 0.05, 0)
+    Loading.Position = UDim2.new(1, -10, 0, 10)
     Loading.Size = UDim2.new(0, 30, 0, 30)
     Loading.BackgroundTransparency = 1
     Loading.ImageColor3 = Color3.fromRGB(255, 255, 255)
