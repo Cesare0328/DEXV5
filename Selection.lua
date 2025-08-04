@@ -195,6 +195,22 @@ for _,v in ipairs(GetChildren(SlideFrame)) do
 	end)
 end
 
+local function createSettingTitle(p1)
+	local A = Instance.new("TextLabel")
+	A.Name = "SettingLabel"
+	A.Position = UDim2.new(0, 0, 0, #SettingList:GetChildren() * 60)
+	A.Size = UDim2.new(1, 0, 0, 60)
+	A.BackgroundTransparency = 1
+	A.Font = Enum.Font.Arial
+	A.TextSize = 18
+	A.TextColor3 = Color3.new(1, 1, 1)
+	A.Text = p1
+	A.TextXAlignment = Enum.TextXAlignment.Center
+	A.TextYAlignment = Enum.TextYAlignment.Center
+	A.Visible = true
+	A.Parent = SettingList
+end
+
 local function createSetting(p1, p2, p3)
 	local A = Clone(SettingTemplate)
 	A.Position = UDim2_new(0, 0, 0, #GetChildren(SettingList) * 60)
@@ -216,6 +232,7 @@ local function createSetting(p1, p2, p3)
 	C(p3)
 end
 
+createSettingTitle("DEX SETTINGS")
 createSetting("Click part to select", "ClickSelect", Settings.ClickSelect)
 createSetting("Selection Box", "SelBox", Settings.SelBox)
 createSetting("Clear property value on focus", "ClearProps", Settings.ClearProps)
@@ -224,6 +241,7 @@ createSetting("Jump to selected Object after Search Exit", "SkipToAfterSearch", 
 createSetting("Hide unnecessary services (requires restart)", "UseInstanceBlacklist", Settings.UseInstanceBlacklist)
 createSetting("Show true 'Instance' names (requires restart)", "UseRealclassName", Settings.UseRealclassName)
 createSetting("Script Storage includes RobloxLocked scripts", "RSSIncludeRL", Settings.RSSIncludeRL)
+createSettingTitle("ENVIRONMENT SETTINGS")
 
 local function getSelection()
 	local A = GetSelection_Bindable:Invoke()
