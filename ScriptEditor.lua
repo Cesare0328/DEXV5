@@ -1400,7 +1400,7 @@ local function DebugScriptAt(o)
     local tmp = {}
     for n in pairs(f) do tmp[#tmp + 1] = n end
     out[#out + 1] = "FUNCTIONS : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
-    wipe(tmp)
+
     for n, c in pairs(t) do tmp[#tmp + 1] = n .. "[" .. c .. "]" end
     out[#out + 1] = "TABLES : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
 
