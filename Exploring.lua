@@ -901,6 +901,7 @@ if NilStorageEnabled then
 		Parent = NilStorage
 	})
 	for _, v in next, getnilinstances() do
+		if (not v:IsA("Attachment") and #v:GetChildren() == 0) then
 		local Cloned
 		v.Archivable = true
 		pcall(function()
@@ -909,6 +910,7 @@ if NilStorageEnabled then
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
 		end)
+		end
 	end
 end
 
@@ -1549,6 +1551,7 @@ function CreateCaution(title,msg)
 	Connect(MainWindow.Ok.MouseButton1Up, function()
 		newCaution.Visible = false
 	end)
+	return MainWindow
 end
 
 function CreateTableCaution(title,msg)
@@ -2253,7 +2256,16 @@ function rightClickMenu(sObj)
 		elseif option == "View Script" then
 			if Option.Modifiable then
 				for _, Selected in ipairs(Selection:Get()) do
-					OpenScript_Bindable:Fire(Selected)
+					if getscriptbytecode(Selected) and string.len(getscriptbytecode(Selected)) > 250000 then
+						ScriptEditor.Visible = false
+						local obj = CreateCaution("Warning", "This script is big in size, there may be lags, do you still want to continue?")
+						Connect(obj.Ok.MouseButton1Up, function()
+							newCaution.Visible = false
+							OpenScript_Bindable:Fire(Selected)
+						end)
+					else
+						OpenScript_Bindable:Fire(Selected)
+					end
 				end
 			end
 		elseif option == "Save Script" then
