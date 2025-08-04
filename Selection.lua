@@ -199,8 +199,8 @@ end
 local function createSettingTitle(p1)
 	local A = Instance.new("TextLabel")
 	A.Name = "SettingLabel"
-	A.Position = UDim2.new(0, 0, 0, #SettingList:GetChildren() * 60)
-	A.Size = UDim2.new(1, 0, 0, 60)
+	A.Position = UDim2.new(0, 0, 0, #SettingList:GetChildren() * 54)
+	A.Size = UDim2.new(1, 0, 0, 54)
 	A.BackgroundTransparency = 1
 	A.Font = Enum.Font.Arial
 	A.TextSize = 18
