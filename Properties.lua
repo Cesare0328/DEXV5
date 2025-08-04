@@ -443,9 +443,9 @@ end
 local MAP_ID = 418720155
 -- Gui Controls --
 local function Create(ty,data)
-	local obj = typeof(ty) == 'string' and Instance_new(ty) or ty
+	local obj = type(ty) == 'string' and Instance_new(ty) or ty
 	for k, v in next, data do
-		if typeof(k) == 'number' then
+		if type(k) == 'number' then
 			v.Parent = obj
 		else
 			obj[k] = v
@@ -473,7 +473,7 @@ do
 
 		local class = 'Frame'
 
-		if typeof(IconFrame) == 'string' then
+		if type(IconFrame) == 'string' then
 			class = IconFrame
 			IconFrame = nil
 		end
@@ -1237,7 +1237,7 @@ local function GetControl(object, propertyData, readOnly)
 		control = Controls[propertyType](object, propertyData, readOnly)
 	elseif RbxApiPropertyData then
 		local ControlType = Controls[RbxApiPropertyData.ValueType.Name] or Controls.default
-		control = Controltypeof(object, propertyData, readOnly)
+		control = Controls.default(object, propertyData, readOnly)
 	else
 		control = Controls.default(object, propertyData, readOnly)
 	end
@@ -1363,7 +1363,7 @@ local function CreateAttributeRow(object, name, value, isAlternateRow)
 	attributeValueFrame.Position = UDim2_new(.5, 0, 0, 0)
 	attributeValueFrame.Parent = rowFrame
 
-	local control = GetAttributeControl(object, name, value, typeof(value), false)
+	local control = GetAttributeControl(object, name, value, type(value), false)
 	control.Parent = attributeValueFrame
 
 	attributeLabel.MouseEnter:Connect(function()
