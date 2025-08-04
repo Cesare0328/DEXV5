@@ -1586,19 +1586,18 @@ local function showSelectionData(obj)
 					Value = value
 				})
 			end
-			for i,v in next, RbxApi.GetProperties(nextObj, nextObj.ClassName, RbxApi) do
-				local suc, err = pcall(function()
-					if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
-						if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
-							table_insert(propHolder,{
-								propertyData = v, 
-								object = nextObj
-							})
-						end
-					else
-						print("skipped", v.Name, "reason: class mismatch or dupe")
+			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.ClassName, RbxApi)) do
+				print("checking", v.Name, "class", v.Class, "instance", nextObj.ClassName)
+				if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
+					if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
+						table_insert(propHolder,{
+							propertyData = v, 
+							object = nextObj
+						})
 					end
-				end)
+				else
+					print("skipped", v.Name, "reason: class mismatch or dupe")
+				end
 			end
 		end
 	end
