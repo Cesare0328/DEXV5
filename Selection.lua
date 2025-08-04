@@ -199,8 +199,8 @@ end
 local function createSettingTitle(p1)
 	local A = Instance.new("TextLabel")
 	A.Name = "SettingLabel"
-	A.Position = UDim2.new(0, 0, 0, #SettingList:GetChildren() * 54)
-	A.Size = UDim2.new(1, 0, 0, 54)
+	A.Position = UDim2.new(0, 0, 0, #SettingList:GetChildren() * 60)
+	A.Size = UDim2.new(1, 0, 0, 60)
 	A.BackgroundTransparency = 1
 	A.Font = Enum.Font.Arial
 	A.TextSize = 18
@@ -212,9 +212,9 @@ local function createSettingTitle(p1)
 	A.Parent = SettingList
 end
 
-local function createSetting(p1, p2, p3)
+local function createSetting(p1, p2, p3, p4)
 	local A = Clone(SettingTemplate)
-	A.Position = UDim2_new(0, 0, 0, #GetChildren(SettingList) * 60)
+	A.Position = UDim2_new(0, 0, 0, (#SettingList:GetChildren() * (p4 and 20 or 60)))
 	A.SName.Text = p1
 	local B = A.Change
 	local function C(p4)
