@@ -12,8 +12,9 @@ local Instance_new = Instance.new
 -- < Services > --
 local HttpService = cloneref(game:GetService("HttpService"))
 local RunService = cloneref(game:GetService("RunService"))
-local CoreGui =cloneref( game:GetService("CoreGui"))
+local CoreGui = cloneref( game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
+local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
 -- < Class Aliases > --
 local WaitForChild = RunService.WaitForChild
 local FindFirstChild = RunService.FindFirstChild
@@ -520,6 +521,46 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     return processed
 end
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
+	local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Parent = ScreenGui
+    TitleLabel.Visible = true
+    TitleLabel.Name = "Title"
+    TitleLabel.Font = Enum.Font.SourceSans
+    TitleLabel.Text = "Starting serialization..."
+    TitleLabel.Position = UDim2.new(0.9, -200, 0.05, 0)
+    TitleLabel.Size = UDim2.new(0, 180, 0, 30)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 16
+    TitleLabel.FontFace.Weight = Enum.FontWeight.Bold
+
+    local Loading = Instance.new("ImageLabel")
+    Loading.Parent = ScreenGui
+    Loading.Visible = true
+    Loading.Position = UDim2.new(0.9, -220, 0.05, 0)
+    Loading.Size = UDim2.new(0, 30, 0, 30)
+    Loading.BackgroundTransparency = 1
+    Loading.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    Loading.Image = getcustomasset("DEXV5\\Assets\\Loading.png")
+	
+	local function ManageLoadingIcon(Icon)
+        local RotSpeed = 0.4
+        local TweenInformation = TweenInfo.new(RotSpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+        while task.wait() do
+            local Tween = TweenService:Create(Icon, TweenInformation, {Rotation = 360})
+            Tween:Play()
+            Tween.Completed:Wait()
+            Icon.Rotation = 0
+        end
+    end
+
+    task.spawn(function()
+        ManageLoadingIcon(Loading)
+    end)
+
     local output = {XmlHeader}
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
@@ -534,9 +575,9 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     local function statusCallback(processed, total, message)
         if total and total > 0 then
             local percentage = (processed / total) * 100
-            print(string.format("[%.2f%%] %s", percentage, message))
+            TitleLabel.Text = string.format("[%.2f%%] %s", percentage, message)
         else
-            print(string.format("[N/A] %s", message))
+            TitleLabel.Text = string.format("[N/A] %s", message)
         end
     end
 
@@ -588,7 +629,11 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     statusCallback(processedInstances, totalInstances, "Serialization complete, writing file...")
 
     local xml = table.concat(output, "\n")
-    local fileName = string.format("%d.rbxlx", game.PlaceId)
+	local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
+    if ok and info and info.Name then
+        placeName = info.Name:gsub("[%s%p]+", "_")
+    end
+    local fileName = placeName .. ".rbxlx"
 
     local success, errorMsg = pcall(Writefile, fileName, xml)
     if success then
@@ -598,6 +643,10 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
         warn(string.format("❌ Failed to save %s: %s", fileName, errorMsg))
     end
+	Loading.Image = getcustomasset("DEXV5\\Assets\\Finsihed.png")
+	task.delay(2, function()
+        ScreenGui:Destroy()
+    end)
 end
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
 createMapSetting(SaveMapSettingFrame.SaveNilInstances, "SaveNilInstances", SaveMapSettings.SaveNilInstances)
