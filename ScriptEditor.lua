@@ -1372,8 +1372,66 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 })
 
 local function DebugScriptAt(o)
-	return "WIP -Cesare"
+    if typeof(o) ~= "Instance" then return "Need Instance" end
+    local env
+    local c = o.ClassName
+    if c == "LocalScript" or c == "Script" then
+        if not getsenv then return "no getsenv" end
+        env = getsenv(o)
+    elseif c == "ModuleScript" then
+        local ok, m = pcall(require, o)
+        if not ok then return "require failed: " .. tostring(m) end
+        env = m
+    else return "bad class: " .. c end
+    if type(env) ~= "table" then return "env not table" end
+
+    local f, t = {}, {}
+    for k, v in pairs(env) do
+        local n = tostring(k)
+        if type(v) == "function" then f[n] = v
+        elseif type(v) == "table" then
+            local c = 0
+            for _ in pairs(v) do c = c + 1 end
+            t[n] = c
+        end
+    end
+
+    local out = { "SCRIPT PATH : " .. o:GetFullName() }
+    local tmp = {}
+    for n in pairs(f) do tmp[#tmp + 1] = n end
+    out[#out + 1] = "FUNCTIONS : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
+    wipe(tmp)
+    for n, c in pairs(t) do tmp[#tmp + 1] = n .. "[" .. c .. "]" end
+    out[#out + 1] = "TABLES : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
+
+    if next(f) then
+        out[#out + 1] = "\n--FUNCTIONS--"
+        for n, fn in pairs(f) do
+            out[#out + 1] = "\nFUNCTION " .. n .. " :"
+            if getupvalues then
+                local ups = {}
+                for i, _ in pairs(getupvalues(fn) or {}) do
+                    local _, v = pcall(getupvalue, fn, i)
+                    if v ~= nil then ups[#ups + 1] = tostring(v) end
+                end
+                if #ups > 0 then out[#out + 1] = "UPVALUES :\n" .. table.concat(ups, ", ") end
+            end
+            if getconstants then
+                local cons = {}
+                for _, v in pairs(getconstants(fn) or {}) do cons[#cons + 1] = tostring(v) end
+                if #cons > 0 then out[#out + 1] = "CONSTANTS :\n" .. table.concat(cons, ", ") end
+            end
+        end
+    end
+
+    if next(t) then
+        out[#out + 1] = "\n--TABLES--"
+        for n, c in pairs(t) do out[#out + 1] = "TABLE " .. n .. " : " .. c .. " entries" end
+    end
+
+    return table.concat(out, "\n")
 end
+
 
 local function openScript(o)
 	CurrentScript = o
