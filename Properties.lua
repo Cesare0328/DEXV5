@@ -173,11 +173,11 @@ local function getRbxApi()
     		end
 		end
 		for _, Property in pairs(gottenprops) do
-			warn(Property)
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
 			local Value_Type = typeof(Value)
 			if not Success then
+				warn(Property)
 				Value = ""
 			end
 			local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
