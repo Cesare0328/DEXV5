@@ -2451,18 +2451,18 @@ do
 						if Option.Selectable then
     						local list = Selection.List
     						for i = 1,#list do
-								if not checkrbxlocked(list[i]) or (NilInstances[list[i]] and not checkrbxlocked(NilInstances[list[i]])) then
+								if not checkrbxlocked(list[i]) then
         							list[i].Parent = parentObj --here
-        							if NilInstances[list[i]] then
+        							if NilInstances[list[i]] and not checkrbxlocked(NilInstances[list[i]]) then
            								NilInstances[list[i]].Parent = NilInstances[parentObj] or parentObj --here
         							end
 								parentNode.Expanded = true
 								end
     						end
 						else
-							if not checkrbxlocked(object) or (NilInstances[object] and not checkrbxlocked(NilInstances[object])) then
+							if not checkrbxlocked(object) then
     							object.Parent = parentObj
-    							if NilInstances[object] then
+    							if NilInstances[object] and not checkrbxlocked(NilInstances[object]) then
         							NilInstances[object].Parent = NilInstances[parentObj] or parentObj
     							end
 							parentNode.Expanded = true
