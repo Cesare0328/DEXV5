@@ -901,7 +901,6 @@ if NilStorageEnabled then
 		Parent = NilStorage
 	})
 	for _, v in next, getnilinstances() do
-		if (not v:IsA("Attachment") and #v:GetChildren() == 0) then
 		local Cloned
 		v.Archivable = true
 		pcall(function()
@@ -910,7 +909,6 @@ if NilStorageEnabled then
 			Cloned.Disabled = true
 			Cloned.Parent = NilStorageMain
 		end)
-		end
 	end
 end
 
