@@ -523,6 +523,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 end
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
 	local ScreenGui = Instance.new("ScreenGui")
+	local Started = true
     ScreenGui.Parent = CoreGui
 
     local TitleLabel = Instance.new("TextLabel")
@@ -551,7 +552,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 	local function ManageLoadingIcon(Icon)
         local RotSpeed = 0.4
         local TweenInformation = TweenInfo.new(RotSpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-        while task.wait() do
+        while Started do task.wait()
             local Tween = TweenService:Create(Icon, TweenInformation, {Rotation = 360})
             Tween:Play()
             Tween.Completed:Wait()
@@ -643,6 +644,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     else
         statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
     end
+	Started = false
 	Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
 	task.delay(2, function()
         ScreenGui:Destroy()
