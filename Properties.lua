@@ -172,12 +172,12 @@ local function getRbxApi()
         		end
     		end
 		end
+		warn(#Properties)
 		for _, Property in pairs(gottenprops) do
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
 			local Value_Type = typeof(Value)
 			if not Success then
-				warn(Property)
 				Value = ""
 			end
 			local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
@@ -193,6 +193,7 @@ local function getRbxApi()
         		Class = ClassName
     		})
 		end
+		warn(#Properties)
 		for prop,_ in pairs(Blacklist) do
 			for index, data in pairs(Properties) do
 				if data.Name == prop then
@@ -200,7 +201,9 @@ local function getRbxApi()
 				end
 			end
 		end
+		warn(#Properties)
 		sortAlphabetic(Properties, "Name")
+		warn(#Properties)
 		return Properties
 	end
 
