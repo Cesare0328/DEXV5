@@ -173,11 +173,11 @@ local function getRbxApi()
     		end
 		end
 		for _, Property in pairs(gottenprops) do
+			warn(Property)
 			local Tags = {}
 			local Success, Value = pcall(gethiddenproperty, classInstance, Property)
 			local Value_Type = typeof(Value)
 			if not Success then
-				warn("gethiddenproperty failed for", Property)
 				Value = ""
 			end
 			local PropertyData = RbxApi.Classes[classInstance.ClassName][Property]
@@ -192,8 +192,6 @@ local function getRbxApi()
         		Tags = Tags,
         		Class = ClassName
     		})
-			local last = Properties[#Properties]
-    		print("inserted", last.Name, "at index", #Properties)
 		end
 		for prop,_ in pairs(Blacklist) do
 			for index, data in pairs(Properties) do
