@@ -119,7 +119,7 @@ SetSetting_Bindable.OnInvoke = function(...)
 	local args = {...}
 	if SpecialSettingPaths[args[1]] then
 		local path = SpecialSettingPaths[args[1]]
-		settings()[path[1]][path[2]] = args[2]
+		settings()[path[1]][path[2]] = not args[2]
 	end
 end
 
