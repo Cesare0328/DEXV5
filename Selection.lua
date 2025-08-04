@@ -600,8 +600,8 @@ local function SaveInstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 end
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
-createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacters", SaveMapSettings.AvoidPlayerCharacters)
 createMapSetting(SaveMapSettingFrame.SaveNilInstances, "SaveNilInstances", SaveMapSettings.SaveNilInstances)
+createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacters", SaveMapSettings.AvoidPlayerCharacters)
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
 
 Connect(SaveMapButton.Activated, function()
