@@ -1,349 +1,480 @@
 -- < Fix for module threads not being supported since synapse x > --
-local script = getgenv().Dex:WaitForChild("Selection")
--- < Aliases > --
-local table_insert = table.insert
-local string_format = string.format
-local string_sub = string.sub
-local string_split = string.split
-local os_date = os.date
-local UDim2_new = UDim2.new
-local Color3_new = Color3.new
-local Instance_new = Instance.new
+local script = getgenv().Dex:WaitForChild("Specials")
+-- < Override getnilinstances to not rely on table > --
+do local o=getgenv().getnilinstances;getgenv().getnilinstances=function()return setmetatable(o(),{__index=function(t,k)for _,v in pairs(t)do if v and v.Name==k then return v end end end})end end
 -- < Services > --
 local HttpService = cloneref(game:GetService("HttpService"))
-local RunService = cloneref(game:GetService("RunService"))
-local CoreGui =cloneref( game:GetService("CoreGui"))
-local Players = cloneref(game:GetService("Players"))
--- < Class Aliases > --
-local WaitForChild = RunService.WaitForChild
-local FindFirstChild = RunService.FindFirstChild
-local GetChildren = RunService.GetChildren
-local Clone = RunService.Clone
-local Destroy = RunService.Destroy
+-- < Aliases > --
+local bit32_band = bit32.band
+local bit32_rshift = bit32.rshift
+local bit32_lshift = bit32.lshift
+local math_random = math.random
+local math_floor = math.floor
+local string_format = string.format
+local string_sub = string.sub
+local string_find = string.find
+local string_split = string.split
+local table_insert = table.insert
+local isexecutorfunction = isvolcanofunction or iselectronfunction
+--
+local WaitForChild = HttpService.WaitForChild
 local JSONDecode = HttpService.JSONDecode
-local JSONEncode = HttpService.JSONEncode
-local Wait, Connect = (function()
-	local A = RunService.Changed
-	return A.Wait, A.Connect
-end)()
-local TweenSize, TweenPosition = (function()
-	local A = Instance_new("Frame")
-	return A.TweenSize, A.TweenPosition
-end)()
 -- < Upvalues > --
-local Heartbeat = RunService.Heartbeat
-local SelectionBoxes = {}
-local Gui = script.Parent
-local SelectionBox = WaitForChild(script, "Box", 300)
-local IntroFrame = WaitForChild(Gui, "IntroFrame")
-local SideMenu = WaitForChild(Gui, "SideMenu")
-local OpenToggleButton = WaitForChild(Gui, "Toggle")
-local CloseToggleButton = WaitForChild(SideMenu, "Toggle")
-local OpenScriptEditorButton = WaitForChild(SideMenu, "OpenScriptEditor")
-local ScriptEditor = WaitForChild(Gui, "ScriptEditor")
-local SlideOut = WaitForChild(SideMenu, "SlideOut")
-local SlideFrame = WaitForChild(SlideOut, "SlideFrame")
-local Slant = WaitForChild(SideMenu, "Slant")
-local ExplorerButton = WaitForChild(SlideFrame, "Explorer")
-local SettingsButton = WaitForChild(SlideFrame, "Settings")
-local ExplorerPanel = WaitForChild(Gui, "ExplorerPanel")
-local PropertiesFrame = WaitForChild(Gui, "PropertiesFrame")
-local SaveMapWindow = WaitForChild(Gui, "SaveMapWindow")
-local RemoteDebugWindow = WaitForChild(Gui, "RemoteDebugWindow")
-local SettingsPanel = WaitForChild(Gui, "SettingsPanel")
-local AboutPanel = WaitForChild(Gui, "About")
-local SettingHeader = WaitForChild(SettingsPanel, "Header")
-local SettingTemplate = WaitForChild(SettingsPanel, "SettingTemplate")
-local SettingList = WaitForChild(SettingsPanel, "SettingList")
-local SaveMapSettingFrame = WaitForChild(SaveMapWindow, "MapSettings")
-local SaveMapButton = WaitForChild(SaveMapWindow, "Save")
-local Bindables = WaitForChild(script.Parent, "Bindables", 300)
-local SelectionChanged_Bindable = WaitForChild(Bindables, "SelectionChanged", 300)
-local GetSetting_Bindable = WaitForChild(Bindables, "GetSetting", 300)
-local GetSelection_Bindable = WaitForChild(Bindables, "GetSelection", 300)
-local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
-local Player = Players.LocalPlayer
-local Mouse = Player:GetMouse()
-local CurrentWindow = "Nothing c:"
-local Windows = {
-	Explorer = {
-		ExplorerPanel,
-		PropertiesFrame
-	},
-	Settings = {SettingsPanel},
-	SaveMap = {SaveMapWindow},
-	Remotes = {RemoteDebugWindow},
-	About = {AboutPanel}
+local Dex = script.Parent
+local newline = tostring("\n")
+local InitScript = rawget(getfenv(gethiddenprop), "script")
+-- < Bindables > --
+local Bindables = WaitForChild(Dex, "Bindables", 300)
+local GetSpecials_Bindable = WaitForChild(Bindables, "GetSpecials", 300)
+-- < Libraries > --
+local Api = {
+	Dump = JSONDecode(HttpService, game:HttpGet("https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/API-DUMP.JSON"))
 }
--- < Custom Aliases > --
-local wait = task.wait
--- < Source > --
-local function BeforeLoad()
-	local A, B = pcall(readfile, "dexv5_settings.json")
-	local C = A and JSONDecode(HttpService, B) or {}
-    local D = "UUID : " .. string.gsub('xxxx-xxxx-xxxx-xxxx', '[x]', function() return string.format('%X', math.random(0, 15)) end) .. "\nVERSION : " .. settings()["Diagnostics"].RobloxVersion
-	WaitForChild(IntroFrame, "UUID", 10).Text = D
-	WaitForChild(AboutPanel, "UUID", 10).Text = D
-	if C.Save then
-		local E = C.Save
-		WaitForChild(SettingHeader, "TextLabel", 10).Text = string_format("Settings | Last Save - %s/%s/%s (%s:%s:%s.%s)", E.Day, E.Month, string_sub(E.Year, #E.Year - 1, #E.Year), E.Hours, E.Minutes, E.Seconds, E.Milliseconds)
-	end
-end
 
-BeforeLoad()
+Api.Dump.Properties = {}
 
-local function switchWindows(p1, p2)
-	if CurrentWindow == p1 and not p2 then return end
-	local A = 0
-	for B, C in next, Windows do
-		A = 0
-		if B ~= p1 then
-			for D, E in next, C do 
-				TweenPosition(E, UDim2_new(1, 30, A * .5, A * 36), "Out", "Quad", .5, true)
-				A += 1
-			end
-		end
-	end
-	A = 0
-	if Windows[p1] then
-		for F, G in next, Windows[p1] do 
-			TweenPosition(G, UDim2_new(1, -300, A * .5, A * 36), "Out", "Quad", .5, true) 
-			A += 1
-		end
-	end
-	if p1 ~= "Nothing c:" then
-		CurrentWindow = p1
-		for H, I in ipairs(GetChildren(SlideFrame)) do
-			I.BackgroundTransparency = 1
-			I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
-		end
-		local J = FindFirstChild(SlideFrame, p1)
-		if J then
-			J.BackgroundTransparency = 1
-			J.Icon.ImageColor3 = Color3_new(1,1,1)
+for _, Class in next, Api.Dump.Classes do
+	local A = Class.Members
+	Api.Dump.Properties[Class.Name] = {}
+	for _, Member in next, A do
+		if Member.MemberType == "Property" then
+			Api.Dump.Properties[Class.Name][Member.Name] = Member.ValueType.Name
 		end
 	end
 end
 
-local function toggleDex(p1)
-	TweenPosition(SideMenu, p1 and UDim2_new(1, -330, 0, 0) or UDim2_new(1, 0, 0, 0), "Out", "Quad", .5, true)
-	TweenPosition(OpenToggleButton, p1 and UDim2_new(1, 0, 0, 0) or UDim2_new(1, -40, 0, 0), "Out", "Quad", .5, true)
-	switchWindows(p1 and CurrentWindow or "Nothing c:", p1 and true or nil)
-end
-
-local SaveMapSettings = {
-	SaveScripts = true,
-	ScriptCache = true,
-	CloseRobloxAfterSave = true
+local Xml = {
+	start = '<roblox xmlns:xmime="https://www.w3.org/2005/05/xmlmime" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.roblox.com/roblox.xsd" version="4">'..newline..'<Meta name="ExplicitAutoJoints">true</Meta>'..newline..'<External>null</External>'..newline..'<External>nil</External>',
+	finish = '</roblox>'
 }
 
-local Settings = {
-	ClickSelect = false,
-	SelBox = false,
-	ClearProps = false,
-	SelectUngrouped = true,
-	SkipToAfterSearch = true,
-	UseInstanceBlacklist = true,
-	UseRealclassName = false,
-	RSSIncludeRL = false
-}
+local Property = {}
 
-pcall(function()
-	local A, B = pcall(readfile, "dexv5_settings.json")
-	if A then
-		local C = JSONDecode(HttpService, B).Settings
-		for D, E in next, C do
-			if Settings[D] then
-				Settings[D] = E
-			end
-		end
-	end
-end)
-
-function SaveSettings()
-	local A = {}
-	local B = os_date("*t")
-	local C, D, E, F, G = B.day, B.month, B.hour, B.min, B.sec
-	A.Settings = Settings
-	A.Save = {
-		Day = ((C < 10) and "0"..tostring(C) or tostring(C)),
-		Month = ((D < 10) and "0"..tostring(D) or tostring(D)),
-		Year = tostring(B.year),
-		Hours = ((E < 10) and "0"..tostring(E) or tostring(E)),
-		Minutes = ((F < 10) and "0"..tostring(F) or tostring(F)),
-		Seconds = ((G < 10) and "0"..tostring(G) or tostring(G)),
-		Milliseconds = string_split(tick(),".")[2] or 0
+function Property:convert(p1, p2, p3, p4)
+	local p4_gsub = {
+		double = "number",
+		int = "number",
+		int32 = "number",
+		int64 = "number",
+		float = "number",
+		float32 = "number",
+		float64 = "number",
+		bool = "boolean",
+		CreatorType = "EnumItem",
+		MeshType = "EnumItem",
+		CameraType = "EnumItem",
+		RenderFidelity = "EnumItem",
+		Color3uint8 = "Fault",
+		SystemAddress = "Fault",
+		Camera = "Ref",
+		BasePart = "Ref",
+		Workspace = "Ref",
+		Instance = "Ref",
+		Player = "Ref",
+		GuiObject = "Ref",
+		LocalizationTable = "Ref"
 	}
-	pcall(writefile, "dexv5_settings.json", JSONEncode(HttpService, A))
-end
-
-Connect(OpenToggleButton.MouseButton1Up, function()
-	toggleDex(true)
-end)
-
-Connect(OpenScriptEditorButton.MouseButton1Up, function()
-	ScriptEditor.Visible = OpenScriptEditorButton.Active 
-end)
-
-Connect(CloseToggleButton.MouseButton1Up, function()
-	toggleDex(not CloseToggleButton.Active)
-end)
-
-for _,v in ipairs(GetChildren(SlideFrame)) do
-	Connect(v.Activated, function()
-		switchWindows(tostring(v))
-	end)
-end
-
-local function createSettingTitle(p1)
-	local A = Instance.new("TextLabel")
-	A.Name = "SettingLabel"
-	A.Position = UDim2.new(0, 0, 0, #SettingList:GetChildren() * 60)
-	A.Size = UDim2.new(1, 0, 0, 60)
-	A.BackgroundTransparency = 1
-	A.Font = Enum.Font.Arial
-	A.TextSize = 18
-	A.TextColor3 = Color3.new(1, 1, 1)
-	A.Text = p1
-	A.TextXAlignment = Enum.TextXAlignment.Center
-	A.TextYAlignment = Enum.TextYAlignment.Center
-	A.Visible = true
-	A.Parent = SettingList
-end
-
-local function createSetting(p1, p2, p3)
-	local A = Clone(SettingTemplate)
-	A.Position = UDim2_new(0, 0, 0, #GetChildren(SettingList) * 60)
-	A.SName.Text = p1
-	local B = A.Change
-	local function C(p4)
-		TweenPosition(B.Bar, p4 and UDim2_new(0,32,0,-2) or UDim2_new(0,-2,0,-2), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .25,true)
-		TweenSize(B.OnBar, p4 and UDim2_new(0,40,0,15) or UDim2_new(0,0,0,15), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .25,true)
-		A.Status.Text = p4 and "On" or "Off"
-		Settings[p2] = p4 and true or false
-	end	
-	Connect(B.Activated, function()
-		C(not Settings[p2])
-		task.wait(1 / 12)
-		pcall(SaveSettings)
-	end)
-	A.Visible = true
-	A.Parent = SettingList
-	C(p3)
-end
-
-createSettingTitle("DEX SETTINGS")
-createSetting("Click part to select", "ClickSelect", Settings.ClickSelect)
-createSetting("Selection Box", "SelBox", Settings.SelBox)
-createSetting("Clear property value on focus", "ClearProps", Settings.ClearProps)
-createSetting("Select ungrouped models" , "SelectUngrouped", Settings.SelectUngrouped)
-createSetting("Jump to selected Object after Search Exit", "SkipToAfterSearch", Settings.SkipToAfterSearch)
-createSetting("Hide unnecessary services (requires restart)", "UseInstanceBlacklist", Settings.UseInstanceBlacklist)
-createSetting("Show true 'Instance' names (requires restart)", "UseRealclassName", Settings.UseRealclassName)
-createSetting("Script Storage includes RobloxLocked scripts", "RSSIncludeRL", Settings.RSSIncludeRL)
-createSettingTitle("ENVIRONMENT SETTINGS")
-
-local function getSelection()
-	local A = GetSelection_Bindable:Invoke()
-	return (A and #A > 0) and A or {}
-end
-
-Connect(Mouse.Button1Down, function()
-	if CurrentWindow == "Explorer" and Settings.ClickSelect then
-		pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {Mouse.Target})
-	end
-end)
-
-Connect(SelectionChanged_Bindable.Event, function()
-	local A = getSelection()
-	local function CleanSelectionBoxes()
-		for _, C in ipairs(SelectionBoxes) do
-			Destroy(C)
-		end
-	end
-	local function CreateSelectionBoxes()
-		for D, E in next, A do
-			if typeof(E) == "Instance" then
-				local F = Clone(SelectionBox)
-				F.Adornee = E
-				F.Parent = CoreGui
-				table_insert(SelectionBoxes, F)
+	local Convert_Types = {
+		number = function()
+			local p3 = p3[1]
+			local isInteger = p3 % 1 == 0
+			local ConversionType = isInteger and "int" or "float"
+			local Conversion_Format = [[<%s name="%s">%s</%s>]]
+			return string_format(Conversion_Format, ConversionType, p2, p3, ConversionType)
+		end,
+		NumberRange = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<NumberRange name="%s">%s</NumberRange>]]
+			return string_format(Conversion_Format, p2, p2.Min.." "..p2.Max)
+		end,
+		NumberSequence = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<NumberSequence name="%s">%s</NumberSequence>]]
+			local ConvertedArray = {}
+			for _, Keypoints in next, p3.Keypoints do
+				table_insert(ConvertedArray, unpack(Keypoints))
 			end
+			return string_format(Conversion_Format, p2, tostring(unpack(ConvertedArray)))
+		end,
+		ColorSequence = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<ColorSequence name="%s">%s</ColorSequence>]]
+			local ConvertedArray = {}
+			for _, Keypoints in next, p3.Keypoints do
+				table_insert(ConvertedArray, unpack(Keypoints))
+			end
+			return string_format(Conversion_Format, p2, tostring(unpack(ConvertedArray)))
+		end,
+		string = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<string name="%s">%s</string>]]
+			return string_format(Conversion_Format, p2, p3)
+		end,
+		BinaryString = function()
+			local p3 = p3[1]
+			local Conversion_Format = '<BinaryString name="%s"><![CDATA[%s]]></BinaryString>'
+			local Raw_Conversion_Format = '<BinaryString name="%s">%s</BinaryString>'
+			local isNilValue = tostring(p3) == "nil"
+			return string_format(isNilValue and Raw_Conversion_Format or Conversion_Format, p2, isNilValue and "" or p3)
+		end,
+		ProtectedString = function()
+			local p3 = p3[1]
+			local Conversion_Format = '<ProtectedString name="%s"><![CDATA[%s]]></ProtectedString>'
+			return string_format(Conversion_Format, p2, p3)
+		end,
+		Content = function()
+			local p3 = p3[1]
+			local Conversion_Format = p4 ~= nil and [[<Content name="%s"><url>%s</url></Content>]] or [[<Content name="%s"><null></null></Content>]]
+			return string_format(Conversion_Format, p2, p3)
+		end,
+		Ray = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<Ray name="%s">
+                <origin>
+                <X>%s</X>
+                <Y>%s</Y>
+                <Z>%s</Z>
+                </origin>
+                <direction>
+                <X>%s</X>
+                <Y>%s</Y>
+                <Z>%s</Z>
+                </direction>
+                </Ray>]]
+			return string_format(Conversion_Format, p2, p3.Origin.X, p3.Origin.Y, p3.Origin.Z, p3.Direction.X, p3.Direction.Y, p3.Direction.Z)
+		end,
+		boolean = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<bool name="%s">%s</bool>]]
+			return string_format(Conversion_Format, p2, tostring(p3))
+		end,
+		EnumItem = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<token name="%s">%s</token>]]
+			return string_format(Conversion_Format, p2, p3.Value)
+		end,
+		CFrame = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<CoordinateFrame name="%s">
+                <X>%s</X>
+                <Y>%s</Y>
+                <Z>%s</Z>
+                <R00>%s</R00>
+                <R01>%s</R01>
+                <R02>%s</R02>
+                <R10>%s</R10>
+                <R11>%s</R11>
+                <R12>%s</R12>
+                <R20>%s</R20>
+                <R21>%s</R21>
+                <R22>%s</R22>
+                </CoordinateFrame>]]
+			return string_format(Conversion_Format, p2, p3.X, p3.Y, p3.Z, p3.RightVector.X, p3.RightVector.Y, p3.RightVector.Z, p3.UpVector.X, p3.UpVector.Y, p3.UpVector.Z, p3.LookVector.X, p3.LookVector.Y, p3.LookVector.Z)
+		end,
+		Vector3 = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<Vector3 name="%s">
+                <X>%s</X>
+                <Y>%s</Y>
+                <Z>%s</Z>
+                </Vector3>]]
+			return string_format(Conversion_Format, p2, p3.X, p3.Y, p3.Z)
+		end,
+		Vector2 = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<Vector2 name="%s">
+                <X>%s</X>
+                <Y>%s</Y>
+                </Vector2>]]
+			return string_format(Conversion_Format, p2, p3.X, p3.Y)
+		end,
+		UDim = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<UDim name="%s">
+                <S>%s</S>
+                <O>%s</O>
+                </UDim>]]
+			return string_format(Conversion_Format, p2, p3.Scale, p3.Offset)
+		end,
+		UDim2 = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<UDim2 name="%s">
+                <XS>%s</XS>
+                <XO>%s</XO>
+                <YS>%s</YS>
+                <YO>%s</YO>
+                </UDim2>]]
+			return string_format(Conversion_Format, p2, p3.X.Scale, p3.X.Offset, p3.Y.Scale, p3.Y.Offset)
+		end,
+		Rect = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<Rect2D name="%s">
+				<min>
+				<X>%s</X>
+                <Y>%s</Y>
+                </min>
+                <max>
+                <X>%s</X>
+                <Y>%s</Y>
+                </max>
+                </Rect2D>]]
+			return string_format(Conversion_Format, p2, p3.Min.X, p3.Min.Y, p3.Max.X, p3.Max.Y)
+		end,
+		Color3 = function()
+			local p3 = p3[1]
+			local Conversion_Format = [[<Color3 name="%s">
+                <R>%s</R>
+                <G>%s</G>
+                <B>%s</B>
+                </Color3>]]
+			return string_format(Conversion_Format, p2, p3.R, p3.G, p3.B)
+		end,
+		PhysicalProperties = function()
+			local Conversion_Format = [[<PhysicalProperties name="%s">
+                <CustomPhysics>false</CustomPhysics>
+                </PhysicalProperties>]]
+			return string_format(Conversion_Format, p2)
+		end,
+		Axes = function()
+			local Conversion_Format = [[<Axes name="%s">
+                <axes>7</axes>
+                </Axes>]]
+			return string_format(Conversion_Format, p2)
+		end,
+		Ref = function()
+			local Conversion_Format = [[<Ref name="%s">null</Ref>]]
+			return string_format(Conversion_Format, p2)
+		end,
+		Fault = function()
+			return '<!--Property "'..p2..'" was not saved as it might affect inserting in Studio.-->'
+		end,
+		Faces = function()
+			return "<!--We are not saving Faces type properties! This is literally useless, lol.-->"
+		end,
+		Region3int16 = function()
+			return "<!--We are not saving Region3int16 type properties! This is literally useless, lol.-->"
+		end,
+		Vector3int16 = function()
+			return "<!--We are not saving Vector3int16 type properties! This is literally useless, lol.-->"
+		end,
+		Vector2int16 = function()
+			return "<!--We are not saving Vector2int16 type properties! This is literally useless, lol.-->"
+		end,
+		BrickColor = function()
+			return "<!--We are not saving BrickColor type properties! This might hurt Color3 / Color3uint8 properties.-->"
+		end
+	}
+	p4 = p4_gsub[p4] and p4_gsub[p4] or p4
+	if Convert_Types[p4] then
+		return Convert_Types[p4]()
+	else
+		return "<!--Couldn't load Property '"..p2.."' with type '"..p4.."'-->"
+	end
+end
+
+function Property:get(p1, p2, Value)
+	local SpecialProperties = {
+		CustomPhysicalProperties =
+			{
+				function()
+				return PhysicalProperties.new(.7,.3,.5,1,1)
+			end,
+				{},
+				"PhysicalProperties"
+			},
+		Source =
+			{
+				decompile,
+				{
+					p1
+				},
+				"ProtectedString"
+			},
+		ChildData =
+			{
+				readbinarystring,
+				{
+					p1,
+					"ChildData"
+				},
+				"BinaryString"
+			},
+		PhysicsData =
+			{
+				readbinarystring,
+				{
+					p1,
+					"PhysicsData"
+				},
+				"BinaryString"
+			},
+		MeshData =
+			{
+				readbinarystring,
+				{
+					p1,
+					"MeshData"
+				},
+				"BinaryString"
+			},
+		SmoothGrid =
+			{
+				readbinarystring,
+				{
+					p1,
+					"SmoothGrid"
+				},
+				"BinaryString"
+			},
+		PhysicsGrid =
+			{
+				readbinarystring,
+				{
+					p1,
+					"PhysicsGrid"
+				},
+				"BinaryString"
+			},
+		MaterialColors =
+			{
+				readbinarystring,
+				{
+					p1,
+					"MaterialColors"
+				},
+				"BinaryString"
+			},
+		Tags =
+			{
+				readbinarystring,
+				{
+					p1,
+					"Tags"
+				},
+				"BinaryString"
+			},
+		AttributesReplicate =
+			{
+				readbinarystring, 
+				{
+					p1,
+					"AttributesReplicate"
+				},
+				"BinaryString"
+			},
+		AttributesSerialize =
+			{
+				readbinarystring,
+				{
+					p1,
+					"AttributesSerialize"
+				},
+				"BinaryString"
+			},
+		RobloxLocked =
+			{
+				checkrbxlocked,
+				{
+					p1
+				},
+				"boolean"
+			},
+		siz =
+			{
+				gethiddenproperty,
+				{
+					p1,
+					"Size"
+				},
+				"Vector3"
+			},
+		shap =
+			{
+				gethiddenproperty,
+				{
+					p1,
+					"Shape"
+				},
+				"EnumItem"
+			}
+	}
+	local SpecialData = SpecialProperties[p2]
+	if SpecialData then
+		local f = SpecialData[1]
+		if f then
+			local r1, r2 = f(unpack(SpecialData[2]))
+			return self:convert(p1, p2, {r1, r2}, SpecialData[3])
 		end
 	end
-	if Settings.SelBox then
-		CleanSelectionBoxes()
-		CreateSelectionBoxes()
+	local ValueType = "string"
+	if Value ~= nil then
+		ValueType = typeof(Value)
+	elseif Value == nil then
+		ValueType = Api.Dump.Properties[p1.ClassName][p2]
 	end
-end)
-
-function GetSetting_Bindable.OnInvoke(p1)
-	local A = Settings[p1]
-	if A then
-		return A
+	if typeof(ValueType) ~= "string" then
+		ValueType = "string"
+		Value = ""
 	end
+	return self:convert(p1, p2, {Value}, ValueType)
 end
 
-local function createMapSetting(p1, p2, p3)
-	local A = p1.Change
-	local function B(on)
-		TweenPosition(A.Bar, on and UDim2_new(0, 32, 0, -2) or UDim2_new(0, -2, 0, -2), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .25, true)
-		TweenSize(A.OnBar, on and UDim2_new(0, 40, 0, 15) or UDim2_new(0, 0, 0, 15), Enum.EasingDirection.Out,  Enum.EasingStyle.Quart, .25, true)
-		p1.Status.Text = on and "On" or "Off"
-		SaveMapSettings[p2] = on and true or false
-	end	
-	Connect(A.Activated, function()
-		B(not SaveMapSettings[p2])
-	end)
-	p1.Visible = true
-	p1.Parent = SaveMapSettingFrame
-	if p3 then
-		B(true)
+local Class = {}
+
+function Class:new(p1)
+	local Referent = "RBX"
+	for i = 1, 32 do
+		local Random = math_random(36)
+		Referent ..= string_sub("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", Random, Random)
 	end
+	return string_format('<Item class="%s" referent="%s">', p1, Referent), Referent
 end
 
-createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
-createMapSetting(SaveMapSettingFrame.ScriptCache, "ScriptCache", SaveMapSettings.ScriptCache)
-createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
-
-Connect(SaveMapButton.Activated, function()
-	saveinstance({noscripts = not SaveMapSettings.SaveScripts, scriptcache = SaveMapSettings.ScriptCache, mode = "optimized"})
-end)
-
-task.wait(0)
-
-TweenPosition(IntroFrame, UDim2_new(1 ,-301, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-
-task.wait(0.5)
-
-switchWindows("Explorer")
-
-task.wait(1)
-
-SideMenu.Visible = true
-
-for i = 0,1,.1 do
-	IntroFrame.BackgroundTransparency = i
-	IntroFrame.Main.BackgroundTransparency = i
-	IntroFrame.Slant.ImageTransparency = i
-	IntroFrame.Title.TextTransparency = i
-	IntroFrame.Version.TextTransparency = i
-	IntroFrame.Creator.TextTransparency = i
-	IntroFrame.Sad.ImageTransparency = i
-	task.wait(0)
+function Class:properties(p1, p2)
+	local Properties = getproperties(p2)
+	for Prop, Value in next, Properties do
+		p1 ..= Property:get(p2, Prop, Value)..newline
+	end
+	return p1
 end
 
-IntroFrame.Visible = false
+function Class:finish()
+	return '</Item>'
+end
+-- < Source > --
+local Specials = {
+	checkrbxlocked = function(p1)
+		if not p1:IsDescendantOf(game) then p1 = NilInstances[p1] end
+    	local success, err = pcall(function()
+        	p1.Parent = p1
+    	end)
+    	if not success and type(err) == "string" and (err:find("locked", 1, true) or err:find("Cannot change", 1, true)) then
+        	return true
+    	end
+    return false
+	end,
+	fireclickdetector = fireclickdetector,
+	firetouchinterest = firetouchinterest,
+	fireproximityprompt = fireproximityprompt,
+	getpropertylist = getproperties,
+	getinstancelist = getinstances or getinstancelist,
+	writeinstance = function(p1, p2)
+		local A, B = Class:new(p1.ClassName)
+		local C = B.." ("..tostring(p1)..")."..p2
+		local D = Xml.start..newline
+		D ..= A..newline
+		D ..= [[<Properties>]]..newline
+		D = Class:properties(D, p1)
+		D ..= [[</Properties>]]..newline
+		D ..= Class:finish()..newline
+		D ..= [[<SharedStrings>]]..newline
+		D ..= [[</SharedStrings>]]..newline
+		D ..= Xml.finish
+		writefile(C, D)
+		return C
+	end
+}
 
-TweenPosition(SlideFrame, UDim2_new(), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-TweenPosition(OpenScriptEditorButton, UDim2_new(0,0,0,150), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-TweenPosition(CloseToggleButton, UDim2_new(0,0,0,180), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-TweenPosition(Slant, UDim2_new(0,0,0,210), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-
-task.wait(.5)
-
-for i = 1,0,-.1 do
-	OpenScriptEditorButton.Icon.ImageTransparency = i
-	CloseToggleButton.TextTransparency = i
-	task.wait(0)
+function GetSpecials_Bindable.OnInvoke()
+	return Specials
 end
