@@ -448,6 +448,7 @@ local Specials = {
     	local success, err = pcall(function()
         	p1.Parent = p1
     	end)
+		warn(p1.Name)
     	if not success and type(err) == "string" and (err:find("locked", 1, true) or err:find("Cannot change", 1, true)) then
 			warn("RBXLOCKED FOR --> " .. p1.Name)
         	return true
