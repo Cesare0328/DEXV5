@@ -1587,14 +1587,14 @@ local function showSelectionData(obj)
 				})
 			end
 			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.className, RbxApi)) do
-				--if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
-					--if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
+				if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
+					if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
 						table_insert(propHolder,{
 							propertyData = v, 
 							object = nextObj
 						})
-					--end
-				--end
+					end
+				end
 			end
 		end
 	end
