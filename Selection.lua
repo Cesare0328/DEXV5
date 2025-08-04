@@ -214,7 +214,7 @@ end
 
 local function createSetting(p1, p2, p3, p4)
 	local A = Clone(SettingTemplate)
-	A.Position = UDim2_new(0, 0, 0, (#SettingList:GetChildren() * (p4 and 50 or 60)))
+	A.Position = UDim2_new(0, 0, 0, (#SettingList:GetChildren() * (p4 and 0 or 60)))
 	A.SName.Text = p1
 	local B = A.Change
 	local function C(p4)
