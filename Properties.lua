@@ -1587,7 +1587,7 @@ local function showSelectionData(obj)
 				})
 			end
 			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.ClassName, RbxApi)) do
-				print("checking", v.Name, "class", v.Class, "instance", nextObj.ClassName)
+				warn("checking", v.Name, "class", v.Class, "instance", nextObj.ClassName)
 				if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
 					if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
 						table_insert(propHolder,{
@@ -1596,7 +1596,7 @@ local function showSelectionData(obj)
 						})
 					end
 				else
-					print("skipped", v.Name, "reason: class mismatch or dupe")
+					warn("skipped", v.Name, "reason: class mismatch or dupe")
 				end
 			end
 		end
