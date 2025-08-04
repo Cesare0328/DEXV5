@@ -2000,6 +2000,7 @@ function rightClickMenu(sObj)
     if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
 		table_insert(actions, 8, "Save Script")
+		table_insert(actions, 9, "Save Bytecode")
 	end
 
 	currentRightClickMenu = CreateRightClickMenu(actions, "", false, function(option)
@@ -2262,11 +2263,18 @@ function rightClickMenu(sObj)
 			for _, Selected in ipairs(Selection:Get()) do
 				writefile(game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'.lua', decompile(Selected))
 			end
+		elseif option == "Save Bytecode" then
+			if not Option.Modifiable then
+				return
+			end
+			for _, Selected in ipairs(Selection:Get()) do
+				writefile(game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'_bytecode.lua', getscriptbytecode(Selected))
+			end
 		elseif option == 'Refresh Instances' then
     		ClearAllChildren(sObj)
     		if sObj == NilStorageMain then
         		for i, v in ipairs(getnilinstances()) do
-            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain then
+            		if v ~= DexOutput and v ~= DexOutputMain and v ~= RunningScriptsStorage and v ~= RunningScriptsStorageMain and v ~= NilStorage and v ~= NilStorageMain and (not v:IsA("Attachment") and #v:GetChildren() == 0) then
                 		v.Archivable = true
 						pcall(function()
                     		local Cloned = Clone(v)
