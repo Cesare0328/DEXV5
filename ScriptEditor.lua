@@ -1561,11 +1561,12 @@ end)
 
 Connect(SaveScript.Activated, function()
 	if ScriptEditor.Content ~= "" then
-		local fileName = FileName.Text
+		local fileName, pathName = FileName.Text, ""
 		if fileName == "File Name" or FileName == "" then
 			fileName = "LocalScript_" .. random(1, 5000)
 		end
 		fileName ..= ".lua"
+		pathName = "DEXV5\\Scripts\\" .. fileName
 		writefile(fileName, ScriptEditor.Content)
 	end
 end)
