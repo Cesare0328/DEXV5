@@ -637,8 +637,8 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         placeName = info.Name:gsub("[%s%p]+", "_")
     end
     local fileName = placeName .. ".rbxlx"
-
-    local success, errorMsg = pcall(Writefile, fileName, xml)
+    local savepath = "DEXV5\\SaveInstances\\" .. fileName
+    local success, errorMsg = pcall(Writefile, savepath, xml)
     if success then
         statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
     else
