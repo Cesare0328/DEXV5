@@ -130,7 +130,7 @@ local function switchWindows(p1, p2)
 	if Windows[p1] then
 		for F, G in next, Windows[p1] do 
 			local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-			local goal = {Position = UDim2_new(1, -300, A * 0.5, A * 36)}
+			local goal = {Position = UDim2_new(0, 0, A * 0.5, A * 36)}
 			TweenService:Create(G, tweenInfo, goal):Play()
 			A += 1
 		end
