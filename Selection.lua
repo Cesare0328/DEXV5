@@ -461,7 +461,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 BackSurface = safeGet("BackSurface"),
                 LeftSurface = safeGet("LeftSurface"),
                 RightSurface = safeGet("RightSurface"),
-                Shape = safeGet("Shape"),
                 Rotation = safeGet("Rotation")
             }
         elseif instance:IsA("Model") then
