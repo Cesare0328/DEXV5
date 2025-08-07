@@ -113,45 +113,41 @@ BeforeLoad()
 
 local function switchWindows(p1, p2)
     if CurrentWindow == p1 and not p2 then return end
-    local TWEEN_TIME = 0.4
-    local EASING_STYLE = "Sine"
-    local EASING_DIRECTION = "Out"
-    local function tweenElement(element, targetPos, duration, easingStyle, easingDirection)
-        TweenService:Create(
-            element,
-            TweenInfo.new(duration, Enum.EasingStyle[easingStyle], Enum.EasingDirection[easingDirection]),
-            {Position = targetPos}
-        ):Play()
+    
+    local tweenDuration = 0.5
+    local easingStyle = "Out"
+    local easingDirection = "Quad"
+    
+    local function TweenPosition(frame, targetPosition, duration, style, direction)
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle[style], Enum.EasingDirection[direction])
+        local tween = TweenService:Create(frame, tweenInfo, {Position = targetPosition})
+        tween:Play()
     end
-    local activeTweens = {}
-    for windowName, windowElements in pairs(Windows) do
-        if windowName ~= p1 then
-            local index = 0
-            for _, element in pairs(windowElements) do
-                local targetPos = UDim2.new(1, 30, index * 0.5, index * 36)
-                table.insert(activeTweens, tweenElement(element, targetPos, TWEEN_TIME, EASING_STYLE, EASING_DIRECTION))
-                index += 1
+    
+    for B, C in next, Windows do
+        if B ~= p1 then
+            for D, E in next, C do 
+                TweenPosition(E, UDim2.new(1, 30, 0, 0), tweenDuration, easingStyle, easingDirection)
             end
         end
     end
+    
     if Windows[p1] then
-        local index = 0
-        for _, element in pairs(Windows[p1]) do
-            local targetPos = UDim2.new(1, -300, index * 0.5, index * 36)
-            table.insert(activeTweens, tweenElement(element, targetPos, TWEEN_TIME, EASING_STYLE, EASING_DIRECTION))
-            index += 1
+        for F, G in next, Windows[p1] do 
+            TweenPosition(G, UDim2.new(1, -300, 0, 0), tweenDuration, easingStyle, easingDirection) 
         end
     end
+    
     if p1 ~= "Nothing c:" then
         CurrentWindow = p1
-        for _, child in ipairs(SlideFrame:GetChildren()) do
-            child.BackgroundTransparency = 1
-            child.Icon.ImageColor3 = Color3.new(0.6, 0.6, 0.6)
+        for H, I in ipairs(GetChildren(SlideFrame)) do
+            I.BackgroundTransparency = 1
+            I.Icon.ImageColor3 = Color3.new(.6, .6, .6)
         end
-        local selectedTab = SlideFrame:FindFirstChild(p1)
-        if selectedTab then
-            selectedTab.BackgroundTransparency = 1
-            selectedTab.Icon.ImageColor3 = Color3.new(1, 1, 1)
+        local J = FindFirstChild(SlideFrame, p1)
+        if J then
+            J.BackgroundTransparency = 0
+            J.Icon.ImageColor3 = Color3.new(1,1,1)
         end
     end
 end
