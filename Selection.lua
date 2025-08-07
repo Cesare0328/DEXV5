@@ -115,8 +115,8 @@ local function switchWindows(p1, p2)
     if CurrentWindow == p1 and not p2 then return end
     
     local tweenDuration = 0.5
-    local easingStyle = "Out"
-    local easingDirection = "Quad"
+    local easingStyle = "Quad"
+    local easingDirection = "Out"
     
     local function TweenPosition(frame, targetPosition, duration, style, direction)
         local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle[style], Enum.EasingDirection[direction])
