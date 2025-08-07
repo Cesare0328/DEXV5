@@ -112,44 +112,40 @@ end
 BeforeLoad()
 
 local function switchWindows(p1, p2)
-    if CurrentWindow == p1 and not p2 then return end
-    
-    local tweenDuration = 0.5
-    local easingStyle = "Quad"
-    local easingDirection = "Out"
-    
-    local function TweenPosition(frame, targetPosition, duration, style, direction)
-        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle[style], Enum.EasingDirection[direction])
-        local tween = TweenService:Create(frame, tweenInfo, {Position = targetPosition})
-        tween:Play()
-    end
-    
-    for B, C in next, Windows do
-        if B ~= p1 then
-            for D, E in next, C do 
-                TweenPosition(E, UDim2.new(1, 30, 0, 0), tweenDuration, easingStyle, easingDirection)
-            end
-        end
-    end
-    
-    if Windows[p1] then
-        for F, G in next, Windows[p1] do 
-            TweenPosition(G, UDim2.new(1, -300, 0, 0), tweenDuration, easingStyle, easingDirection) 
-        end
-    end
-    
-    if p1 ~= "Nothing c:" then
-        CurrentWindow = p1
-        for H, I in ipairs(GetChildren(SlideFrame)) do
-            I.BackgroundTransparency = 1
-            I.Icon.ImageColor3 = Color3.new(.6, .6, .6)
-        end
-        local J = FindFirstChild(SlideFrame, p1)
-        if J then
-            J.BackgroundTransparency = 0
-            J.Icon.ImageColor3 = Color3.new(1,1,1)
-        end
-    end
+	if CurrentWindow == p1 and not p2 then return end
+	local A = 0
+	for B, C in next, Windows do
+		A = 0
+		if B ~= p1 then
+			for D, E in next, C do 
+				local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+				local goal = {Position = UDim2_new(1, 30, A * 0.5, A * 36)}
+				TweenService:Create(E, tweenInfo, goal):Play()
+				A += 1
+			end
+		end
+	end
+	A = 0
+	if Windows[p1] then
+		for F, G in next, Windows[p1] do 
+			local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			local goal = {Position = UDim2_new(1, -300, A * 0.5, A * 36)}
+			TweenService:Create(G, tweenInfo, goal):Play()
+			A += 1
+		end
+	end
+	if p1 ~= "Nothing c:" then
+		CurrentWindow = p1
+		for H, I in ipairs(GetChildren(SlideFrame)) do
+			I.BackgroundTransparency = 1
+			I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
+		end
+		local J = FindFirstChild(SlideFrame, p1)
+		if J then
+			J.BackgroundTransparency = 1
+			J.Icon.ImageColor3 = Color3_new(1,1,1)
+		end
+	end
 end
 
 local function toggleDex(p1)
