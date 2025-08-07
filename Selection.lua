@@ -392,7 +392,7 @@ local PropertySerializers = {
     Instance = function(name, value)
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
     end,
-    Enum = function(name, value)
+    EnumItem = function(name, value)
         return string.format('<token name="%s">%s</token>', name, tostring(value))
     end
 }
@@ -455,7 +455,11 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 FrontSurface = instance.FrontSurface,
                 BackSurface = instance.BackSurface,
                 LeftSurface = instance.LeftSurface,
-                RightSurface = instance.RightSurface
+                RightSurface = instance.RightSurface,
+                Material = instance.Material,
+                MaterialVariant = instance.MaterialVariant,
+                Shape = instance.Shape,
+                Rotation = instance.Rotation
             }
         elseif instance:IsA("Model") then
             properties = {
