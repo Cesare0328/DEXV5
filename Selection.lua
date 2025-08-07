@@ -437,29 +437,32 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
         local properties = {}
         if instance:IsA("BasePart") then
+            local function safeGet(propName)
+                local success, value = pcall(function() return instance[propName] end)
+                return success and value or nil
+            end
             properties = {
-                Position = instance.Position,
-                Size = instance.Size,
-                CFrame = instance.CFrame,
-                Color = instance.Color,
-                BrickColor = instance.BrickColor,
-                Material = tostring(instance.Material),
-                Transparency = instance.Transparency,
-                Reflectance = instance.Reflectance,
-                Anchored = instance.Anchored,
-                CanCollide = instance.CanCollide,
-                CastShadow = instance.CastShadow,
-                Massless = instance.Massless,
-                TopSurface = instance.TopSurface,
-                BottomSurface = instance.BottomSurface,
-                FrontSurface = instance.FrontSurface,
-                BackSurface = instance.BackSurface,
-                LeftSurface = instance.LeftSurface,
-                RightSurface = instance.RightSurface,
-                Material = instance.Material,
-                MaterialVariant = instance.MaterialVariant,
-                Shape = instance.Shape,
-                Rotation = instance.Rotation
+                Position = safeGet("Position"),
+                Size = safeGet("Size"),
+                CFrame = safeGet("CFrame"),
+                Color = safeGet("Color"),
+                BrickColor = safeGet("BrickColor"),
+                Material = safeGet("Material"),
+                MaterialVariant = safeGet("MaterialVariant"),
+                Transparency = safeGet("Transparency"),
+                Reflectance = safeGet("Reflectance"),
+                Anchored = safeGet("Anchored"),
+                CanCollide = safeGet("CanCollide"),
+                CastShadow = safeGet("CastShadow"),
+                Massless = safeGet("Massless"),
+                TopSurface = safeGet("TopSurface"),
+                BottomSurface = safeGet("BottomSurface"),
+                FrontSurface = safeGet("FrontSurface"),
+                BackSurface = safeGet("BackSurface"),
+                LeftSurface = safeGet("LeftSurface"),
+                RightSurface = safeGet("RightSurface"),
+                Shape = safeGet("Shape"),
+                Rotation = safeGet("Rotation")
             }
         elseif instance:IsA("Model") then
             properties = {
