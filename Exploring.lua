@@ -2273,14 +2273,14 @@ function rightClickMenu(sObj)
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
-				writefile(game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'.lua', decompile(Selected))
+				writefile("DEXV5\\Scripts\\" .. game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'.lua', decompile(Selected))
 			end
 		elseif option == "Save Bytecode" then
 			if not Option.Modifiable then
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
-				writefile(game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'_bytecode.lua', getscriptbytecode(Selected))
+				writefile("DEXV5\\Scripts\\" .. game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'_bytecode.lua', getscriptbytecode(Selected))
 			end
 		elseif option == 'Refresh Instances' then
     		ClearAllChildren(sObj)
