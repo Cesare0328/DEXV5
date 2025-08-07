@@ -112,36 +112,48 @@ end
 BeforeLoad()
 
 local function switchWindows(p1, p2)
-	if CurrentWindow == p1 and not p2 then return end
-	local A = 0
-	for B, C in next, Windows do
-		A = 0
-		if B ~= p1 then
-			for D, E in next, C do 
-				TweenPosition(E, UDim2_new(1, 30, A * .5, A * 36), "Out", "Quad", .5, true)
-				A += 1
-			end
-		end
-	end
-	A = 0
-	if Windows[p1] then
-		for F, G in next, Windows[p1] do 
-			TweenPosition(G, UDim2_new(1, -300, A * .5, A * 36), "Out", "Quad", .5, true) 
-			A += 1
-		end
-	end
-	if p1 ~= "Nothing c:" then
-		CurrentWindow = p1
-		for H, I in ipairs(GetChildren(SlideFrame)) do
-			I.BackgroundTransparency = 1
-			I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
-		end
-		local J = FindFirstChild(SlideFrame, p1)
-		if J then
-			J.BackgroundTransparency = 1
-			J.Icon.ImageColor3 = Color3_new(1,1,1)
-		end
-	end
+    if CurrentWindow == p1 and not p2 then return end
+    local TWEEN_TIME = 0.4
+    local EASING_STYLE = "InOutSine"
+    local EASING_DIRECTION = "Out"
+    local function tweenElement(element, targetPos, duration, easingStyle, easingDirection)
+        TweenService:Create(
+            element,
+            TweenInfo.new(duration, Enum.EasingStyle[easingStyle], Enum.EasingDirection[easingDirection]),
+            {Position = targetPos}
+        ):Play()
+    end
+    local activeTweens = {}
+    for windowName, windowElements in pairs(Windows) do
+        if windowName ~= p1 then
+            local index = 0
+            for _, element in pairs(windowElements) do
+                local targetPos = UDim2.new(1, 30, index * 0.5, index * 36)
+                table.insert(activeTweens, tweenElement(element, targetPos, TWEEN_TIME, EASING_STYLE, EASING_DIRECTION))
+                index += 1
+            end
+        end
+    end
+    if Windows[p1] then
+        local index = 0
+        for _, element in pairs(Windows[p1]) do
+            local targetPos = UDim2.new(1, -300, index * 0.5, index * 36)
+            table.insert(activeTweens, tweenElement(element, targetPos, TWEEN_TIME, EASING_STYLE, EASING_DIRECTION))
+            index += 1
+        end
+    end
+    if p1 ~= "Nothing c:" then
+        CurrentWindow = p1
+        for _, child in ipairs(SlideFrame:GetChildren()) do
+            child.BackgroundTransparency = 1
+            child.Icon.ImageColor3 = Color3.new(0.6, 0.6, 0.6)
+        end
+        local selectedTab = SlideFrame:FindFirstChild(p1)
+        if selectedTab then
+            selectedTab.BackgroundTransparency = 1
+            selectedTab.Icon.ImageColor3 = Color3.new(1, 1, 1)
+        end
+    end
 end
 
 local function toggleDex(p1)
@@ -456,7 +468,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 LeftSurface = instance.LeftSurface,
                 RightSurface = instance.RightSurface,
                 Material = instance.Material,
-                MaterialVariant = instance.MaterialVariant,
                 Rotation = instance.Rotation
             }
         elseif instance:IsA("Model") then
