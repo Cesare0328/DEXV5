@@ -114,7 +114,7 @@ BeforeLoad()
 local function switchWindows(p1, p2)
     if CurrentWindow == p1 and not p2 then return end
     local TWEEN_TIME = 0.4
-    local EASING_STYLE = "InOutSine"
+    local EASING_STYLE = "Sine"
     local EASING_DIRECTION = "Out"
     local function tweenElement(element, targetPos, duration, easingStyle, easingDirection)
         TweenService:Create(
