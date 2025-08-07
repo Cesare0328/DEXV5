@@ -391,6 +391,9 @@ local PropertySerializers = {
     end,
     Instance = function(name, value)
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
+    end,
+    Enum = function(name, value)
+        return string.format('<token name="%s">%s</token>', name, tostring(value))
     end
 }
 local function CountInstances(instance, avoidPlayerCharacters)
@@ -446,7 +449,13 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Anchored = instance.Anchored,
                 CanCollide = instance.CanCollide,
                 CastShadow = instance.CastShadow,
-                Massless = instance.Massless
+                Massless = instance.Massless,
+                TopSurface = instance.TopSurface,
+                BottomSurface = instance.BottomSurface,
+                FrontSurface = instance.FrontSurface,
+                BackSurface = instance.BackSurface,
+                LeftSurface = instance.LeftSurface,
+                RightSurface = instance.RightSurface
             }
         elseif instance:IsA("Model") then
             properties = {
