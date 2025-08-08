@@ -264,14 +264,14 @@ local function CanBeSelectionBoxed(Instance)
     end
     local Current = Instance
     while Current and Current ~= ScreenGui do
-        if Current:IsA("Frame") and Current.ClipDescendants then
+        if Current:IsA("Frame") and Current.ClipsDescendants then
             local ParentSize = Current.AbsoluteSize
             local ParentPosition = Current.AbsolutePosition
             if AbsolutePosition.X < ParentPosition.X or
                AbsolutePosition.Y < ParentPosition.Y or
                AbsolutePosition.X + AbsoluteSize.X > ParentPosition.X + ParentSize.X or
                AbsolutePosition.Y + AbsoluteSize.Y > ParentPosition.Y + ParentSize.Y then
-                return false, "Instance is clipped by parent's ClipDescendants"
+                return false, "Instance is clipped by parent's ClipsDescendants"
             end
         end
         Current = Current.Parent
