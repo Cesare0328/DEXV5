@@ -1905,7 +1905,7 @@ function PromptPartESP(inst)
 	Connect(CurrentPartESPWindow.MainWindow.Add.MouseButton1Up, function()
     	if CurrentPartESPWindow then
         	for _, v in ipairs(GetChildren(ArgumentList)) do
-            	if v.Name == "TextSize" then
+            	if v.Name == "Type" and v.Text == "TextSize" then
                 	local success, val = pcall(tonumber, v.Text)
                 	if success then
                     	v.Text = tostring(val + 1)
@@ -1920,7 +1920,7 @@ function PromptPartESP(inst)
 	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseButton1Up, function()
 		if CurrentPartESPWindow then
 			for _, v in ipairs(GetChildren(ArgumentList)) do
-            	if v.Name == "TextSize" then
+            	if v.Name == "Type" and v.Text == "TextSize" then
                 	local success, val = pcall(tonumber, v.Text)
                 	if success then
                     	if val >= 1 then v.Text = tostring(val - 1) end
