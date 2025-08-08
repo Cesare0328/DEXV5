@@ -1913,7 +1913,7 @@ function PromptPartESP(inst)
 	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseLeave, function()
 		SubHover = false
 	end)
-	Connect(CurrentPartESPWindow.MainWindow.Add.MouseButton1Up, function()
+	Connect(CurrentPartESPWindow.MainWindow.Add.MouseButton1Down, function()
     	if CurrentPartESPWindow then
         	for _, v in pairs(GetChildren(ArgumentList)) do
             	if v.Type.Text == "TextSize" then
@@ -1935,7 +1935,7 @@ function PromptPartESP(inst)
     	end
 	end)
 
-	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseButton1Up, function()
+	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseButton1Down, function()
 		if CurrentPartESPWindow then
 			for _, v in pairs(GetChildren(ArgumentList)) do
             	if v.Type.Text == "TextSize" then
