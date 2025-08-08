@@ -1908,7 +1908,8 @@ function PromptPartESP(inst)
             	if v.Type.Text == "TextSize" then
                 	local success, val = pcall(tonumber, v.Type.Text)
                 	if success then
-                    	v.Type.Text = tostring(val + 1)
+						val += 1
+                    	v.Type.Text = tostring(val)
                 	else
                     	v.Type.Text = "15"
                 	end
@@ -1923,7 +1924,8 @@ function PromptPartESP(inst)
             	if v.Type.Text == "TextSize" then
                 	local success, val = pcall(tonumber, v.Type.Text)
                 	if success then
-                    	if val >= 1 then v.Type.Text = tostring(val - 1) end
+						val -= 1
+                    	if val >= 1 then v.Type.Text = tostring(val) end
                 	else
                     	v.Type.Text = "15"
                 	end
