@@ -1871,6 +1871,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 		local found = false
 		for i,v in pairs(Target:GetChildren()) do
 			if v:IsA("BasePart") then
+				Target = v
 				found = true
 			end
 		end
@@ -1935,10 +1936,11 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
         end
 
         if IsBox then
-            local pos1, vis1 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(2.15, 3, 0).p)
-            local pos2, vis2 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
-            local pos3, vis3 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
-            local pos4, vis4 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(-2.15, -3, 0).p)
+            local basePos = Target.Parent:IsA("Model") and Target.Parent:GetBoundingBox().Position or Target:IsA("Model") and Target:GetBoundingBox().Position or Target.Position
+            local pos1, vis1 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(2.15, 3, 0).p)
+            local pos2, vis2 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
+            local pos3, vis3 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
+            local pos4, vis4 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(-2.15, -3, 0).p)
             Box.Color = Options.ESPColor.Value
 
             TopLeft = Vector2.new(pos1.X, pos1.Y)
