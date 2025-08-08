@@ -72,6 +72,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
+local OldMax, OldMin = nil, nil
 local Mouse = LocalPlayer:GetMouse()
 local Option = {
 	Modifiable = true, -- can modify object parents in the hierarchy
@@ -2120,6 +2121,10 @@ function rightClickMenu(sObj)
 				return
 			end
 			setthreadidentity(8)
+			if OldMin then
+				LocalPlayer.CameraMinZoomDistance = OldMin
+				LocalPlayer.CameraMaxZoomDistance = OldMax
+			end
 			local MainWindow = Dex.ModelViewer.MainWindow
 			local OkButton = MainWindow:WaitForChild("Ok")
 
@@ -2152,7 +2157,7 @@ function rightClickMenu(sObj)
 			local MaxDimension = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
 			local Distance = (MaxDimension * 0.5) / math.tan(math.rad(70) * 0.5) + MaxDimension
 
-			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, IsHovering, OldMax, OldMin, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), false, nil, nil, {}
+			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, IsHovering, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), false, {}
 
 			local function UpdateCamera()
     			Camera.CFrame = CFrame.new(Vector3.new(0, 0, Zoom), Vector3.new(0, 0, 0))
@@ -2214,6 +2219,8 @@ function rightClickMenu(sObj)
 				for _,v in pairs(Events) do
 					v:Disconnect()
 				end
+				LocalPlayer.CameraMinZoomDistance = OldMin
+				LocalPlayer.CameraMaxZoomDistance = OldMax
 			end)
 
 			Events.InputBegan = UserInputService.InputBegan:Connect(function(Input, GameProcessed)
