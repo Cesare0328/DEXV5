@@ -2137,7 +2137,10 @@ function rightClickMenu(sObj)
 			ViewportFrame.Parent = MainWindow
 
 			local Model = Selection:Get()[1]
+			local Old = Model.Archivable
+			Model.Archivable = true
 			local ModelClone = Model:Clone()
+			Model.Archivable = Old
 			ModelClone.Parent = ViewportFrame
 
 			local Camera = Instance.new("Camera")
@@ -2149,7 +2152,7 @@ function rightClickMenu(sObj)
 			local MaxDimension = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
 			local Distance = (MaxDimension * 0.5) / math.tan(math.rad(70) * 0.5) + MaxDimension
 
-			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), {}
+			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, IsHovering, OldMax, OldMin, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), false, nil, nil, {}
 
 			local function UpdateCamera()
     			Camera.CFrame = CFrame.new(Vector3.new(0, 0, Zoom), Vector3.new(0, 0, 0))
@@ -2166,6 +2169,17 @@ function rightClickMenu(sObj)
 			end
 			UpdateCamera()
 
+			Events.MouseEnter = MainWindow.MouseEnter:Connect(function()
+    			IsHovering = true
+				OldMin, OldMax = LocalPlayer.CameraMinZoomDistance, LocalPlayer.CameraMaxZoomDistance
+				LocalPlayer.CameraMinZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+				LocalPlayer.CameraMaxZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+			end)
+			Events.MouseLeave = MainWindow.MouseLeave:Connect(function()
+    			IsHovering = false
+				LocalPlayer.CameraMinZoomDistance = OldMin
+				LocalPlayer.CameraMaxZoomDistance = OldMax
+			end)
 			Events.DescendantAdded = Model.DescendantAdded:Connect(function(Descendant)
     			local Clone = Descendant:Clone()
     			if Clone then
@@ -2204,7 +2218,7 @@ function rightClickMenu(sObj)
 
 			Events.InputBegan = UserInputService.InputBegan:Connect(function(Input, GameProcessed)
     			if GameProcessed then return end
-    			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+    			if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsHovering then
         			IsDragging = true
         			LastMousePos = Input.Position
         			PivotPoint = GetMouse3DPoint(Input.Position)
@@ -2213,13 +2227,13 @@ function rightClickMenu(sObj)
 			end)
 
 			Events.InputEnded = UserInputService.InputEnded:Connect(function(Input)
-    			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+    			if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsHovering then
         			IsDragging = false
     			end
 			end)
 
 			Events.InputChanged = UserInputService.InputChanged:Connect(function(Input)
-    			if IsDragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
+    			if IsDragging and Input.UserInputType == Enum.UserInputType.MouseMovement and IsHovering then
         			local Delta = Input.Position - LastMousePos
         			Rotation = Rotation * CFrame.Angles(Delta.Y * 0.005, Delta.X * 0.005, 0)
         			UpdateCamera()
