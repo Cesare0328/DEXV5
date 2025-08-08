@@ -2238,7 +2238,7 @@ function rightClickMenu(sObj)
         			Rotation = Rotation * CFrame.Angles(Delta.Y * 0.005, Delta.X * 0.005, 0)
         			UpdateCamera()
         			LastMousePos = Input.Position
-    			elseif Input.UserInputType == Enum.UserInputType.MouseWheel then
+    			elseif Input.UserInputType == Enum.UserInputType.MouseWheel and IsHovering then
         			Zoom = math.clamp(Zoom - Input.Position.Z * MaxDimension * 0.1, MaxDimension * 0.5, MaxDimension * 5)
         			UpdateCamera()
     			end
