@@ -1875,7 +1875,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 				found = true
 			end
 		end
-		if Target.PrimaryPart then Target = Target.PrimaryPart found = true end
+		if Target:IsA("Model") then if Target.PrimaryPart then Target = Target.PrimaryPart found = true end end
 		if not found then
 			CreateCaution("WARNING", "This model does not have any parts to tie to.")
 		end
