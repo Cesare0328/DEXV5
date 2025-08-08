@@ -2123,7 +2123,7 @@ function rightClickMenu(sObj)
 			local MainWindow = Dex.ModelViewer.MainWindow
 			local OkButton = MainWindow:WaitForChild("Ok")
 
-			for i,v in pairs(MainWindow:GetChildren()) do
+			for _,v in pairs(MainWindow:GetChildren()) do
 				if v:IsA("ViewportFrame") then
 					v:Destroy()
 				end
@@ -2149,7 +2149,7 @@ function rightClickMenu(sObj)
 			local MaxDimension = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
 			local Distance = (MaxDimension * 0.5) / math.tan(math.rad(70) * 0.5) + MaxDimension
 
-			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, Event1, Event2, Event3, Event4 = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), nil, nil, nil, nil
+			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), {}
 
 			local function UpdateCamera()
     			Camera.CFrame = CFrame.new(Vector3.new(0, 0, Zoom), Vector3.new(0, 0, 0))
@@ -2166,16 +2166,43 @@ function rightClickMenu(sObj)
 			end
 			UpdateCamera()
 
-			Event1 = OkButton.MouseButton1Click:Connect(function()
+			Events.DescendantAdded = Model.DescendantAdded:Connect(function(Descendant)
+    			local Clone = Descendant:Clone()
+    			if Clone then
+        			local Path = Descendant:GetFullName():sub(#Model:GetFullName() + 2)
+        			local TargetParent = ModelClone
+        			if Path ~= Descendant.Name then
+            			local PathParts = Path:split(".")
+            			for i = 1, #PathParts - 1 do
+                			TargetParent = TargetParent:FindFirstChild(PathParts[i]) or TargetParent
+            			end
+        			end
+        			Clone.Parent = TargetParent
+    			end
+			end)
+			Events.DescendantRemoving = Model.DescendantRemoving:Connect(function(Descendant)
+    			local Path = Descendant:GetFullName():sub(#Model:GetFullName() + 2)
+    			local Target = ModelClone
+    			if Path ~= Descendant.Name then
+        			local PathParts = Path:split(".")
+        			for i = 1, #PathParts - 1 do
+            			Target = Target:FindFirstChild(PathParts[i]) or Target
+        			end
+    			end
+    			local Clone = Target:FindFirstChild(Descendant.Name)
+    			if Clone then
+        			Clone:Destroy()
+    			end
+			end)
+			Events.OkButton = OkButton.MouseButton1Click:Connect(function()
     			MainWindow.Parent.Visible = false
     			ViewportFrame:Destroy()
-				Event1:Disconnect()
-				Event2:Disconnect()
-				Event3:Disconnect()
-				Event4:Disconnect()
+				for _,v in pairs(Events) do
+					v:Disconnect()
+				end
 			end)
 
-			Event2 = UserInputService.InputBegan:Connect(function(Input, GameProcessed)
+			Events.InputBegan = UserInputService.InputBegan:Connect(function(Input, GameProcessed)
     			if GameProcessed then return end
     			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
         			IsDragging = true
@@ -2185,13 +2212,13 @@ function rightClickMenu(sObj)
     			end
 			end)
 
-			Event3 = UserInputService.InputEnded:Connect(function(Input)
+			Events.InputEnded = UserInputService.InputEnded:Connect(function(Input)
     			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
         			IsDragging = false
     			end
 			end)
 
-			Event4 = UserInputService.InputChanged:Connect(function(Input)
+			Events.InputChanged = UserInputService.InputChanged:Connect(function(Input)
     			if IsDragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
         			local Delta = Input.Position - LastMousePos
         			Rotation = Rotation * CFrame.Angles(Delta.Y * 0.005, Delta.X * 0.005, 0)
