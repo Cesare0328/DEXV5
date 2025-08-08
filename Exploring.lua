@@ -1867,14 +1867,14 @@ local function ToPropValue(value,type)
 end
 local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
     if not Target then return end
-	if v:IsA("Model") then
+	if Target:IsA("Model") then
 		local found = false
-		for i,v in pairs(v:GetChildren()) do
+		for i,v in pairs(Target:GetChildren()) do
 			if v:IsA("BasePart") then
 				found = true
 			end
 		end
-		if v.PrimaryPart then Target = v.PrimaryPart found = true end
+		if Target.PrimaryPart then Target = Target.PrimaryPart found = true end
 		if not found then
 			CreateCaution("WARNING", "This model does not have any parts to tie to.")
 		end
