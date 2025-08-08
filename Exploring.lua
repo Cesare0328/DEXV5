@@ -236,7 +236,7 @@ local function CanBeSelectionBoxed(Instance)
         return false, "Parent ScreenGui is not enabled"
     end
     local AbsolutePosition = Instance.AbsolutePosition
-    local ScreenSize = UserInputService:GetScreenSize()
+    local ScreenSize = workspace.CurrentCamera.ViewportSize
     if AbsolutePosition.X + AbsoluteSize.X <= 0 or AbsolutePosition.X >= ScreenSize.X or
        AbsolutePosition.Y + AbsoluteSize.Y <= 0 or AbsolutePosition.Y >= ScreenSize.Y then
         return false, "Instance is fully off-screen"
@@ -251,10 +251,12 @@ local function CanBeSelectionBoxed(Instance)
            Instance.TextTransparency < 1 and Instance.Text ~= "" then
         HasContent = true
     end
-    for _, Child in ipairs(Instance:GetChildren()) do
-        if Child:IsA("GuiObject") and Child.Visible and Child.AbsoluteSize.X > 0 and Child.AbsoluteSize.Y > 0 then
-            HasContent = true
-            break
+    if not HasContent then
+        for _, Child in ipairs(Instance:GetChildren()) do
+            if Child:IsA("GuiObject") and Child.Visible and Child.AbsoluteSize.X > 0 and Child.AbsoluteSize.Y > 0 then
+                HasContent = true
+                break
+            end
         end
     end
     if not HasContent then
@@ -274,7 +276,7 @@ local function CanBeSelectionBoxed(Instance)
         end
         Current = Current.Parent
     end
-    return true
+    return true, "Instance is valid for selection-boxing"
 end
 
 local function SetSelectionBox2D(TargetGui)
