@@ -1626,7 +1626,41 @@ local function ToValue(value,type)
 		return nil
 	end
 end
-
+local function GetModelCFrameAndSize(model)
+    local MinPos, MaxPos = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+    for _, Part in pairs(model:GetDescendants()) do
+        if Part:IsA("BasePart") then
+            local Cf = Part.CFrame
+            local Size = Part.Size
+            local Corners = {
+                Cf * CFrame.new(Size * 0.5),
+                Cf * CFrame.new(-Size * 0.5),
+                Cf * CFrame.new(Vector3.new(Size.X, Size.Y, -Size.Z) * 0.5),
+                Cf * CFrame.new(Vector3.new(Size.X, -Size.Y, Size.Z) * 0.5),
+                Cf * CFrame.new(Vector3.new(-Size.X, Size.Y, Size.Z) * 0.5),
+                Cf * CFrame.new(Vector3.new(-Size.X, -Size.Y, -Size.Z) * 0.5),
+                Cf * CFrame.new(Vector3.new(Size.X, -Size.Y, -Size.Z) * 0.5),
+                Cf * CFrame.new(Vector3.new(-Size.X, Size.Y, -Size.Z) * 0.5),
+            }
+            for _, Corner in pairs(Corners) do
+                local Pos = Corner.Position
+                MinPos = Vector3.new(math.min(MinPos.X, Pos.X), math.min(MinPos.Y, Pos.Y), math.min(MinPos.Z, Pos.Z))
+                MaxPos = Vector3.new(math.max(MaxPos.X, Pos.X), MaxPos.Y, MaxPos.Z)
+            end
+        end
+    end
+    local Size = MaxPos - MinPos
+    local Center = (MinPos + MaxPos) * 0.5
+    return CFrame.new(Center), Size
+end
+local function GetMouse3DPoint(MousePos)
+    local Ray = Camera:ViewportPointToRay(MousePos.X, MousePos.Y)
+    local RaycastParams = RaycastParams.new()
+    RaycastParams.FilterType = Enum.RaycastFilterType.Whitelist
+    RaycastParams.FilterDescendantsInstances = {ModelClone}
+    local RaycastResult = Workspace:Raycast(Camera.CFrame.Position, Ray.Direction * 1000, RaycastParams)
+    return RaycastResult and RaycastResult.Position or Vector3.new(0, 0, 0)
+end
 local function ToPropValue(value,type)
 	if type == "Vector2" then
 		local list = string_split(value,",")
@@ -1999,6 +2033,7 @@ function rightClickMenu(sObj)
 	end
     if IsA(sObj, "Model") then
 		table_insert(actions, 7, "Ungroup")
+		table_insert(actions, 7, "View Model")
 	end
     if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
@@ -2088,6 +2123,79 @@ function rightClickMenu(sObj)
 					Selection:Add(v)
 				end
 			end
+		elseif option == "View Model" then
+			if not Option.Modifiable or not #Selection:Get() == 1 then
+				return
+			end
+			local MainWindow = CoreGui:WaitForChild("Dex").ModelViewer.MainWindow
+			local OkButton = MainWindow:WaitForChild("Ok")
+
+			local ViewportFrame = Instance.new("ViewportFrame")
+			ViewportFrame.Size = UDim2.new(1, 0, 1, 0)
+			ViewportFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+			ViewportFrame.BorderColor3 = Color3.fromRGB(149, 149, 149)
+			ViewportFrame.ZIndex = 10
+			ViewportFrame.BackgroundTransparency = 1
+			ViewportFrame.Parent = MainWindow
+
+			local Model = Selection:Get()[1]
+			local ModelClone = Model:Clone()
+			ModelClone.Parent = ViewportFrame
+
+			local Camera = Instance.new("Camera")
+			Camera.Parent = ViewportFrame
+			ViewportFrame.CurrentCamera = Camera
+
+			local ModelCFrame, ModelSize = GetModelCFrameAndSize(ModelClone)
+			ModelClone:PivotTo(CFrame.new(Vector3.new(0, 0, 0)))
+			local MaxDimension = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
+			local Distance = (MaxDimension * 0.5) / math.tan(math.rad(70) * 0.5) + MaxDimension
+
+			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, Event1, Event2, Event3, Event4 = CFrame.new(), Distance, false, nil, Vectro3.new(0, 0, 0), nil, nil, nil, nil
+
+			local function UpdateCamera()
+    			Camera.CFrame = CFrame.new(Vector3.new(0, 0, Zoom), Vector3.new(0, 0, 0))
+    			local PivotCFrame = CFrame.new(PivotPoint)
+    			ModelClone:PivotTo(PivotCFrame * Rotation * CFrame.new(-PivotPoint))
+			end
+			UpdateCamera()
+
+			Event1 = OkButton.MouseButton1Click:Connect(function()
+    			MainWindow.Visible = false
+    			ViewportFrame:Destroy()
+				Event1:Disconnect()
+				Event2:Disconnect()
+				Event3:Disconnect()
+				Event4:Disconnect()
+			end)
+
+			Event2 = UserInputService.InputBegan:Connect(function(Input, GameProcessed)
+    			if GameProcessed then return end
+    			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+        			IsDragging = true
+        			LastMousePos = Input.Position
+        			PivotPoint = GetMouse3DPoint(Input.Position)
+        			UpdateCamera()
+    			end
+			end)
+
+			Event3 = UserInputService.InputEnded:Connect(function(Input)
+    			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+        			IsDragging = false
+    			end
+			end)
+
+			Event4 = UserInputService.InputChanged:Connect(function(Input)
+    			if IsDragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
+        			local Delta = Input.Position - LastMousePos
+        			Rotation = Rotation * CFrame.Angles(Delta.Y * 0.005, Delta.X * 0.005, 0)
+        			UpdateCamera()
+        			LastMousePos = Input.Position
+    			elseif Input.UserInputType == Enum.UserInputType.MouseWheel then
+        			Zoom = math.clamp(Zoom - Input.Position.Z * MaxDimension * 0.1, MaxDimension * 0.5, MaxDimension * 5)
+        			UpdateCamera()
+    			end
+			end)
 		elseif option == "Select Children" then
 			if not Option.Modifiable then
 				return
