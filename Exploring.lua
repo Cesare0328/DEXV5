@@ -1882,6 +1882,10 @@ function PromptPartESP(inst)
 	NameArg.Visible = true
 	createDDown(NameArg.Type, inst, "Name")
 
+	NameArg.Value.Changed:Connect(function()
+    	NameArg.Value.Text = NameArg.Value.Text:sub(1, 30)
+	end)
+
 	local TextSizeArg = Clone(ArgumentTemplate)
 	local Default = Instance.new("StringValue")
 	Default.Name = "15"
