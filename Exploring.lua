@@ -1875,7 +1875,7 @@ function PromptPartESP(inst)
 	CurrentPartESPWindow.Parent = Dex
 	CurrentPartESPWindow.Visible = true
 
-	local IsBoxESP, IsDistanceESP, ArgumentList, ArgumentTemplate = false, false, CurrentPartESPWindow.MainWindow.Arguments, CurrentPartESPWindow.MainWindow.ArgumentTemplate
+	local IsBoxESP, IsDistanceESP, AddHover, SubHover, ArgumentList, ArgumentTemplate = false, false, false, false, CurrentPartESPWindow.MainWindow.Arguments, CurrentPartESPWindow.MainWindow.ArgumentTemplate
 
 	local NameArg = Clone(ArgumentTemplate)
 	NameArg.Parent = ArgumentList
@@ -1901,7 +1901,18 @@ function PromptPartESP(inst)
 			CurrentPartESPWindow = nil
 		end
 	end)
-
+	Connect(CurrentPartESPWindow.MainWindow.Add.MouseEnter, function()
+		AddHover = true
+	end)
+	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseEnter, function()
+		SubHover = true
+	end)
+	Connect(CurrentPartESPWindow.MainWindow.Add.MouseLeave, function()
+		AddHover = false
+	end)
+	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseLeave, function()
+		SubHover = false
+	end)
 	Connect(CurrentPartESPWindow.MainWindow.Add.MouseButton1Up, function()
     	if CurrentPartESPWindow then
         	for _, v in pairs(GetChildren(ArgumentList)) do
@@ -1910,6 +1921,12 @@ function PromptPartESP(inst)
                 	if success and val then
 						val += 1
                     	v.Value.Text = tostring(val)
+						task.wait(1)
+						while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and AddHover do
+							val += 1
+                    		v.Value.Text = tostring(val)
+							task.wait(0.05)
+						end
                 	else
                     	v.Value.Text = "15"
                 	end
@@ -1925,7 +1942,13 @@ function PromptPartESP(inst)
                 	local success, val = pcall(tonumber, v.Value.Text)
                 	if success and val then
 						val -= 1
-                    	if val >= 1 then v.Value.Text = tostring(val) end
+						if val >= 1 then v.Value.Text = tostring(val) end
+						task.wait(1)
+						while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and SubHover do
+							val -= 1
+							if val >= 1 then v.Value.Text = tostring(val) end
+							task.wait(0.05)
+						end
                 	else
                     	v.Value.Text = "15"
                 	end
