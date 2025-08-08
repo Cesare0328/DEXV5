@@ -2067,7 +2067,7 @@ function rightClickMenu(sObj)
 	elseif IsA(sObj, "ProximityPrompt") then
 		table_insert(actions, 8, "Fire ProximityPrompt")
 	end
-    if IsA(sObj, "Model") then
+    if IsA(sObj, "Model") and not sObj == workspace then
 		table_insert(actions, 7, "Ungroup")
 		table_insert(actions, 7, "View Model")
 	end
@@ -2160,7 +2160,7 @@ function rightClickMenu(sObj)
 				end
 			end
 		elseif option == "View Model" then
-			if not Option.Modifiable or not #Selection:Get() == 1 or Selection:Get()[1] == workspace then
+			if not Option.Modifiable or not #Selection:Get() == 1 then
 				return
 			end
 			setthreadidentity(8)
