@@ -1876,16 +1876,18 @@ function PromptPartESP(inst)
 	Connect(NameArg.Type.MouseButton1Down, function()
 		createDDown(NameArg.Type, function(choice)
 			NameArg.Type.Text = choice
-		end, "Name", "TextSize")
+		end, "Name")
 	end)
 
 	local TextSizeArg = Clone(ArgumentTemplate)
-	TextSizeArg.Parent = ArgumentList
+	TextSizeArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
+	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	TextSizeArg.Visible = true
+	TextSizeArg.Parent = ArgumentList
 	Connect(TextSizeArg.Type.MouseButton1Down, function()
-		createDDown(TextSizeArg.Type, function(choice)
+		createDDown(TextSizeArg.Type,function(choice)
 			TextSizeArg.Type.Text = choice
-		end, "Name", "TextSize")
+		end,"TextSize")
 	end)
 
 	Connect(CurrentPartESPWindow.MainWindow.Ok.MouseButton1Up, function()
