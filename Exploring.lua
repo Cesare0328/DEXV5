@@ -1916,8 +1916,8 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
             Distance = math.floor((workspace.CurrentCamera:GetPivot().p - Target.Position).Magnitude)
         end
 
-        local ScreenPositionUpper = CurrentCamera:WorldToViewportPoint((Target:GetRenderCFrame() * CFrame.new(0, Target.Size.Y + Target.Size.Y + (2 / 25), 0)).Position)
-        local pos, vis = CurrentCamera:WorldToViewportPoint(Target.Position + Vector3.new(0, 7, 0))
+        local ScreenPositionUpper = workspace.CurrentCamera:WorldToViewportPoint((Target:GetRenderCFrame() * CFrame.new(0, Target.Size.Y + Target.Size.Y + (2 / 25), 0)).Position)
+        local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(Target.Position + Vector3.new(0, 7, 0))
         name.Color = Options.ESPColor.Value
 
         if not IsDistance then
@@ -1937,10 +1937,10 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 
         if IsBox then
             local basePos = Target.Parent:IsA("Model") and Target.Parent:GetBoundingBox().Position or Target:IsA("Model") and Target:GetBoundingBox().Position or Target.Position
-            local pos1, vis1 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(2.15, 3, 0).p)
-            local pos2, vis2 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
-            local pos3, vis3 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
-            local pos4, vis4 = CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, CurrentCamera.CFrame.p) * CFrame.new(-2.15, -3, 0).p)
+            local pos1, vis1 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(2.15, 3, 0).p)
+            local pos2, vis2 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
+            local pos3, vis3 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
+            local pos4, vis4 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(-2.15, -3, 0).p)
             Box.Color = Options.ESPColor.Value
 
             TopLeft = Vector2.new(pos1.X, pos1.Y)
