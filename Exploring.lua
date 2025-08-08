@@ -26,10 +26,12 @@ local math_ceil = math.ceil
 local math_random = math.random
 local math_huge = math.huge
 -- < Services > --
-local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local UserInputService = cloneref(game:GetService("UserInputService"))
+local HttpService = cloneref(game:GetService("HttpService"))
+local RunService = cloneref(game:GetService("RunService"))
+local PlayerGui = cloneref(game:GetService("PlayerGui"))
+local CoreGui = cloneref(game:GetService("CoreGui"))
+local Players = cloneref(game:GetService("Players"))
 -- < Class Aliases > --
 local IsA = game.IsA
 local ClearAllChildren = game.ClearAllChildren
@@ -73,7 +75,7 @@ local LocalPlayer = Players.LocalPlayer
 local Searched = false
 local ContextMenuHovered = false
 local OldMax, OldMin = nil, nil
-local Mouse = LocalPlayer:GetMouse()
+local Mouse = cloneref(LocalPlayer:GetMouse())
 local Option = {
 	Modifiable = true, -- can modify object parents in the hierarchy
 	Selectable = true -- can select objects
@@ -1533,9 +1535,18 @@ do
 
 	SetSelection_Bindable.OnInvoke = function(...)
 		Selection:Set(...)
-		local TargetIndex = findObjectIndex(Selection:Get()[1])
-        local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-        scrollBar:ScrollTo(ScrollIndex)
+		if Selection:Get()[1] then
+			local TargetIndex = findObjectIndex(Selection:Get()[1])
+        	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        	scrollBar:ScrollTo(ScrollIndex)
+		else
+			if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
+				Selection:Set({PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]})
+			end
+			if #CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 and not CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]:IsDescendantOf(Dex) then
+				Selection:Set({PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]})
+			end
+		end
 	end
 
 	GetSelection_Bindable.OnInvoke = function()
