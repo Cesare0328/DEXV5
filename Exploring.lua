@@ -342,9 +342,7 @@ local function createDDown(dBut, callback, ...)
     local slots, base = {...}, dBut
     if #slots == 1 then
         dBut.Text = slots[1]
-        callback(slots[1])
         dBut.Interactable = false
-        dBut.BackgroundTransparency = 0.5
         barActive = false
         return
     end
