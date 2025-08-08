@@ -329,36 +329,44 @@ end
 local barActive, activeOptions = false, {}
 
 local function createDDown(dBut, callback, ...)
-	if barActive then
-		for _,v in ipairs(activeOptions) do
-			Destroy(v)
-		end
-		table_clear(activeOptions)
-		barActive = false
-		return
-	else
-		barActive = true
-	end
-	local slots, base = {...}, dBut
-	for i,v in ipairs(slots) do
-		local newOption = Clone(base)
-		newOption.ZIndex = 2
-		newOption.Name = "Option " .. tostring(i)
-		newOption.BackgroundTransparency = 0
-		table_insert(activeOptions, newOption)
-		newOption.Position = UDim2_new(-.4, dBut.Position.X.Offset, dBut.Position.Y.Scale, dBut.Position.Y.Offset + (#activeOptions * dBut.Size.Y.Offset))
-		newOption.Text = slots[i]
-		newOption.Parent = base.Parent.Parent.Parent
-		Connect(newOption.MouseButton1Down, function()
-			dBut.Text = slots[i]
-			callback(slots[i])
-			for _,v in ipairs(activeOptions) do
-				Destroy(v)
-			end
-			table_clear(activeOptions)
-			barActive = false
-		end)
-	end
+    if barActive then
+        for _, v in ipairs(activeOptions) do
+            Destroy(v)
+        end
+        table_clear(activeOptions)
+        barActive = false
+        return
+    else
+        barActive = true
+    end
+    local slots, base = {...}, dBut
+    if #slots == 1 then
+        dBut.Text = slots[1]
+        callback(slots[1])
+        dBut.Interactable = false
+        dBut.BackgroundTransparency = 0.5
+        barActive = false
+        return
+    end
+    for i, v in ipairs(slots) do
+        local newOption = Clone(base)
+        newOption.ZIndex = 2
+        newOption.Name = "Option " .. tostring(i)
+        newOption.BackgroundTransparency = 0
+        table_insert(activeOptions, newOption)
+        newOption.Position = UDim2_new(-.4, dBut.Position.X.Offset, dBut.Position.Y.Scale, dBut.Position.Y.Offset + (#activeOptions * dBut.Size.Y.Offset))
+        newOption.Text = slots[i]
+        newOption.Parent = base.Parent.Parent.Parent
+        Connect(newOption.MouseButton1Down, function()
+            dBut.Text = slots[i]
+            callback(slots[i])
+            for _, v in ipairs(activeOptions) do
+                Destroy(v)
+            end
+            table_clear(activeOptions)
+            barActive = false
+        end)
+    end
 end
 
 local function EventConnect(event, func)
