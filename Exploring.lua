@@ -2127,7 +2127,7 @@ function rightClickMenu(sObj)
 			if not Option.Modifiable or not #Selection:Get() == 1 then
 				return
 			end
-			local MainWindow = CoreGui:WaitForChild("Dex").ModelViewer.MainWindow
+			local MainWindow = Dex.ModelViewer.MainWindow
 			local OkButton = MainWindow:WaitForChild("Ok")
 
 			local ViewportFrame = Instance.new("ViewportFrame")
