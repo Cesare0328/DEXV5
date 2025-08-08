@@ -217,6 +217,66 @@ local function FindFirstParentAfterScreenGui(Instance)
     return nil
 end
 
+local function CanBeSelectionBoxed(Instance)
+    if not Instance or not Instance:IsA("GuiObject") then
+        return false, "Instance is nil or not a GuiObject"
+    end
+    if not Instance.Visible then
+        return false, "Instance is not visible"
+    end
+    local AbsoluteSize = Instance.AbsoluteSize
+    if AbsoluteSize.X <= 0 or AbsoluteSize.Y <= 0 then
+        return false, "Instance has zero or negative size"
+    end
+    local ScreenGui = Instance:FindFirstAncestorOfClass("ScreenGui")
+    if not ScreenGui then
+        return false, "Instance is not parented under a ScreenGui"
+    end
+    if not ScreenGui.Enabled then
+        return false, "Parent ScreenGui is not enabled"
+    end
+    local AbsolutePosition = Instance.AbsolutePosition
+    local ScreenSize = game:GetService("UserInputService"):GetScreenSize()
+    if AbsolutePosition.X + AbsoluteSize.X <= 0 or AbsolutePosition.X >= ScreenSize.X or
+       AbsolutePosition.Y + AbsoluteSize.Y <= 0 or AbsolutePosition.Y >= ScreenSize.Y then
+        return false, "Instance is fully off-screen"
+    end
+    local HasContent = false
+    if Instance:IsA("Frame") and Instance.BackgroundTransparency < 1 then
+        HasContent = true
+    elseif (Instance:IsA("ImageLabel") or Instance:IsA("ImageButton")) and
+           Instance.ImageTransparency < 1 and Instance.Image ~= "" then
+        HasContent = true
+    elseif (Instance:IsA("TextLabel") or Instance:IsA("TextButton")) and
+           Instance.TextTransparency < 1 and Instance.Text ~= "" then
+        HasContent = true
+    end
+    for _, Child in ipairs(Instance:GetChildren()) do
+        if Child:IsA("GuiObject") and Child.Visible and Child.AbsoluteSize.X > 0 and Child.AbsoluteSize.Y > 0 then
+            HasContent = true
+            break
+        end
+    end
+    if not HasContent then
+        return false, "Instance is empty (no visible content or children)"
+    end
+    local Current = Instance
+    while Current and Current ~= ScreenGui do
+        if Current:IsA("Frame") and Current.ClipDescendants then
+            local ParentSize = Current.AbsoluteSize
+            local ParentPosition = Current.AbsolutePosition
+            if AbsolutePosition.X < ParentPosition.X or
+               AbsolutePosition.Y < ParentPosition.Y or
+               AbsolutePosition.X + AbsoluteSize.X > ParentPosition.X + ParentSize.X or
+               AbsolutePosition.Y + AbsoluteSize.Y > ParentPosition.Y + ParentSize.Y then
+                return false, "Instance is clipped by parent's ClipDescendants"
+            end
+        end
+        Current = Current.Parent
+    end
+    return true
+end
+
 local function SetSelectionBox2D(TargetGui)
     if not TargetGui then
         if Dex and Dex:FindFirstChild("SelectionBox2D") then
@@ -1600,7 +1660,7 @@ do
 		local found = true
 		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
 			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
-			if Obj.Visible then
+			if CanBeSelectionBoxed(Obj) then
 				Selection:Set({Obj})
 				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
 				local TargetIndex = findObjectIndex(Selection:Get()[1])
