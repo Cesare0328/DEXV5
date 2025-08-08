@@ -2121,6 +2121,7 @@ function rightClickMenu(sObj)
 				return
 			end
 			setthreadidentity(8)
+			OldMin, OldMax = LocalPlayer.CameraMinZoomDistance, LocalPlayer.CameraMaxZoomDistance
 			if OldMin then
 				LocalPlayer.CameraMinZoomDistance = OldMin
 				LocalPlayer.CameraMaxZoomDistance = OldMax
@@ -2176,7 +2177,6 @@ function rightClickMenu(sObj)
 
 			Events.MouseEnter = MainWindow.MouseEnter:Connect(function()
     			IsHovering = true
-				OldMin, OldMax = LocalPlayer.CameraMinZoomDistance, LocalPlayer.CameraMaxZoomDistance
 				LocalPlayer.CameraMinZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
 				LocalPlayer.CameraMaxZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
 			end)
