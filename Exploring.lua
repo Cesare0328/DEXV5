@@ -1897,7 +1897,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 
     local loop
     loop = RunService.RenderStepped:connect(function()
-        if not Target.Parent then
+        if not Target:IsDescendantOf(game) then
             loop:Disconnect()
             if name then
                 name.Visible = false
