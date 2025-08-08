@@ -2117,7 +2117,7 @@ function rightClickMenu(sObj)
 				end
 			end
 		elseif option == "View Model" then
-			if not Option.Modifiable or not #Selection:Get() == 1 then
+			if not Option.Modifiable or not #Selection:Get() == 1 or Selection:Get()[1] == workspace then
 				return
 			end
 			setthreadidentity(8)
