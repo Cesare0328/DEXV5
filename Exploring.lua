@@ -29,7 +29,6 @@ local math_huge = math.huge
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local HttpService = cloneref(game:GetService("HttpService"))
 local RunService = cloneref(game:GetService("RunService"))
-local PlayerGui = cloneref(game:GetService("PlayerGui"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
 -- < Class Aliases > --
@@ -72,6 +71,7 @@ local checkrbxlocked = Specials.checkrbxlocked
 -- < Upvalues > --
 local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
 local Searched = false
 local ContextMenuHovered = false
 local OldMax, OldMin = nil, nil
