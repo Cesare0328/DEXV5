@@ -966,10 +966,12 @@ local ConfirmationWindow = WaitForChild(Dex, "Confirmation")
 local CautionWindow = WaitForChild(Dex, "Caution")
 local TableCautionWindow = WaitForChild(Dex, "TableCaution")
 
+local PartESPWindow = WaitForChild(Dex, "AddESP")
 local RemoteWindow = WaitForChild(Dex, "CallRemote")
 
 local ScriptEditor = WaitForChild(Dex, "ScriptEditor")
 
+local CurrentPartESPWindow
 local CurrentRemoteWindow
 
 local lastSelectedNode
@@ -1857,6 +1859,94 @@ local function ToPropValue(value,type)
 	end
 end
 
+function PromptPartESP(inst)
+	if CurrentPartESPWindow then
+		Destroy(CurrentPartESPWindow)
+		CurrentPartESPWindow = nil
+	end
+	CurrentPartESPWindow = Clone(PartESPWindow)
+	CurrentPartESPWindow.Parent = Dex
+	CurrentPartESPWindow.Visible = true
+
+	local IsBoxESP, IsDistanceESP, ArgumentList, ArgumentTemplate = false, false, CurrentPartESPWindow.MainWindow.Arguments, CurrentPartESPWindow.MainWindow.ArgumentTemplate
+
+	local newArgument = Clone(ArgumentTemplate)
+	newArgument.Parent = ArgumentList
+	newArgument.Visible = true
+	Connect(newArgument.Type.MouseButton1Down, function()
+		createDDown(newArgument.Type, function(choice)
+			newArgument.Type.Text = choice
+		end,"Name", "TextSize")
+	end)
+
+	Connect(CurrentPartESPWindow.MainWindow.Ok.MouseButton1Up, function()
+		if CurrentPartESPWindow and inst.Parent ~= nil then
+			local MyArguments = {}
+			for _,v in ipairs(GetChildren(ArgumentList)) do
+				table_insert(MyArguments, ToValue(v.Value.Text,v.Type.Text))
+			end
+			Destroy(CurrentPartESPWindow)
+			CurrentPartESPWindow = nil
+		end
+	end)
+
+	Connect(CurrentPartESPWindow.MainWindow.Add.MouseButton1Up, function()
+    	if CurrentPartESPWindow then
+        	for _, v in ipairs(GetChildren(ArgumentList)) do
+            	if v.Name == "TextSize" then
+                	local success, val = pcall(tonumber, v.Text)
+                	if success then
+                    	v.Text = tostring(val + 1)
+                	else
+                    	v.Text = "15"
+                	end
+            	end
+        	end
+    	end
+	end)
+
+	Connect(CurrentPartESPWindow.MainWindow.Subtract.MouseButton1Up, function()
+		if CurrentPartESPWindow then
+			for _, v in ipairs(GetChildren(ArgumentList)) do
+            	if v.Name == "TextSize" then
+                	local success, val = pcall(tonumber, v.Text)
+                	if success then
+                    	if val >= 1 then v.Text = tostring(val - 1) end
+                	else
+                    	v.Text = "15"
+                	end
+            	end
+        	end
+		end
+	end)
+
+	Connect(CurrentPartESPWindow.MainWindow.Cancel.MouseButton1Up, function()
+		if CurrentPartESPWindow then
+			Destroy(CurrentPartESPWindow)
+			CurrentPartESPWindow = nil
+		end
+	end)
+
+	Connect(CurrentPartESPWindow.MainWindow.Distance.MouseButton1Up, function()
+		if IsDistanceESP then
+			IsDistanceESP = false
+			CurrentPartESPWindow.MainWindow.Distance.enabled.Visible = false
+		else
+			IsDistanceESP = true
+			CurrentPartESPWindow.MainWindow.Distance.enabled.Visible = true
+		end
+	end)
+	Connect(CurrentPartESPWindow.MainWindow.Box.MouseButton1Up, function()
+		if IsBoxESP then
+			IsBoxESP = false
+			CurrentPartESPWindow.MainWindow.Box.enabled.Visible = false
+		else
+			IsBoxESP = true
+			CurrentPartESPWindow.MainWindow.Box.enabled.Visible = true
+		end
+	end)
+end
+
 function PromptRemoteCaller(inst)
 	if CurrentRemoteWindow then
 		Destroy(CurrentRemoteWindow)
@@ -2154,6 +2244,7 @@ function rightClickMenu(sObj)
 	end
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") then
 		table_insert(actions, 8, "Teleport to")
+		table_insert(actions, 9, "Add to ESP")
 	end
     if filteringInstances() and Searched then
 		table_insert(actions, 1, "Clear Search and Jump to")
@@ -2443,6 +2534,11 @@ function rightClickMenu(sObj)
 			    end
 				break
 			end
+		elseif option == "Add to ESP" then
+			if not Option.Modifiable then
+				return
+			end
+			PromptPartESP(Selection:Get()[1])
 		elseif option == "Clear Search and Jump to" then
 			explorerFilter.Text = ""
             rawUpdateList()
