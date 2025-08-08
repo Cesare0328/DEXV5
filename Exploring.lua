@@ -2224,9 +2224,11 @@ function rightClickMenu(sObj)
 				LocalPlayer.CameraMaxZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
 			end)
 			Events.MouseLeave = MainWindow.MouseLeave:Connect(function()
-    			IsHovering = false
-				LocalPlayer.CameraMinZoomDistance = OldMin
-				LocalPlayer.CameraMaxZoomDistance = OldMax
+				if not IsDragging then
+        			IsHovering = false
+        			LocalPlayer.CameraMinZoomDistance = OldMin
+        			LocalPlayer.CameraMaxZoomDistance = OldMax
+    			end
 			end)
 			Events.DescendantAdded = Model.DescendantAdded:Connect(function(Descendant)
     			local Clone = Descendant:Clone()
@@ -2277,8 +2279,12 @@ function rightClickMenu(sObj)
 			end)
 
 			Events.InputEnded = UserInputService.InputEnded:Connect(function(Input)
-    			if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsHovering then
+    			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
         			IsDragging = false
+        			if not IsHovering then
+            			LocalPlayer.CameraMinZoomDistance = OldMin
+            			LocalPlayer.CameraMaxZoomDistance = OldMax
+       				end
     			end
 			end)
 
