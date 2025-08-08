@@ -2123,6 +2123,11 @@ function rightClickMenu(sObj)
 			local MainWindow = Dex.ModelViewer.MainWindow
 			local OkButton = MainWindow:WaitForChild("Ok")
 
+			for i,v in pairs(MainWindow:GetChildren()) do
+				if v:IsA("ViewportFrame") then
+					v:Destroy()
+				end
+			end
 			local ViewportFrame = Instance.new("ViewportFrame")
 			ViewportFrame.Size = UDim2.new(1, 0, 1, 0)
 			ViewportFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
@@ -2162,7 +2167,7 @@ function rightClickMenu(sObj)
 			UpdateCamera()
 
 			Event1 = OkButton.MouseButton1Click:Connect(function()
-    			MainWindow.Parent.Visible = true
+    			MainWindow.Parent.Visible = false
     			ViewportFrame:Destroy()
 				Event1:Disconnect()
 				Event2:Disconnect()
