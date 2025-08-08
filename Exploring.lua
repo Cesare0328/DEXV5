@@ -1927,7 +1927,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
         end
 
         if Target then
-            name.Position = Vector2.new(ScreenPositionUpper.x, ScreenPositionUpper.y) + Vector2.new(0, name.TextBounds.Y - 45)
+            name.Position = Vector2.new(ScreenPositionUpper.x, ScreenPositionUpper.y) + Vector2.new(0, name.TextBounds.Y + 45)
         end
         if vis and Target then
             name.Visible = true
