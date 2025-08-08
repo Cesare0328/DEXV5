@@ -1918,7 +1918,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 
         local ScreenPositionUpper = workspace.CurrentCamera:WorldToViewportPoint((Target:GetRenderCFrame() * CFrame.new(0, Target.Size.Y + Target.Size.Y + (2 / 25), 0)).Position)
         local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(Target.Position + Vector3.new(0, 7, 0))
-        name.Color = Options.ESPColor.Value
+        name.Color = Color3.fromRGB(255, 255, 255)
 
         if not IsDistance then
             name.Text = Name
@@ -1941,7 +1941,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
             local pos2, vis2 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
             local pos3, vis3 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
             local pos4, vis4 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(-2.15, -3, 0).p)
-            Box.Color = Options.ESPColor.Value
+            Box.Color = Color3.fromRGB(255, 255, 255)
 
             TopLeft = Vector2.new(pos1.X, pos1.Y)
             TopRight = Vector2.new(pos2.X, pos2.Y)
