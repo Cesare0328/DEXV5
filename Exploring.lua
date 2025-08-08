@@ -1971,7 +1971,9 @@ function PromptPartESP(inst)
 	createDDown(NameArg.Type, inst, "Name")
 
 	NameArg.Value.Changed:Connect(function()
-    	NameArg.Value.Text = NameArg.Value.Text:sub(1, 30)
+		if NameArg:FindFirstChild("Value") then
+    		NameArg.Value.Text = NameArg.Value.Text:sub(1, 30)
+		end
 	end)
 
 	local TextSizeArg = Clone(ArgumentTemplate)
@@ -1985,10 +1987,11 @@ function PromptPartESP(inst)
 
 	Connect(CurrentPartESPWindow.MainWindow.Ok.MouseButton1Up, function()
 		if CurrentPartESPWindow and inst.Parent ~= nil then
-			local MyArguments = {}
-			for _,v in ipairs(GetChildren(ArgumentList)) do
-				table_insert(MyArguments, ToValue(v.Value.Text,v.Type.Text))
+			local success, val = pcall(tonumber, TextSizeArg.Value.Text)
+			if not success or not val then
+				val = 15
 			end
+			StartPartESP(inst, NameArg.Value.Text, val, IsDistanceESP, IsBoxESP)
 			Destroy(CurrentPartESPWindow)
 			CurrentPartESPWindow = nil
 		end
