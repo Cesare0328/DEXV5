@@ -203,6 +203,20 @@ local function Create(p1, p2)
 	return A
 end
 
+local function FindFirstParentAfterScreenGui(Instance)
+    if not Instance then
+        return nil
+    end
+    local Current = Instance
+    while Current and Current.Parent do
+        if Current.Parent:IsA("ScreenGui") then
+            return Current
+        end
+        Current = Current.Parent
+    end
+    return nil
+end
+
 local function SetSelectionBox2D(TargetGui)
     if not TargetGui then
         if Dex and Dex:FindFirstChild("SelectionBox2D") then
@@ -1588,7 +1602,7 @@ do
 			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
 			if Obj.Visible then
 				Selection:Set({Obj})
-				SetSelectionBox2D(Obj)
+				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
 				local TargetIndex = findObjectIndex(Selection:Get()[1])
         		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
         		scrollBar:ScrollTo(ScrollIndex)
