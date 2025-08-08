@@ -1906,12 +1906,12 @@ function PromptPartESP(inst)
     	if CurrentPartESPWindow then
         	for _, v in pairs(GetChildren(ArgumentList)) do
             	if v.Type.Text == "TextSize" then
-                	local success, val = pcall(tonumber, v.Type.Text)
+                	local success, val = pcall(tonumber, v.Value.Text)
                 	if success and val then
 						val += 1
-                    	v.Type.Text = tostring(val)
+                    	v.Value.Text = tostring(val)
                 	else
-                    	v.Type.Text = "15"
+                    	v.Value.Text = "15"
                 	end
             	end
         	end
@@ -1922,12 +1922,12 @@ function PromptPartESP(inst)
 		if CurrentPartESPWindow then
 			for _, v in pairs(GetChildren(ArgumentList)) do
             	if v.Type.Text == "TextSize" then
-                	local success, val = pcall(tonumber, v.Type.Text)
+                	local success, val = pcall(tonumber, v.Value.Text)
                 	if success and val then
 						val -= 1
-                    	if val >= 1 then v.Type.Text = tostring(val) end
+                    	if val >= 1 then v.Value.Text = tostring(val) end
                 	else
-                    	v.Type.Text = "15"
+                    	v.Value.Text = "15"
                 	end
             	end
         	end
