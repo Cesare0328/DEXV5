@@ -1880,10 +1880,8 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 			CreateCaution("WARNING", "This model does not have any parts to tie to.")
 		end
 	end
-    local Disconnect = false
-
     local name = Drawing.new("Text")
-    name.Size = 17
+    name.Size = TextSize
     name.Outline = true
     name.OutlineColor = Color3.fromRGB(20, 20, 23)
     name.Center = true
@@ -1936,7 +1934,8 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
         end
 
         if IsBox then
-            local basePos = Target.Parent:IsA("Model") and Target.Parent:GetBoundingBox().Position or Target:IsA("Model") and Target:GetBoundingBox().Position or Target.Position
+            local basePos = Target and Target.Parent:IsA("Model") and Target.Parent:GetBoundingBox().Position or Target and Target:IsA("Model") and Target:GetBoundingBox().Position or Target.Position
+			if not Target then break end
             local pos1, vis1 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(2.15, 3, 0).p)
             local pos2, vis2 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
             local pos3, vis3 = workspace.CurrentCamera:WorldToViewportPoint(CFrame.new(basePos, workspace.CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
