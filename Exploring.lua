@@ -203,6 +203,31 @@ local function Create(p1, p2)
 	return A
 end
 
+local function SetSelectionBox2D(TargetGui)
+    if not TargetGui then
+        if Dex and Dex:FindFirstChild("SelectionBox2D") then
+            local HighlightFrame = Dex.SelectionBox2D:FindFirstChildWhichIsA("Frame")
+            if HighlightFrame then
+                HighlightFrame.Visible = false
+            end
+        end
+        return nil
+    end
+    local SelectionBox2D = TargetGui:FindFirstChild("SelectionBox2D")
+    if not SelectionBox2D or not SelectionBox2D:IsA("ScreenGui") then
+        return nil
+    end
+    local HighlightFrame = SelectionBox2D:FindFirstChildWhichIsA("Frame")
+    if not HighlightFrame then
+        return nil
+    end
+    HighlightFrame.Size = TargetGui.Size
+    HighlightFrame.Position = TargetGui.Position
+    HighlightFrame.ZIndex = TargetGui.ZIndex + 1
+    HighlightFrame.Visible = true
+    return HighlightFrame
+end
+
 local barActive, activeOptions = false, {}
 
 local function createDDown(dBut, callback, ...)
@@ -1534,6 +1559,7 @@ do
 	end
 
 	SetSelection_Bindable.OnInvoke = function(...)
+		SetSelectionBox2D(nil)
 		Selection:Set(...)
 		if Selection:Get()[1] then
 			local TargetIndex = findObjectIndex(Selection:Get()[1])
@@ -1541,13 +1567,17 @@ do
         	scrollBar:ScrollTo(ScrollIndex)
 		else
 			if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
-				Selection:Set({PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]})
+				local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+				Selection:Set({Obj})
+				SetSelectionBox2D(Obj)
 				local TargetIndex = findObjectIndex(Selection:Get()[1])
         		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
         		scrollBar:ScrollTo(ScrollIndex)
 			end
 			if #CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 and not CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]:IsDescendantOf(Dex) then
-				Selection:Set({PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]})
+				local Obj = CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+				Selection:Set({Obj})
+				SetSelectionBox2D(Obj)
 				local TargetIndex = findObjectIndex(Selection:Get()[1])
         		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
         		scrollBar:ScrollTo(ScrollIndex)
