@@ -340,6 +340,7 @@ local function createDDown(dBut, callback, ...)
         barActive = true
     end
     local slots, base = {...}, dBut
+	warn(#slots)
     if #slots == 1 then
         dBut.Text = slots[1]
         dBut.Interactable = false
@@ -1893,7 +1894,7 @@ function PromptPartESP(inst)
 	Connect(TextSizeArg.Type.MouseButton1Down, function()
 		createDDown(TextSizeArg.Type,function(choice)
 			TextSizeArg.Type.Text = choice
-		end,"TextSize")
+		end, "TextSize")
 	end)
 
 	Connect(CurrentPartESPWindow.MainWindow.Ok.MouseButton1Up, function()
