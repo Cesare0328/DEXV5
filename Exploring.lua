@@ -213,7 +213,7 @@ local function SetSelectionBox2D(TargetGui)
         end
         return nil
     end
-    local SelectionBox2D = TargetGui:FindFirstChild("SelectionBox2D")
+    local SelectionBox2D = Dex:FindFirstChild("SelectionBox2D")
     if not SelectionBox2D or not SelectionBox2D:IsA("ScreenGui") then
         return nil
     end
@@ -221,10 +221,32 @@ local function SetSelectionBox2D(TargetGui)
     if not HighlightFrame then
         return nil
     end
-    HighlightFrame.Size = TargetGui.Size
-    HighlightFrame.Position = TargetGui.Position
-    HighlightFrame.ZIndex = TargetGui.ZIndex + 1
-    HighlightFrame.Visible = true
+    SelectionBox2D.Enabled = true
+    if TargetGui.Parent:IsA("ScreenGui") then
+        SelectionBox2D.IgnoreGuiInset = TargetGui.Parent.IgnoreGuiInset
+    end
+    local function UpdateHighlight()
+        if not TargetGui or not HighlightFrame then
+            return
+        end
+        local AbsoluteSize = TargetGui.AbsoluteSize
+        HighlightFrame.Size = UDim2.new(0, AbsoluteSize.X, TargetGui.Size.Y.Scale, TargetGui.Size.Y.Offset)
+        HighlightFrame.Position = TargetGui.Position
+        HighlightFrame.AnchorPoint = TargetGui.AnchorPoint
+        HighlightFrame.ZIndex = TargetGui.ZIndex + 10
+        HighlightFrame.Visible = true
+    end
+    UpdateHighlight()
+    TargetGui:GetPropertyChangedSignal("Size"):Connect(UpdateHighlight)
+    TargetGui:GetPropertyChangedSignal("Position"):Connect(UpdateHighlight)
+    TargetGui:GetPropertyChangedSignal("AnchorPoint"):Connect(UpdateHighlight)
+    TargetGui:GetPropertyChangedSignal("ZIndex"):Connect(UpdateHighlight)
+    TargetGui.AncestryChanged:Connect(function()
+        if TargetGui.Parent:IsA("ScreenGui") then
+            SelectionBox2D.IgnoreGuiInset = TargetGui.Parent.IgnoreGuiInset
+        end
+        UpdateHighlight()
+    end)
     return HighlightFrame
 end
 
