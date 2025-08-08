@@ -1870,13 +1870,22 @@ function PromptPartESP(inst)
 
 	local IsBoxESP, IsDistanceESP, ArgumentList, ArgumentTemplate = false, false, CurrentPartESPWindow.MainWindow.Arguments, CurrentPartESPWindow.MainWindow.ArgumentTemplate
 
-	local newArgument = Clone(ArgumentTemplate)
-	newArgument.Parent = ArgumentList
-	newArgument.Visible = true
-	Connect(newArgument.Type.MouseButton1Down, function()
-		createDDown(newArgument.Type, function(choice)
-			newArgument.Type.Text = choice
-		end,"Name", "TextSize")
+	local NameArg = Clone(ArgumentTemplate)
+	NameArg.Parent = ArgumentList
+	NameArg.Visible = true
+	Connect(NameArg.Type.MouseButton1Down, function()
+		createDDown(NameArg.Type, function(choice)
+			NameArg.Type.Text = choice
+		end, "Name", "TextSize")
+	end)
+
+	local TextSizeArg = Clone(ArgumentTemplate)
+	TextSizeArg.Parent = ArgumentList
+	TextSizeArg.Visible = true
+	Connect(TextSizeArg.Type.MouseButton1Down, function()
+		createDDown(TextSizeArg.Type, function(choice)
+			TextSizeArg.Type.Text = choice
+		end, "Name", "TextSize")
 	end)
 
 	Connect(CurrentPartESPWindow.MainWindow.Ok.MouseButton1Up, function()
