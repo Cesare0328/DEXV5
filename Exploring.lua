@@ -1561,27 +1561,23 @@ do
 	SetSelection_Bindable.OnInvoke = function(...)
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
-		if Selection:Get()[1] then
-			local TargetIndex = findObjectIndex(Selection:Get()[1])
-        	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-        	scrollBar:ScrollTo(ScrollIndex)
-		else
-			if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
-				local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+		local found = true
+		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
+			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+			if Obj.Visible then
 				Selection:Set({Obj})
 				SetSelectionBox2D(Obj)
 				local TargetIndex = findObjectIndex(Selection:Get()[1])
         		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
         		scrollBar:ScrollTo(ScrollIndex)
+			else
+				found = false
 			end
-			--if #CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 and not CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]:IsDescendantOf(Dex) then
-				--local Obj = CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
-				--Selection:Set({Obj})
-				--SetSelectionBox2D(Obj)
-				--local TargetIndex = findObjectIndex(Selection:Get()[1])
-        		--local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-        		--scrollBar:ScrollTo(ScrollIndex)
-			--end
+		end
+		if Selection:Get()[1] and not found then
+			local TargetIndex = findObjectIndex(Selection:Get()[1])
+        	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        	scrollBar:ScrollTo(ScrollIndex)
 		end
 	end
 
