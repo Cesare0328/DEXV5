@@ -342,6 +342,7 @@ local function createDDown(dBut, callback, ...)
     local slots, base = {...}, dBut
     if #slots == 1 then
         dBut.Text = slots[1]
+		dBut.Parent.Value.Text = callback.Name
         dBut.Interactable = false
         barActive = false
         return
@@ -1879,18 +1880,16 @@ function PromptPartESP(inst)
 	local NameArg = Clone(ArgumentTemplate)
 	NameArg.Parent = ArgumentList
 	NameArg.Visible = true
-	createDDown(NameArg.Type, function(choice)
-		NameArg.Type.Text = choice
-	end, "Name")
+	createDDown(NameArg.Type, inst, "Name")
 
 	local TextSizeArg = Clone(ArgumentTemplate)
+	local Default = Instance.new("StringValue")
+	Default.Name = "15"
 	TextSizeArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	TextSizeArg.Visible = true
 	TextSizeArg.Parent = ArgumentList
-	createDDown(TextSizeArg.Type,function(choice)
-		TextSizeArg.Type.Text = choice
-	end, "TextSize")
+	createDDown(TextSizeArg.Type, Default, "TextSize")
 
 	Connect(CurrentPartESPWindow.MainWindow.Ok.MouseButton1Up, function()
 		if CurrentPartESPWindow and inst.Parent ~= nil then
