@@ -2152,7 +2152,7 @@ function rightClickMenu(sObj)
 			local MaxDimension = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
 			local Distance = (MaxDimension * 0.5) / math.tan(math.rad(70) * 0.5) + MaxDimension
 
-			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, Event1, Event2, Event3, Event4 = CFrame.new(), Distance, false, nil, Vectro3.new(0, 0, 0), nil, nil, nil, nil
+			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, Event1, Event2, Event3, Event4 = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), nil, nil, nil, nil
 
 			local function UpdateCamera()
     			Camera.CFrame = CFrame.new(Vector3.new(0, 0, Zoom), Vector3.new(0, 0, 0))
