@@ -2201,7 +2201,7 @@ function rightClickMenu(sObj)
 			local MaxDimension = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
 			local Distance = (MaxDimension * 0.5) / math.tan(math.rad(70) * 0.5) + MaxDimension
 
-			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, IsHovering, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), false, {}
+			local Rotation, Zoom, IsDragging, LastMousePos, PivotPoint, IsHovering, IsSubjectToHover, Events = CFrame.new(), Distance, false, nil, Vector3.new(0, 0, 0), false, false, {}
 
 			local function UpdateCamera()
     			Camera.CFrame = CFrame.new(Vector3.new(0, 0, Zoom), Vector3.new(0, 0, 0))
@@ -2219,11 +2219,13 @@ function rightClickMenu(sObj)
 			UpdateCamera()
 
 			Events.MouseEnter = MainWindow.MouseEnter:Connect(function()
+				IsSubjectToHover = true
     			IsHovering = true
 				LocalPlayer.CameraMinZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
 				LocalPlayer.CameraMaxZoomDistance = (workspace.CurrentCamera.Focus.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
 			end)
 			Events.MouseLeave = MainWindow.MouseLeave:Connect(function()
+				IsSubjectToHover = false
 				if not IsDragging then
         			IsHovering = false
         			LocalPlayer.CameraMinZoomDistance = OldMin
@@ -2280,6 +2282,7 @@ function rightClickMenu(sObj)
 
 			Events.InputEnded = UserInputService.InputEnded:Connect(function(Input)
     			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+					if not IsSubjectToHover then IsHovering = false then
         			IsDragging = false
         			if not IsHovering then
             			LocalPlayer.CameraMinZoomDistance = OldMin
