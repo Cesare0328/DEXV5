@@ -1653,14 +1653,6 @@ local function GetModelCFrameAndSize(model)
     local Center = (MinPos + MaxPos) * 0.5
     return CFrame.new(Center), Size
 end
-local function GetMouse3DPoint(MousePos)
-    local Ray = Camera:ViewportPointToRay(MousePos.X, MousePos.Y)
-    local RaycastParams = RaycastParams.new()
-    RaycastParams.FilterType = Enum.RaycastFilterType.Whitelist
-    RaycastParams.FilterDescendantsInstances = {ModelClone}
-    local RaycastResult = Workspace:Raycast(Camera.CFrame.Position, Ray.Direction * 1000, RaycastParams)
-    return RaycastResult and RaycastResult.Position or Vector3.new(0, 0, 0)
-end
 local function ToPropValue(value,type)
 	if type == "Vector2" then
 		local list = string_split(value,",")
@@ -2159,10 +2151,18 @@ function rightClickMenu(sObj)
     			local PivotCFrame = CFrame.new(PivotPoint)
     			ModelClone:PivotTo(PivotCFrame * Rotation * CFrame.new(-PivotPoint))
 			end
+			local function GetMouse3DPoint(MousePos)
+    			local Ray = Camera:ViewportPointToRay(MousePos.X, MousePos.Y)
+    			local RaycastParams = RaycastParams.new()
+    			RaycastParams.FilterType = Enum.RaycastFilterType.Whitelist
+    			RaycastParams.FilterDescendantsInstances = {ModelClone}
+    			local RaycastResult = Workspace:Raycast(Camera.CFrame.Position, Ray.Direction * 1000, RaycastParams)
+    			return RaycastResult and RaycastResult.Position or Vector3.new(0, 0, 0)
+			end
 			UpdateCamera()
 
 			Event1 = OkButton.MouseButton1Click:Connect(function()
-    			MainWindow.Visible = false
+    			MainWindow.Parent.Visible = true
     			ViewportFrame:Destroy()
 				Event1:Disconnect()
 				Event2:Disconnect()
