@@ -1542,9 +1542,15 @@ do
 		else
 			if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
 				Selection:Set({PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]})
+				local TargetIndex = findObjectIndex(Selection:Get()[1])
+        		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        		scrollBar:ScrollTo(ScrollIndex)
 			end
 			if #CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 and not CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]:IsDescendantOf(Dex) then
 				Selection:Set({PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]})
+				local TargetIndex = findObjectIndex(Selection:Get()[1])
+        		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        		scrollBar:ScrollTo(ScrollIndex)
 			end
 		end
 	end
