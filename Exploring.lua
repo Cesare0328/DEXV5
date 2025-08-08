@@ -1865,7 +1865,95 @@ local function ToPropValue(value,type)
 		return nil
 	end
 end
+local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
+    if not Target then return end
+	if v:IsA("Model") then
+		local found = false
+		for i,v in pairs(v:GetChildren()) do
+			if v:IsA("BasePart") then
+				found = true
+			end
+		end
+		if v.PrimaryPart then Target = v.PrimaryPart found = true end
+		if not found then
+			CreateCaution("WARNING", "This model does not have any parts to tie to.")
+		end
+	end
+    local Disconnect = false
 
+    local name = Drawing.new("Text")
+    name.Size = 17
+    name.Outline = true
+    name.OutlineColor = Color3.fromRGB(20, 20, 23)
+    name.Center = true
+    name.Font = Drawing.Fonts.Monospace
+
+    local Box
+    if IsBox then
+        Box = Drawing.new("Quad")
+        Box.Thickness = 1.85
+    end
+    local vis1, vis2, vis3, vis4 = false, false, false, false
+    local TopLeft, TopRight, BottomLeft, BottomRight = nil, nil, nil, nil
+
+    local loop
+    loop = RunService.RenderStepped:connect(function()
+        if not Target then
+            loop:Disconnect()
+            if name then
+                name.Visible = false
+                name:Destroy()
+            end
+            if Box then
+                Box.Visible = false
+                Box:Destroy()
+            end
+            return
+        end
+        local Distance
+        if workspace.CurrentCamera and Target then
+            Distance = math.floor((workspace.CurrentCamera:GetPivot().p - Target.Position).Magnitude)
+        end
+
+        local ScreenPositionUpper = CurrentCamera:WorldToViewportPoint((Target:GetRenderCFrame() * CFrame.new(0, Target.Size.Y + Target.Size.Y + (2 / 25), 0)).Position)
+        local pos, vis = CurrentCamera:WorldToViewportPoint(Target.Position + Vector3.new(0, 7, 0))
+        name.Color = Options.ESPColor.Value
+
+        if not IsDistance then
+            name.Text = Name
+        else
+            name.Text = Name .. " [" .. Distance .. "m]"
+        end
+
+        if Target then
+            name.Position = Vector2.new(ScreenPositionUpper.x, ScreenPositionUpper.y) + Vector2.new(0, name.TextBounds.Y - 45)
+        end
+        if vis and Target then
+            name.Visible = true
+        else
+            name.Visible = false
+        end
+
+        if IsBox then
+            local pos1, vis1 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(2.15, 3, 0).p)
+            local pos2, vis2 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(-2.15, 3, 0).p)
+            local pos3, vis3 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(2.15, -3, 0).p)
+            local pos4, vis4 = CurrentCamera:WorldToViewportPoint(CFrame.new(Target.Position, CurrentCamera.CFrame.p) * CFrame.new(-2.15, -3, 0).p)
+            Box.Color = Options.ESPColor.Value
+
+            TopLeft = Vector2.new(pos1.X, pos1.Y)
+            TopRight = Vector2.new(pos2.X, pos2.Y)
+            BottomLeft = Vector2.new(pos3.X, pos3.Y)
+            BottomRight = Vector2.new(pos4.X, pos4.Y)
+
+            Box.PointA = TopRight
+            Box.PointB = TopLeft
+            Box.PointC = BottomLeft
+            Box.PointD = BottomRight
+            Box.Visible = vis1 or vis2 or vis3 or vis4
+        end
+    end)
+end
 function PromptPartESP(inst)
 	if CurrentPartESPWindow then
 		Destroy(CurrentPartESPWindow)
