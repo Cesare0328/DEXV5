@@ -2127,6 +2127,7 @@ function rightClickMenu(sObj)
 			if not Option.Modifiable or not #Selection:Get() == 1 then
 				return
 			end
+			setthreadidentity(8)
 			local MainWindow = Dex.ModelViewer.MainWindow
 			local OkButton = MainWindow:WaitForChild("Ok")
 
