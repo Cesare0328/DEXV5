@@ -2282,7 +2282,7 @@ function rightClickMenu(sObj)
 
 			Events.InputEnded = UserInputService.InputEnded:Connect(function(Input)
     			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-					if not IsSubjectToHover then IsHovering = false then
+					if not IsSubjectToHover then IsHovering = false end
         			IsDragging = false
         			if not IsHovering then
             			LocalPlayer.CameraMinZoomDistance = OldMin
