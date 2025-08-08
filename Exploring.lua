@@ -2197,6 +2197,8 @@ function rightClickMenu(sObj)
         			UpdateCamera()
     			end
 			end)
+			MainWindow.Parent.Visible = true
+			MainWindow.Parent.Title.Text = "[Model Viewer] Viewing: " .. Model.Name
 		elseif option == "Select Children" then
 			if not Option.Modifiable then
 				return
