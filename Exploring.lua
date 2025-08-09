@@ -328,7 +328,7 @@ end
 
 local barActive, activeOptions = false, {}
 
-local function createDDown(dBut, callback, ...)
+getgenv().createDDown = function(dBut, callback, ...)
     if barActive then
         for _, v in ipairs(activeOptions) do
             Destroy(v)
@@ -2391,7 +2391,7 @@ function rightClickMenu(sObj)
 	end
     if IsA(sObj, "Model") and not sObj == workspace then
 		table_insert(actions, 7, "Ungroup")
-		table_insert(actions, 7, "View Model")
+		table_insert(actions, 10, "View Model")
 	end
     if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
