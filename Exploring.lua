@@ -328,7 +328,7 @@ end
 
 local barActive, activeOptions = false, {}
 
-local function createDDown(dBut, callback, ...)
+getgenv().createDDown = function(dBut, callback, ...)
     if barActive then
         for _, v in ipairs(activeOptions) do
             Destroy(v)
