@@ -509,28 +509,28 @@ local function PromptStreamingEnabledCaution(TitleLabel)
 	BaseArg.Parent = ArgumentList
 	BaseArg.Visible = true
     ATDict[1] = BaseArg
-	createDDown(BaseArg.Type, inst, "Base Render")
+	createDDown(BaseArg.Type, TitleLabel, "Base Render")
 
     local ScaleArg = Clone(ArgumentTemplate)
     ScaleArg.Size = UDim2_new(0, 270, 0, ScaleArg.Size.Y.Offset)
 	ScaleArg.Parent = ArgumentList
 	ScaleArg.Visible = true
     ATDict[2] = ScaleArg
-	createDDown(ScaleArg.Type, inst, "Scale Render")
+	createDDown(ScaleArg.Type, TitleLabel, "Scale Render")
 
     local IntervalArg = Clone(ArgumentTemplate)
     IntervalArg.Size = UDim2_new(0, 270, 0, IntervalArg.Size.Y.Offset)
 	IntervalArg.Parent = ArgumentList
 	IntervalArg.Visible = true
     ATDict[3] = IntervalArg
-	createDDown(IntervalArg.Type, inst, "Interval")
+	createDDown(IntervalArg.Type, TitleLabel, "Interval")
 
     local MaxArg = Clone(ArgumentTemplate)
     MaxArg.Size = UDim2_new(0, 270, 0, MaxArg.Size.Y.Offset)
 	MaxArg.Parent = ArgumentList
 	MaxArg.Visible = true
     ATDict[4] = MaxArg
-	createDDown(MaxArg.Type, inst, "Max Render")
+	createDDown(MaxArg.Type, TitleLabel, "Max Render")
 
     for i = 1, 4 do
         HandleAddition(CurrentSaveInstanceWindow.MainWindow["Add" .. tostring(i)], ATDict[i].Type.Text, ATDictScale[i], ATDictBase[i], ArgumentList)
