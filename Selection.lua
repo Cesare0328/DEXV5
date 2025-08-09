@@ -15,6 +15,7 @@ local RunService = cloneref(game:GetService("RunService"))
 local CoreGui = cloneref( game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
 local TweenService = cloneref(game:GetService("TweenService"))
+local UserInputService = cloneref(game:GetService("UserInputService"))
 local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
 -- < Class Aliases > --
 local WaitForChild = RunService.WaitForChild
@@ -36,6 +37,8 @@ end)()
 local Heartbeat = RunService.Heartbeat
 local SelectionBoxes = {}
 local Gui = script.Parent
+local CurrentSaveInstanceWindow
+local SaveCautionWindow = WaitForChild(Dex, "SaveCaution")
 local SelectionBox = WaitForChild(script, "Box", 300)
 local IntroFrame = WaitForChild(Gui, "IntroFrame")
 local SideMenu = WaitForChild(Gui, "SideMenu")
@@ -414,6 +417,142 @@ local function CountInstances(instance, avoidPlayerCharacters)
     return count
 end
 
+local function StartScaleBasedRendering(base, scale, interval, max)
+local base = base
+repeat task.wait()
+    sethiddenproperty(workspace, "StreamingMinRadius", base)
+    sethiddenproperty(workspace, "StreamingTargetRadius", base)
+    Player:RequestStreamAroundAsync(workspace.CurrentCamera.CFrame.p)
+    base += scale
+    task.wait(interval)
+until base >= max
+end
+
+local function HandleAddition(Instance, Type, Scale, Base, ArgumentList)
+local AddHover
+Connect(Instance.MouseEnter, function()
+	AddHover = true
+end)
+Connect(Instance.MouseLeave, function()
+	AddHover = false
+end)
+Instance.MouseButton1Down:Connect(function()
+    if CurrentSaveInstanceWindow then
+        for _, v in pairs(GetChildren(ArgumentList)) do
+            if v.Type.Text == Type then
+                local success, val = pcall(tonumber, v.Value.Text)
+                if success and val then
+					val += Scale
+                    v.Value.Text = tostring(val)
+					task.wait(1)
+					while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and AddHover do
+						val += Scale
+                    	v.Value.Text = tostring(val)
+					    task.wait(0.05)
+					end
+                else
+                    v.Value.Text = tostring(Base)
+                end
+            end
+        end
+    end
+end)
+end
+
+local function HandleSubtraction(Instance, Type, Scale, Base, ArgumentList)
+local SubHover
+Connect(Instance.MouseEnter, function()
+	SubHover = true
+end)
+Connect(Instance.MouseLeave, function()
+	SubHover = false
+end)
+Instance.MouseButton1Down:Connect(function()
+    if CurrentSaveInstanceWindow then
+		for _, v in pairs(GetChildren(ArgumentList)) do
+            if v.Type.Text == Type then
+                local success, val = pcall(tonumber, v.Value.Text)
+                if success and val then
+					val -= Scale
+					if val < Base then v.Value.Text = tostring(val) end
+					task.wait(1)
+					while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and SubHover do
+						val -= Scale
+						if val < Base then v.Value.Text = tostring(val) end
+						task.wait(0.05)
+					end
+                else
+                    v.Value.Text = tostring(Base)
+                end
+            end
+        end
+	end
+end)
+end
+local function PromptStreamingEnabledCaution(TitleLabel)
+    TitleLabel.Text = "Waiting..."
+    local ATDict = {[1] = nil, [2] = nil, [3] = nil, [4] = nil}
+    local ATDictScale = {[1] = 500, [2] = 500, [3] = 0.5, [4] = 500}
+    local ATDictBase = {[1] = 1000, [2] = 500, [3] = 0.5, [4] = 10000}
+    if CurrentSaveInstanceWindow then
+		Destroy(CurrentSaveInstanceWindow)
+		CurrentSaveInstanceWindow = nil
+	end
+	CurrentSaveInstanceWindow = Clone(SaveCautionWindow)
+	CurrentSaveInstanceWindow.Parent = Dex
+	CurrentSaveInstanceWindow.Visible = true
+    
+    local AddHover, SubHover, ArgumentList, ArgumentTemplate = false, false, CurrentSaveInstanceWindow.MainWindow.Arguments, CurrentSaveInstanceWindow.MainWindow.ArgumentTemplate
+
+	local BaseArg = Clone(ArgumentTemplate)
+    BaseArg.Size = UDim2_new(0, 270, 0, BaseArg.Size.Y.Offset)
+	BaseArg.Parent = ArgumentList
+	BaseArg.Visible = true
+    ATDict[1] = BaseArg
+	createDDown(BaseArg.Type, inst, "Base Render")
+
+    local ScaleArg = Clone(ArgumentTemplate)
+    ScaleArg.Size = UDim2_new(0, 270, 0, ScaleArg.Size.Y.Offset)
+	ScaleArg.Parent = ArgumentList
+	ScaleArg.Visible = true
+    ATDict[2] = ScaleArg
+	createDDown(ScaleArg.Type, inst, "Scale Render")
+
+    local IntervalArg = Clone(ArgumentTemplate)
+    IntervalArg.Size = UDim2_new(0, 270, 0, IntervalArg.Size.Y.Offset)
+	IntervalArg.Parent = ArgumentList
+	IntervalArg.Visible = true
+    ATDict[3] = IntervalArg
+	createDDown(IntervalArg.Type, inst, "Interval")
+
+    local MaxArg = Clone(ArgumentTemplate)
+    MaxArg.Size = UDim2_new(0, 270, 0, MaxArg.Size.Y.Offset)
+	MaxArg.Parent = ArgumentList
+	MaxArg.Visible = true
+    ATDict[4] = MaxArg
+	createDDown(MaxArg.Type, inst, "Max Render")
+
+    for i = 1, 4 do
+        HandleAddition(CurrentSaveInstanceWindow.MainWindow["Add" .. tostring(i)], ATDict[i].Type.Text, ATDictScale[i], ATDictBase[i], ArgumentList)
+    end
+    for i = 1, 4 do
+        HandleSubtraction(CurrentSaveInstanceWindow.MainWindow["Subtract" .. tostring(i)], ATDict[i].Type.Text, ATDictScale[i], ATDictBase[i], ArgumentList)
+    end
+    Connect(CurrentSaveInstanceWindow.MainWindow.Ok.MouseButton1Up, function()
+		if CurrentSaveInstanceWindow and inst.Parent ~= nil then
+			local success, val = pcall(tonumber, TextSizeArg.Value.Text)
+			if not success or not val then
+				val = 15
+			end
+            task.spawn(function()
+			    StartScaleBasedRendering(BaseArg.Value.Text, ScaleArg.Value.Text, IntervalArg.Value.Text, MaxArg.Value.Text)
+            end)
+			Destroy(CurrentSaveInstanceWindow)
+			CurrentSaveInstanceWindow = nil
+		end
+	end)
+end
+
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
         statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
@@ -428,7 +567,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
 
-    local isLocalPlayer = instance == Players.LocalPlayer
+    local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
 
     if isLocalPlayer then
@@ -535,9 +674,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     table.insert(output, "</Item>")
     return processed
 end
+
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
-	local ScreenGui = Instance.new("ScreenGui")
-	local Started = true
+    local ScreenGui = Instance.new("ScreenGui")
+    local Started = true
     ScreenGui.Parent = CoreGui
 
     local TitleLabel = Instance.new("TextLabel")
@@ -552,7 +692,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.TextSize = 16
     TitleLabel.FontFace.Weight = Enum.FontWeight.Bold
-	TitleLabel.TextXAlignment = Enum.TextXAlignment.Right
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Right
 
     local Loading = Instance.new("ImageLabel")
     Loading.Parent = ScreenGui
@@ -562,11 +702,12 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     Loading.BackgroundTransparency = 1
     Loading.ImageColor3 = Color3.fromRGB(255, 255, 255)
     Loading.Image = getcustomasset("DEXV5\\Assets\\Loading.png")
-	
-	local function ManageLoadingIcon(Icon)
+
+    local function ManageLoadingIcon(Icon)
         local RotSpeed = 0.4
         local TweenInformation = TweenInfo.new(RotSpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-        while Started do task.wait()
+        while Started do
+            task.wait()
             local Tween = TweenService:Create(Icon, TweenInformation, {Rotation = 360})
             Tween:Play()
             Tween.Completed:Wait()
@@ -577,6 +718,12 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     task.spawn(function()
         ManageLoadingIcon(Loading)
     end)
+
+    if workspace.StreamingEnabled then
+        TitleLabel.Text = "StreamingEnabled Detected"
+        task.wait(0.575)
+        PromptStreamingEnabledCaution(TitleLabel)
+    end
 
     local output = {XmlHeader}
     local totalInstances = 0
@@ -608,8 +755,8 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
             table.insert(output, "<Properties>")
             table.insert(output, PropertySerializers.string("Name", instance.Name))
             table.insert(output, "</Properties>")
-            if Players.LocalPlayer then
-                processedInstances = SerializeInstance(Players.LocalPlayer, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+            if Player then
+                processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
             end
             table.insert(output, "</Item>")
         else
@@ -646,7 +793,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     statusCallback(processedInstances, totalInstances, "Serialization complete, writing file...")
 
     local xml = table.concat(output, "\n")
-	local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
+    local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
     if ok and info and info.Name then
         placeName = info.Name:gsub("[%s%p]+", "_")
     end
@@ -658,9 +805,9 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     else
         statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
     end
-	Started = false
-	Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
-	task.delay(2, function()
+    Started = false
+    Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
+    task.delay(2, function()
         ScreenGui:Destroy()
     end)
 end
