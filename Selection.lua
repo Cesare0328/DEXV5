@@ -556,7 +556,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
 			local success, val = pcall(tonumber, BaseArg.Value.Text)
 			local success2, val2 = pcall(tonumber, ScaleArg.Value.Text)
 			local success3, val3 = pcall(tonumber, IntervalArg.Value.Text)
-			local success4, val5 = pcall(tonumber, MaxArg.Value.Text)
+			local success4, val4 = pcall(tonumber, MaxArg.Value.Text)
 			
             Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
