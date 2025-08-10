@@ -559,6 +559,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
             Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
 			StartScaleBasedRendering(val or ATDictBase[1], val2 or ATDictBase[2], val3 or ATDictBase[3], val4 or ATDictBase[4])
+            return true
 		end
 	end)
     Connect(CurrentSaveInstanceWindow.MainWindow.Cancel.MouseButton1Up, function()
@@ -568,6 +569,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
 			return false
 		end
 	end)
+    coroutine.yield()
 end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
