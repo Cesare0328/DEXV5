@@ -545,16 +545,16 @@ local function PromptStreamingEnabledCaution(TitleLabel)
         HandleSubtraction(CurrentSaveInstanceWindow.MainWindow["Subtract" .. tostring(i)], ATDict[i].Type.Text, ATDictScale[i], ATDictBase[i], ArgumentList)
     end
     Connect(CurrentSaveInstanceWindow.MainWindow.Ok.MouseButton1Up, function()
-		if CurrentSaveInstanceWindow and inst.Parent ~= nil then
-			local success, val = pcall(tonumber, TextSizeArg.Value.Text)
-			if not success or not val then
-				val = 15
-			end
-            task.spawn(function()
-			    StartScaleBasedRendering(BaseArg.Value.Text, ScaleArg.Value.Text, IntervalArg.Value.Text, MaxArg.Value.Text)
-            end)
-			Destroy(CurrentSaveInstanceWindow)
+		if CurrentSaveInstanceWindow then
+            TitleLabel.Text = "Starting..."
+			local success, val = pcall(tonumber, BaseArg.Value.Text)
+			local success2, val2 = pcall(tonumber, ScaleArg.Value.Text)
+			local success3, val3 = pcall(tonumber, IntervalArg.Value.Text)
+			local success4, val5 = pcall(tonumber, MaxArg.Value.Text)
+			
+            Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
+			StartScaleBasedRendering(val or ATDictBase[1], val2 or ATDictBase[2], val3 or ATDictBase[3], val4 or ATDictBase[4])
 		end
 	end)
 end
