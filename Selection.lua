@@ -633,6 +633,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if instance:IsA("MeshPart") then
                 properties.MeshId = instance.MeshId
                 properties.TextureID = instance.TextureID
+                properties.MeshSize = instance.MeshSize
             end
             if instance:IsA("BasePart") and instance.MaterialVariant ~= "" then
                 properties.MaterialVariant = instance.MaterialVariant
