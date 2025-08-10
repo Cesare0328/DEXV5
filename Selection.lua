@@ -491,6 +491,7 @@ end)
 end
 local function PromptStreamingEnabledCaution(TitleLabel)
     TitleLabel.Text = "Waiting..."
+    local response = nil
     local ATDict = {[1] = nil, [2] = nil, [3] = nil, [4] = nil}
     local ATDictScale = {[1] = 500, [2] = 500, [3] = 0.5, [4] = 500}
     local ATDictBase = {[1] = 1000, [2] = 500, [3] = 0.5, [4] = 10000}
@@ -559,17 +560,20 @@ local function PromptStreamingEnabledCaution(TitleLabel)
             Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
 			StartScaleBasedRendering(val or ATDictBase[1], val2 or ATDictBase[2], val3 or ATDictBase[3], val4 or ATDictBase[4])
-            return true
+            response = true
 		end
 	end)
     Connect(CurrentSaveInstanceWindow.MainWindow.Cancel.MouseButton1Up, function()
 		if CurrentSaveInstanceWindow then
             Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
-			return false
+			response = false
 		end
 	end)
-    coroutine.yield()
+    while response == nil do
+        task.wait()
+    end
+    return response
 end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
