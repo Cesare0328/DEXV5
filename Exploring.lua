@@ -2379,10 +2379,7 @@ function rightClickMenu(sObj)
 	end
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") and not sObj == workspace then
 		table_insert(actions, 8, "Teleport to")
-		table_insert(actions, 9, "Add to ESP")
-		for i,v in pairs(actions) do
-			warn(i,v)
-		end
+		table_insert(actions, 11, "Add to ESP")
 	end
     if filteringInstances() and Searched then
 		table_insert(actions, 1, "Clear Search and Jump to")
@@ -2395,8 +2392,8 @@ function rightClickMenu(sObj)
 		table_insert(actions, 8, "Fire ProximityPrompt")
 	end
     if IsA(sObj, "Model") and not sObj == workspace then
-		table_insert(actions, 7, "Ungroup")
-		table_insert(actions, 10, "View Model")
+		table_insert(actions, 8, "Ungroup")
+		table_insert(actions, 9, "View Model")
 	end
     if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
 		table_insert(actions, 7, "View Script")
