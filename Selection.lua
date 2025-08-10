@@ -474,11 +474,11 @@ Instance.MouseButton1Down:Connect(function()
                 local success, val = pcall(tonumber, v.Value.Text)
                 if success and val then
 					val -= Scale
-					if val < Base then v.Value.Text = tostring(val) end
+					if val < Base then v.Value.Text = tostring(Base) end
 					task.wait(1)
 					while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and SubHover do
 						val -= Scale
-						if val < Base then v.Value.Text = tostring(val) end
+						if val < Base then v.Value.Text = tostring(Base) end
 						task.wait(0.05)
 					end
                 else
@@ -514,6 +514,8 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     local ScaleArg = Clone(ArgumentTemplate)
     ScaleArg.Size = UDim2_new(0, 270, 0, ScaleArg.Size.Y.Offset)
 	ScaleArg.Parent = ArgumentList
+    TextSizeArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
+	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	ScaleArg.Visible = true
     ATDict[2] = ScaleArg
 	createDDown(ScaleArg.Type, TitleLabel, "Scale Render")
@@ -521,6 +523,8 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     local IntervalArg = Clone(ArgumentTemplate)
     IntervalArg.Size = UDim2_new(0, 270, 0, IntervalArg.Size.Y.Offset)
 	IntervalArg.Parent = ArgumentList
+    TextSizeArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
+	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	IntervalArg.Visible = true
     ATDict[3] = IntervalArg
 	createDDown(IntervalArg.Type, TitleLabel, "Interval")
@@ -528,6 +532,8 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     local MaxArg = Clone(ArgumentTemplate)
     MaxArg.Size = UDim2_new(0, 270, 0, MaxArg.Size.Y.Offset)
 	MaxArg.Parent = ArgumentList
+    TextSizeArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
+	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	MaxArg.Visible = true
     ATDict[4] = MaxArg
 	createDDown(MaxArg.Type, TitleLabel, "Max Render")
