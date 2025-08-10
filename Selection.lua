@@ -421,7 +421,7 @@ local function StartScaleBasedRendering(base, scale, interval, max, TitleLabel)
 local base = base
 repeat task.wait()
     TitleLabel.Text = string.format("Rendering [%s/%s]", tostring(base), tostring(max))
-    sethiddenproperty(workspace, "StreamingMinRadius", base)
+    --sethiddenproperty(workspace, "StreamingMinRadius", base)
     sethiddenproperty(workspace, "StreamingTargetRadius", base)
     Player:RequestStreamAroundAsync(workspace.CurrentCamera.CFrame.p)
     base += scale
