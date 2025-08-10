@@ -342,7 +342,9 @@ getgenv().createDDown = function(dBut, callback, ...)
     local slots, base = {...}, dBut
     if #slots == 1 then
         dBut.Text = slots[1]
-		dBut.Parent.Value.Text = callback.Name
+		if not callback:IsA("TextLabel") then
+			dBut.Parent.Value.Text = callback.Name
+		end
         dBut.Interactable = false
         barActive = false
         return
