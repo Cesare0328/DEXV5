@@ -756,9 +756,9 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         game.DescendantAdded:Connect(function(v)
             if v:IsA("Model") then
                 v.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
-            else
-                v:Clone().Parent = v.Parent
-                v:Destroy()
+            --else
+                --v:Clone().Parent = v.Parent
+                --v:Destroy()
             end
         end)
     end
