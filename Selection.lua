@@ -508,6 +508,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     BaseArg.Size = UDim2_new(0, 270, 0, BaseArg.Size.Y.Offset)
 	BaseArg.Parent = ArgumentList
 	BaseArg.Visible = true
+    BaseArg.Value.Text = tostring(ATDictBase[1])
     ATDict[1] = BaseArg
 	createDDown(BaseArg.Type, TitleLabel, "Base Render")
 
@@ -517,6 +518,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     ScaleArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	ScaleArg.Visible = true
+    ScaleArg.Value.Text = tostring(ATDictBase[2])
     ATDict[2] = ScaleArg
 	createDDown(ScaleArg.Type, TitleLabel, "Scale Render")
 
@@ -526,6 +528,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     IntervalArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	IntervalArg.Visible = true
+    IntervalArg.Value.Text = tostring(ATDictBase[3])
     ATDict[3] = IntervalArg
 	createDDown(IntervalArg.Type, TitleLabel, "Interval")
 
@@ -535,6 +538,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     MaxArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
 	MaxArg.Visible = true
+    MaxArg.Value.Text = tostring(ATDictBase[4])
     ATDict[4] = MaxArg
 	createDDown(MaxArg.Type, TitleLabel, "Max Render")
 
@@ -555,6 +559,13 @@ local function PromptStreamingEnabledCaution(TitleLabel)
             Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
 			StartScaleBasedRendering(val or ATDictBase[1], val2 or ATDictBase[2], val3 or ATDictBase[3], val4 or ATDictBase[4])
+		end
+	end)
+    Connect(CurrentSaveInstanceWindow.MainWindow.Cancel.MouseButton1Up, function()
+		if CurrentSaveInstanceWindow then
+            Destroy(CurrentSaveInstanceWindow)
+			CurrentSaveInstanceWindow = nil
+			return false
 		end
 	end)
 end
@@ -728,7 +739,8 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     if workspace.StreamingEnabled then
         TitleLabel.Text = "StreamingEnabled Detected"
         task.wait(0.575)
-        PromptStreamingEnabledCaution(TitleLabel)
+        local val = PromptStreamingEnabledCaution(TitleLabel)
+        if not val then TitleLabel.Text = "Cancelled." task.wait(0.5) Started = false Loading:Destroy() TitleLabel:Destroy() end
     end
 
     local output = {XmlHeader}
