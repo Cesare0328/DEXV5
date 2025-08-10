@@ -381,6 +381,7 @@ local PropertySerializers = {
         return string.format('<float name="%s">%.6f</float>', name, value)
     end,
     Vector3 = function(name, value)
+        if name == "Size" then name = "size" end
         return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>',
             name, value.X, value.Y, value.Z)
     end,
