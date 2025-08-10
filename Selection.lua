@@ -746,7 +746,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         TitleLabel.Text = "StreamingEnabled Detected"
         task.wait(0.575)
         local val = PromptStreamingEnabledCaution(TitleLabel)
-        if not val then TitleLabel.Text = "Cancelled." task.wait(0.5) Started = false Loading:Destroy() TitleLabel:Destroy() end
+        if not val then TitleLabel.Text = "Cancelled." task.wait(0.5) Started = false Loading:Destroy() TitleLabel:Destroy() return end
     end
 
     local output = {XmlHeader}
