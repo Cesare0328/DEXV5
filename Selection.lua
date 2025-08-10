@@ -753,6 +753,14 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         task.wait(0.575)
         local val = PromptStreamingEnabledCaution(TitleLabel)
         if not val then TitleLabel.Text = "Cancelled." task.wait(0.5) Started = false Loading:Destroy() TitleLabel:Destroy() return end
+        game.DescendantAdded:Connect(function(v)
+            if v:IsA("Model") then
+                v.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
+            else
+                v:Clone().Parent = v.Parent
+                v:Destroy()
+            end
+        end)
     end
 
     local output = {XmlHeader}
