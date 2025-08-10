@@ -429,7 +429,7 @@ until base >= max
 end
 
 local function HandleAddition(Instance, Type, Scale, Base, ArgumentList)
-local AddHover
+local AddHover = true
 Connect(Instance.MouseEnter, function()
 	AddHover = true
 end)
@@ -460,7 +460,7 @@ end)
 end
 
 local function HandleSubtraction(Instance, Type, Scale, Base, ArgumentList)
-local SubHover
+local SubHover = true
 Connect(Instance.MouseEnter, function()
 	SubHover = true
 end)
@@ -474,11 +474,11 @@ Instance.MouseButton1Down:Connect(function()
                 local success, val = pcall(tonumber, v.Value.Text)
                 if success and val then
 					val -= Scale
-					if val < Base then v.Value.Text = tostring(Base) end
+					if val < Base then v.Value.Text = tostring(Base) else v.Value.Text = tostring(val) end
 					task.wait(1)
 					while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and SubHover do
 						val -= Scale
-						if val < Base then v.Value.Text = tostring(Base) end
+						if val < Base then v.Value.Text = tostring(Base) else v.Value.Text = tostring(val) end
 						task.wait(0.05)
 					end
                 else
