@@ -368,7 +368,11 @@ local function GetRef(instance)
 end
 local PropertySerializers = {
     string = function(name, value)
-        return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
+        if name == "MeshId" or name == "TextureID" then
+            return string.format('<Content name="%s">%s</Content>', name, EscapeXml(value))
+        else
+            return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
+        end
     end,
     bool = function(name, value)
         return string.format('<bool name="%s">%s</bool>', name, tostring(value):lower())
