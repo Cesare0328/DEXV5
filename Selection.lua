@@ -381,7 +381,7 @@ local PropertySerializers = {
         return string.format('<float name="%s">%.6f</float>', name, value)
     end,
     Vector3 = function(name, value)
-        if name == "Size" then name = "size" elseif name == "MeshSize" then name = "ModelMeshSize" end
+        if name == "Size" then name = "size" end
         return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>',
             name, value.X, value.Y, value.Z)
     end,
@@ -633,7 +633,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if instance:IsA("MeshPart") then
                 properties.MeshId = instance.MeshId
                 properties.TextureID = instance.TextureID
-                properties.MeshSize = instance.MeshSize
             end
             if instance:IsA("BasePart") and instance.MaterialVariant ~= "" then
                 properties.MaterialVariant = instance.MaterialVariant
