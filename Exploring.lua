@@ -2040,11 +2040,11 @@ function PromptPartESP(inst)
                 	local success, val = pcall(tonumber, v.Value.Text)
                 	if success and val then
 						val -= 1
-						if val < 1 then v.Value.Text = tostring(val) end
+						if val < 1 then v.Value.Text = "15" end
 						task.wait(1)
 						while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and SubHover do
 							val -= 1
-							if val < 1 then v.Value.Text = tostring(val) end
+							if val < 1 then v.Value.Text = "15" end
 							task.wait(0.05)
 						end
                 	else
