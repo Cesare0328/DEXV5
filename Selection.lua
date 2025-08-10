@@ -678,6 +678,11 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Shadows = instance.Shadows,
                 Angle = instance.Angle
             }
+        elseif instance:IsA("BlurEffect") then
+            properties = {
+                Enabled = false,
+                Size = instance.Size
+            }
         end
 
         for propName, propValue in pairs(properties) do
