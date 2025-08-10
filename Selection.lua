@@ -417,9 +417,10 @@ local function CountInstances(instance, avoidPlayerCharacters)
     return count
 end
 
-local function StartScaleBasedRendering(base, scale, interval, max)
+local function StartScaleBasedRendering(base, scale, interval, max, TitleLabel)
 local base = base
 repeat task.wait()
+    TitleLabel.Text = string.format("Rendering [%s/%s]", tostring(base), tostring(max))
     sethiddenproperty(workspace, "StreamingMinRadius", base)
     sethiddenproperty(workspace, "StreamingTargetRadius", base)
     Player:RequestStreamAroundAsync(workspace.CurrentCamera.CFrame.p)
@@ -559,7 +560,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
 			
             Destroy(CurrentSaveInstanceWindow)
 			CurrentSaveInstanceWindow = nil
-			StartScaleBasedRendering(val or ATDictBase[1], val2 or ATDictBase[2], val3 or ATDictBase[3], val4 or ATDictBase[4])
+			StartScaleBasedRendering(val or ATDictBase[1], val2 or ATDictBase[2], val3 or ATDictBase[3], val4 or ATDictBase[4], TitleLabel)
             response = true
 		end
 	end)
