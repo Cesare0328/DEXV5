@@ -625,6 +625,16 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Material = instance.Material,
                 Rotation = instance.Rotation
             }
+            if instance:IsA("MeshPart") then
+                properties.MeshId = instance.MeshId
+                properties.TextureId = instance.TextureId -- Include TextureId for MeshParts as well
+            end
+            if instance:IsA("BasePart") and instance.MaterialVariant ~= "" then
+                properties.MaterialVariant = instance.MaterialVariant
+            end
+            if instance:IsA("Part") then
+                properties.Shape = instance.Shape
+            end
         elseif instance:IsA("Model") then
             properties = {
                 PrimaryPart = instance.PrimaryPart,
