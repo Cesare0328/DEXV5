@@ -640,6 +640,15 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if instance:IsA("Part") then
                 properties.Shape = instance.Shape
             end
+        elseif instance:IsA("SpecialMesh") then
+            properties = {
+                MeshId = instance.MeshId,
+                MeshType = instance.MeshType,
+                Offset = instance.Offset,
+                Scale = instance.Scale,
+                VertexColor = instance.VertexColor,
+                TextureId = instance.TextureId
+            }
         elseif instance:IsA("Model") then
             properties = {
                 PrimaryPart = instance.PrimaryPart,
