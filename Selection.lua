@@ -366,48 +366,153 @@ local function GetRef(instance)
     end
     return RefCache[instance]
 end
+local function EscapeXml(str)
+    if type(str) ~= "string" then
+        return str
+    end
+    return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
+end
+
 local PropertySerializers = {
     string = function(name, value)
-        if name == "MeshId" or name == "TextureID" and value ~= "" then
+        if name == "MeshId" or name == "TextureId" or name == "TextureID" and value ~= "" then
             return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
         else
             return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
         end
     end,
+
     bool = function(name, value)
         return string.format('<bool name="%s">%s</bool>', name, tostring(value):lower())
     end,
+
     number = function(name, value)
-        return string.format('<float name="%s">%.6f</float>', name, value)
+        if math.floor(value) == value then
+            return string.format('<int name="%s">%d</int>', name, value)
+        else
+            return string.format('<float name="%s">%.6f</float>', name, value)
+        end
     end,
+
     Vector3 = function(name, value)
-        if name == "Size" then name = "size" end
-        return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>',
-            name, value.X, value.Y, value.Z)
+        return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>', name, value.X, value.Y, value.Z)
     end,
+
     CFrame = function(name, value)
         local c = {value:GetComponents()}
-        return string.format(
-            '<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z>' ..
-            '<R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02>' ..
-            '<R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12>' ..
-            '<R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CoordinateFrame>',
-            name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+        return string.format('<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R21><R22>%.6f</R22></CoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
     end,
+
     Color3 = function(name, value)
-        return string.format('<Color3 name="%s"><R>%.6f</R><G>%.6f</G><B>%.6f</B></Color3>',
-            name, value.R, value.G, value.B)
+        return string.format('<Color3 name="%s"><R>%.6f</R><G>%.6f</G><B>%.6f</B></Color3>', name, value.R, value.G, value.B)
     end,
+
     BrickColor = function(name, value)
         return string.format('<BrickColor name="%s">%d</BrickColor>', name, value.Number)
     end,
+
     Instance = function(name, value)
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
     end,
+
     EnumItem = function(name, value)
         return string.format('<token name="%s">%s</token>', name, tostring(value))
+    end,
+
+    UDim2 = function(name, value)
+        return string.format('<UDim2 name="%s"><XS>%.6f</XS><XO>%d</XO><YS>%.6f</YS><YO>%d</YO></UDim2>', name, value.X.Scale, value.X.Offset, value.Y.Scale, value.Y.Offset)
+    end,
+
+    Vector2 = function(name, value)
+        return string.format('<Vector2 name="%s"><X>%.6f</X><Y>%.6f</Y></Vector2>', name, value.X, value.Y)
+    end,
+
+    Rect = function(name, value)
+        return string.format('<Rect2D name="%s"><min><X>%.6f</X><Y>%.6f</Y></min><max><X>%.6f</X><Y>%.6f</Y></max></Rect2D>', name, value.Min.X, value.Min.Y, value.Max.X, value.Max.Y)
+    end,
+
+    Faces = function(name, value)
+        return string.format('<Faces name="%s">%d</Faces>', name, value.Value)
+    end,
+
+    Axes = function(name, value)
+        return string.format('<Axes name="%s">%d</Axes>', name, value.Value)
+    end,
+    
+    UDim = function(name, value)
+        return string.format('<UDim name="%s"><S>%.6f</S><O>%d</O></UDim>', name, value.Scale, value.Offset)
+    end,
+
+    ColorSequence = function(name, value)
+        local points = ""
+        for _, keypoint in ipairs(value.Keypoints) do
+            points = points .. string.format('<ColorSequenceKeypoint><Time>%.6f</Time><Value><R>%.6f</R><G>%.6f</G><B>%.6f</B></Value></ColorSequenceKeypoint>', keypoint.Time, keypoint.Value.R, keypoint.Value.G, keypoint.Value.B)
+        end
+        return string.format('<ColorSequence name="%s">%s</ColorSequence>', name, points)
+    end,
+
+    NumberSequence = function(name, value)
+        local points = ""
+        for _, keypoint in ipairs(value.Keypoints) do
+            points = points .. string.format('<NumberSequenceKeypoint><Time>%.6f</Time><Value>%.6f</Value><Envelope>%.6f</Envelope></NumberSequenceKeypoint>', keypoint.Time, keypoint.Value, keypoint.Envelope)
+        end
+        return string.format('<NumberSequence name="%s">%s</NumberSequence>', name, points)
+    end,
+
+    NumberRange = function(name, value)
+        return string.format('<NumberRange name="%s">%.6f %.6f</NumberRange>', name, value.Min, value.Max)
+    end,
+
+    PhysicalProperties = function(name, value)
+        if value.CustomPhysics then
+            return string.format('<PhysicalProperties name="%s"><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight)
+        else
+            return string.format('<PhysicalProperties name="%s"><CustomPhysics>false</CustomPhysics></PhysicalProperties>', name)
+        end
+    end,
+
+    Font = function(name, value)
+        return string.format('<Font name="%s"><Family><url>%s</url></Family><Weight>%d</Weight><Style>%s</Style><CachedFaceId><url>%s</url></CachedFaceId></Font>', name, EscapeXml(value.Family), value.Weight.Value, value.Style.Name, EscapeXml(value.CachedFaceId))
+    end,
+    
+    Region3 = function(name, value)
+        return string.format('<Region3 name="%s"><min><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></min><max><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></max></Region3>', name, value.CFrame.X - value.Size.X/2, value.CFrame.Y - value.Size.Y/2, value.CFrame.Z - value.Size.Z/2, value.CFrame.X + value.Size.X/2, value.CFrame.Y + value.Size.Y/2, value.CFrame.Z + value.Size.Z/2)
+    end,
+
+    Region3int16 = function(name, value)
+        return string.format('<Region3int16 name="%s"><min><X>%d</X><Y>%d</Y><Z>%d</Z></min><max><X>%d</X><Y>%d</Y><Z>%d</Z></max></Region3int16>', name, value.Min.X, value.Min.Y, value.Min.Z, value.Max.X, value.Max.Y, value.Max.Z)
+    end,
+    
+    double = function(name, value)
+        return string.format('<double name="%s">%.16e</double>', name, value)
+    end,
+
+    int64 = function(name, value)
+        return string.format('<int64 name="%s">%d</int64>', name, value)
+    end,
+
+    BinaryString = function(name, value)
+        return string.format('<BinaryString name="%s">%s</BinaryString>', name, value)
+    end,
+
+    SharedString = function(name, value)
+        return string.format('<SharedString name="%s">%s</SharedString>', name, value)
+    end,
+
+    UniqueId = function(name, value)
+        return string.format('<UniqueId name="%s">%s</UniqueId>', name, value)
+    end,
+
+    OptionalCoordinateFrame = function(name, value)
+        if value then
+            local c = {value.Value:GetComponents()}
+            return string.format('<OptionalCoordinateFrame name="%s"><CFrame><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R21><R22>%.6f</R22></CFrame></OptionalCoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+        else
+            return string.format('<OptionalCoordinateFrame name="%s"/>', name)
+        end
     end
 }
+
 local function CountInstances(instance, avoidPlayerCharacters)
     local count = 1
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
