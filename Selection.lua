@@ -807,7 +807,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             end
             properties = {
                 Source = source,
-                Disabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Disabled or nil
+                Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
             }
         elseif instance:IsA("Decal") then
             properties = {
