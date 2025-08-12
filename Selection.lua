@@ -389,7 +389,7 @@ local PropertySerializers = {
             local formatted_val = string.format('%.9f', value):gsub('0*$', ''):gsub('\\.$', '')
             return string.format('<float name="%s">%s</float>', name, formatted_val)
         else
-            return string.format('<Int name="%s">%d</int>', name, value)
+            return string.format('<int name="%s">%d</int>', name, value)
         end
     end,
 
@@ -400,6 +400,10 @@ local PropertySerializers = {
     CFrame = function(name, value)
         local c = {value:GetComponents()}
         return string.format('<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R21><R22>%.6f</R22></CoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+    end,
+
+    EnumItem = function(name, value)
+        return string.format('<token name="%s">%s</token>', name, value.Value)
     end
 }
 local function CountInstances(instance, avoidPlayerCharacters)
