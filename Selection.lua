@@ -828,7 +828,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if success and val ~= nil and v ~= "Parent" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
-            task.wait(0)
+            RunService.Stepped:Wait()
         end
 
         for propName, propValue in pairs(properties) do
