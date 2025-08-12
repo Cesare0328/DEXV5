@@ -95,7 +95,6 @@ local Blacklist = {
     Chat = true,
     CorePackages = true
 }
-local BlacklistModels = {}
 local RefCounter = 0
 local RefCache = {}
 -- < Custom Aliases > --
@@ -162,8 +161,7 @@ local SaveMapSettings = {
 	SaveScripts = true,
 	AvoidPlayerCharacters = true,
 	SaveNilInstances = true,
-	CloseRobloxAfterSave = true,
-    ProgressiveSave = false
+	CloseRobloxAfterSave = true
 }
 
 local Settings = {
@@ -405,12 +403,7 @@ local PropertySerializers = {
 
     CFrame = function(name, value)
         local c = {value:GetComponents()}
-        if name == "WorldPivot" then
-            name = "WorldPivotData"
-            return string.format('<OptionalCoordinateFrame name="%s"><CFrame><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CFrame></OptionalCoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
-        else
-            return string.format('<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
-        end
+        return string.format('<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
     end,
 
     EnumItem = function(name, value)
@@ -704,26 +697,16 @@ local function PromptStreamingEnabledCaution(TitleLabel)
 end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-    if SaveMapSettings.ProgressiveSave then task.wait(0) end
-    if instance.ClassName:find("Wrap") then return end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
         statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
 
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
-        table.insert(BlacklistModels, instance)
         statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
-    
-    for _,v in pairs(BlacklistModels) do
-    if instance:IsDescendantOf(v) then
-        statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
-        return processed
-    end
-    end
-    
+
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
 
@@ -1016,7 +999,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end)
 end
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
-createMapSetting(SaveMapSettingFrame.ProgressiveSave, "ProgressiveSave", SaveMapSettings.ProgressiveSave)
 createMapSetting(SaveMapSettingFrame.SaveNilInstances, "SaveNilInstances", SaveMapSettings.SaveNilInstances)
 createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacters", SaveMapSettings.AvoidPlayerCharacters)
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
