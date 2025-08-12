@@ -937,9 +937,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         game.DescendantAdded:Connect(function(v)
             if v:IsA("Model") then
                 v.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
-            --else
-                --v:Clone().Parent = v.Parent
-                --v:Destroy()
             end
         end)
     end
@@ -950,8 +947,8 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
     end
     if saveNilInstances then
-        local nilInstances = getnilinstances() or {}
-        totalInstances = totalInstances + #nilInstances
+        local Nil = getnilinstances() or {}
+        totalInstances = totalInstances + #Nil
     end
 
     local processedInstances = 0
@@ -992,17 +989,27 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         table.insert(output, "</Properties>")
         ref = GetRef("NilInstancesFolder")
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
-        table.insert(output, string.format('<string name="Name">Nil Instances</string>'))
-        local nilInstances = getnilinstances() or {}
-        for _, nilInstance in ipairs(nilInstances) do
-            statusCallback(processedInstances, totalInstances, "Processing nil instance: " .. (nilInstance:GetFullName() or "Unnamed Nil"))
-            processedInstances = processedInstances + 1
-            ref = GetRef(nilInstance)
-            table.insert(output, string.format('<Item class="%s" referent="%s">', nilInstance.ClassName or "Unknown", ref))
-            table.insert(output, "<Properties>")
-            table.insert(output, PropertySerializers.string("Name", nilInstance.Name or "Unnamed"))
-            table.insert(output, "</Properties>")
-            table.insert(output, "</Item>")
+        table.insert(output, "<Properties>")
+        table.insert(output, PropertySerializers.string("Name", "Nil Instances"))
+        table.insert(output, "</Properties>")
+        local Nil = getnilinstances() or {}
+        for _, v in ipairs(Nil) do
+            local Class = v.ClassName
+            if not Class:find("Wrap") and not Class == "Attachment" and not Class == "Bone" then
+                statusCallback(processedInstances, totalInstances, "Processing nil instance: " .. (v:GetFullName() or "Unnamed Nil"))
+                processedInstances = processedInstances + 1
+                local ref = GetRef(v)
+                table.insert(output, string.format('<Item class="%s" referent="%s">', className or "Unknown", ref))
+                table.insert(output, "<Properties>")
+                table.insert(output, PropertySerializers.string("Name", v.Name or "Unnamed"))
+                table.insert(output, "</Properties>")
+
+                for _, k in ipairs(v:GetChildren()) do
+                    processedInstances = SerializeInstance(k, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+                end
+
+                table.insert(output, "</Item>")
+            end
         end
         table.insert(output, "</Item>")
         table.insert(output, "</Item>")
