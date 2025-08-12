@@ -404,7 +404,19 @@ local PropertySerializers = {
 
     EnumItem = function(name, value)
         return string.format('<token name="%s">%s</token>', name, value.Value)
-    end
+    end,
+
+    Color3 = function(name, value)
+        return string.format('<Color3 name="%s"><R>%.6f</R><G>%.6f</G><B>%.6f</B></Color3>', name, value.R, value.G, value.B)
+    end,
+
+    BrickColor = function(name, value)
+        return string.format('<BrickColor name="%s">%d</BrickColor>', name, value.Number)
+    end,
+
+    Instance = function(name, value)
+        return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
+    end,
 }
 local function CountInstances(instance, avoidPlayerCharacters)
     local count = 1
