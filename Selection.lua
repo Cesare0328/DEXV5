@@ -705,7 +705,7 @@ end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
     if SaveMapSettings.ProgressiveSave then task.wait(0) end
-    if instance.ClassName:find("Wrap") then warn(instance.Name) return processed end
+    if instance.ClassName:find("Wrap") then return processed end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
         statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
         return processed
