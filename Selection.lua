@@ -713,7 +713,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
-    local isGradual = SaveMapSettings.ProgressiveSave
 
     if isLocalPlayer then
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
@@ -847,9 +846,15 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         table.insert(output, "</Properties>")
     end
 
-    for _, child in ipairs(instance:GetChildren()) do
-        processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-        if isGradual then task.wait(0) end
+    if SaveMapSettings.ProgressiveSave then
+        for _, child in ipairs(instance:GetChildren()) do
+            processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+            task.wait(0)
+        end
+    else
+        for _, child in ipairs(instance:GetChildren()) do
+            processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+        end
     end
 
     table.insert(output, "</Item>")
