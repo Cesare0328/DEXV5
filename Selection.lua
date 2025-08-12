@@ -828,7 +828,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if success and val ~= nil and v ~= "Parent" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
-            RunService.Stepped:Wait()
         end
 
         for propName, propValue in pairs(properties) do
@@ -848,6 +847,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+        task.wait(0)
     end
 
     table.insert(output, "</Item>")
