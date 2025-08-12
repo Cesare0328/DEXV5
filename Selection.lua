@@ -861,7 +861,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 table.insert(output, PropertySerializers.customfloat(propName, propValue))
             else
                 if serializer and propValue ~= nil then
-                    if instance == worksapce.CurrentCamera then
+                    if instance == workspace.CurrentCamera then
                         local old = instance.CameraType
                         instance.CameraType = Enum.CameraType.Fixed
                         table.insert(output, serializer(propName, propValue))
