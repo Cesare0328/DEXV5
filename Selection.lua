@@ -700,6 +700,7 @@ end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
     if SaveMapSettings.ProgressiveSave then task.wait(0) end
+    if instance.ClassName:find("Wrap") then return end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
         statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
         return processed
@@ -836,7 +837,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         end
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
-            if success and val ~= nil and v ~= "Parent" and not instance.ClassName:find("Wrap") and PropertySerializers[typeof(val)] then
+            if success and val ~= nil and v ~= "Parent" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
