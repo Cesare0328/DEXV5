@@ -431,7 +431,7 @@ local PropertySerializers = {
     end,
 
     Faces = function(name, value)
-        return string.format('<Faces name="%s">%d</Faces>', name, value.Value)
+        return string.format('<Faces name="%s">%d</Faces>', name, value)
     end,
 
     Axes = function(name, value)
