@@ -416,7 +416,7 @@ local PropertySerializers = {
 
     Instance = function(name, value)
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
-    end,
+    end
 }
 local function CountInstances(instance, avoidPlayerCharacters)
     local count = 1
