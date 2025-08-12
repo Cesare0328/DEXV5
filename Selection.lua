@@ -849,7 +849,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-        if 
         if isGradual then task.wait(0) end
     end
 
