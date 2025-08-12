@@ -369,9 +369,7 @@ end
 local PropertySerializers = {
     string = function(name, value)
         if name == "MeshId" or name == "TextureId" or name == "TextureID" or name == "Texture" then
-            if value ~= "" then
-                return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
-            end
+            return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
         else
             return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
         end
