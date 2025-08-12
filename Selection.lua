@@ -478,7 +478,7 @@ local PropertySerializers = {
     end,
 
     Font = function(name, value)
-        return string.format('<Font name="%s"><Family><url>%s</url></Family><Weight>%d</Weight><Style>%s</Style><CachedFaceId><url>%s</url></CachedFaceId></Font>', name, EscapeXml(value.Family), value.Weight.Value, value.Style.Name, EscapeXml(value.CachedFaceId))
+        return string.format('<Font name="%s"><Family><url>%s</url></Family><Weight>%d</Weight><Style>%s</Style></Font>', name, EscapeXml(value.Family), value.Weight.Value, value.Style.Name)
     end,
     
     Region3 = function(name, value)
