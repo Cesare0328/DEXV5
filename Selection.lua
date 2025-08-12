@@ -460,6 +460,55 @@ local PropertySerializers = {
 
     NumberRange = function(name, value)
         return string.format('<NumberRange name="%s">%.6f %.6f</NumberRange>', name, value.Min, value.Max)
+    end,
+
+        PhysicalProperties = function(name, value)
+        if value.CustomPhysics then
+            return string.format('<PhysicalProperties name="%s"><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight)
+        else
+            return string.format('<PhysicalProperties name="%s"><CustomPhysics>false</CustomPhysics></PhysicalProperties>', name)
+        end
+    end,
+
+    Font = function(name, value)
+        return string.format('<Font name="%s"><Family><url>%s</url></Family><Weight>%d</Weight><Style>%s</Style><CachedFaceId><url>%s</url></CachedFaceId></Font>', name, EscapeXml(value.Family), value.Weight.Value, value.Style.Name, EscapeXml(value.CachedFaceId))
+    end,
+    
+    Region3 = function(name, value)
+        return string.format('<Region3 name="%s"><min><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></min><max><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></max></Region3>', name, value.CFrame.X - value.Size.X/2, value.CFrame.Y - value.Size.Y/2, value.CFrame.Z - value.Size.Z/2, value.CFrame.X + value.Size.X/2, value.CFrame.Y + value.Size.Y/2, value.CFrame.Z + value.Size.Z/2)
+    end,
+
+    Region3int16 = function(name, value)
+        return string.format('<Region3int16 name="%s"><min><X>%d</X><Y>%d</Y><Z>%d</Z></min><max><X>%d</X><Y>%d</Y><Z>%d</Z></max></Region3int16>', name, value.Min.X, value.Min.Y, value.Min.Z, value.Max.X, value.Max.Y, value.Max.Z)
+    end,
+    
+    double = function(name, value)
+        return string.format('<double name="%s">%.16e</double>', name, value)
+    end,
+
+    int64 = function(name, value)
+        return string.format('<int64 name="%s">%d</int64>', name, value)
+    end,
+
+    BinaryString = function(name, value)
+        return string.format('<BinaryString name="%s">%s</BinaryString>', name, value)
+    end,
+
+    SharedString = function(name, value)
+        return string.format('<SharedString name="%s">%s</SharedString>', name, value)
+    end,
+
+    UniqueId = function(name, value)
+        return string.format('<UniqueId name="%s">%s</UniqueId>', name, value)
+    end,
+
+    OptionalCoordinateFrame = function(name, value)
+        if value then
+            local c = {value.Value:GetComponents()}
+            return string.format('<OptionalCoordinateFrame name="%s"><CFrame><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R21><R22>%.6f</R22></CFrame></OptionalCoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+        else
+            return string.format('<OptionalCoordinateFrame name="%s"/>', name)
+        end
     end
 }
 local function CountInstances(instance, avoidPlayerCharacters)
@@ -761,6 +810,11 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Enabled = false,
                 Size = instance.Size
             }
+        end
+        for _, v in pairs(getproperties(instance)) do
+            if PropertySerializers[typeof(instance[v])] then
+                properties[v] = instance[v]
+            end
         end
 
         for propName, propValue in pairs(properties) do
