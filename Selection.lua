@@ -784,7 +784,9 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             properties = {
                 PrimaryPart = instance.PrimaryPart,
                 WorldPivot = instance.WorldPivot,
-                ScaleFactor = instance:GetScale()
+                ScaleFactor = instance:GetScale(),
+                ModelMeshCFrame = gethiddenproperty(instance, "ModelMeshCFrame"),
+                ModelMeshSize = gethiddenproperty(instance, "ModelMeshSize")
             }
         elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
             local source = "Decompile failed"
