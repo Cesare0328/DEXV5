@@ -368,15 +368,7 @@ local function GetRef(instance)
 end
 local PropertySerializers = {
     string = function(name, value)
-        if name == "MeshId" or name == "TextureId" or name == "TextureID" or name == "Texture" then
-            if value == "" then
-                return string.format('<Content name="%s"><null></null></Content>', name)
-            else
-                return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
-            end
-        else
-            return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
-        end
+        return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
     end,
 
     boolean = function(name, value)
@@ -384,13 +376,7 @@ local PropertySerializers = {
     end,
 
     number = function(name, value)
-        local s_value = tostring(value)
-        if s_value:find("[.eE]") then
-            local formatted_val = string.format('%.9f', value):gsub('0*$', ''):gsub('\\.$', '')
-            return string.format('<float name="%s">%s</float>', name, formatted_val)
-        else
-            return string.format('<int name="%s">%d</int>', name, value)
-        end
+        return string.format('<float name="%s">%.6f</float>', name, value)
     end,
 
     Vector3 = function(name, value)
