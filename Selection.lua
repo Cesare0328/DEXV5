@@ -380,10 +380,12 @@ local PropertySerializers = {
     end,
 
     number = function(name, value)
-        if math.floor(value) == value then
-            return string.format('<int name="%s">%d</int>', name, value)
+        local s_value = tostring(value)
+        if s_value:find("[.eE]") then
+            local formatted_val = string.format('%.9f', value):gsub('0*$', ''):gsub('\\.$', '')
+            return string.format('<float name="%s">%s</float>', name, formatted_val)
         else
-            return string.format('<float name="%s">%.6f</float>', name, value)
+            return string.format('<int name="%s">%d</int>', name, value)
         end
     end,
 
