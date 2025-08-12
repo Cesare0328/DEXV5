@@ -812,7 +812,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             }
         end
         for _,v in pairs(getproperties(instance)) do
-            if PropertySerializers[typeof(instance[v])] then
+            local success, val = pcall(function() return instance[propName] end)
+            if success and val ~= nil and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
