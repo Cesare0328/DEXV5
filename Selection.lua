@@ -762,7 +762,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         elseif instance:IsA("Model") then
             properties = {
                 PrimaryPart = instance.PrimaryPart,
-                WorldPivot = instance.WorldPivot
+                WorldPivot = instance.WorldPivot,
+                ScaleFactor = instance:GetScale()
             }
         elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
             local source = "Decompile failed"
@@ -823,13 +824,18 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if success and val ~= nil and v ~= "Parent" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
+            task.wait(0)
         end
 
         for propName, propValue in pairs(properties) do
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
-            if serializer and propValue ~= nil then
-                table.insert(output, serializer(propName, propValue))
+            if propName == "ScaleFactor" then
+                table.insert(output, PropertySerializers.float(propName, propValue))
+            else
+                if serializer and propValue ~= nil then
+                    table.insert(output, serializer(propName, propValue))
+                end
             end
         end
 
