@@ -400,6 +400,7 @@ local PropertySerializers = {
     end,
 
     Vector3 = function(name, value)
+        if name == "Size" then name = "size" end
         return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>', name, value.X, value.Y, value.Z)
     end,
 
@@ -566,7 +567,7 @@ end)
 Instance.MouseButton1Down:Connect(function()
     if CurrentSaveInstanceWindow then
         for _, v in pairs(GetChildren(ArgumentList)) do
-            if v.Type.Text == Type then
+            if v:FindFirstChild("Type") and v.Type.Text == Type then
                 local success, val = pcall(tonumber, v.Value.Text)
                 if success and val then
 					val += Scale
@@ -764,6 +765,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             if instance:IsA("MeshPart") then
                 properties.MeshId = instance.MeshId
                 properties.TextureID = instance.TextureID
+                properties.InitialSize = gethiddenproperty(instance, "InitialSize")
+            end
+            if instance:IsA("PartOperation") then
+                properties.InitialSize = gethiddenproperty(instance, "InitialSize")
             end
             if instance:IsA("BasePart") and instance.MaterialVariant ~= "" then
                 properties.MaterialVariant = instance.MaterialVariant
