@@ -811,7 +811,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Size = instance.Size
             }
         end
-        for _, v in pairs(getproperties(instance)) do
+        for _,v in pairs(getproperties(instance)) do
             if PropertySerializers[typeof(instance[v])] then
                 properties[v] = instance[v]
             end
