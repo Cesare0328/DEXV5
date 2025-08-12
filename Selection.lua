@@ -95,6 +95,7 @@ local Blacklist = {
     Chat = true,
     CorePackages = true
 }
+local BlacklistModels = {}
 local RefCounter = 0
 local RefCache = {}
 -- < Custom Aliases > --
@@ -704,10 +705,18 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     end
 
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
+        table.insert(BlacklistModels, instance)
         statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
-
+    
+    for _,v in pairs(BlacklistModels) do
+    if instance:IsDescendantOf(v) then
+        statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
+        return processed
+    end
+    end
+    
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
 
