@@ -368,8 +368,10 @@ local function GetRef(instance)
 end
 local PropertySerializers = {
     string = function(name, value)
-        if name == "MeshId" or name == "TextureId" or name == "TextureID" and value ~= "" then
-            return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
+        if name == "MeshId" or name == "TextureId" or name == "TextureID" or name == "Texture" then
+            if value ~= "" then
+                return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
+            end
         else
             return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
         end
