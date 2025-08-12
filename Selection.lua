@@ -814,13 +814,13 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             }
         elseif instance:IsA("BlurEffect") then
             properties = {
-                Enabled = false,
+                Enabled = instance.Enabled,
                 Size = instance.Size
             }
         end
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
-            if success and val ~= nil and val ~= "Parent" and PropertySerializers[typeof(val)] then
+            if success and val ~= nil and v ~= "Parent" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
