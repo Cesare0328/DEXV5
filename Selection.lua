@@ -416,6 +416,50 @@ local PropertySerializers = {
 
     Instance = function(name, value)
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
+    end,
+
+        UDim2 = function(name, value)
+        return string.format('<UDim2 name="%s"><XS>%.6f</XS><XO>%d</XO><YS>%.6f</YS><YO>%d</YO></UDim2>', name, value.X.Scale, value.X.Offset, value.Y.Scale, value.Y.Offset)
+    end,
+
+    Vector2 = function(name, value)
+        return string.format('<Vector2 name="%s"><X>%.6f</X><Y>%.6f</Y></Vector2>', name, value.X, value.Y)
+    end,
+
+    Rect = function(name, value)
+        return string.format('<Rect2D name="%s"><min><X>%.6f</X><Y>%.6f</Y></min><max><X>%.6f</X><Y>%.6f</Y></max></Rect2D>', name, value.Min.X, value.Min.Y, value.Max.X, value.Max.Y)
+    end,
+
+    Faces = function(name, value)
+        return string.format('<Faces name="%s">%d</Faces>', name, value.Value)
+    end,
+
+    Axes = function(name, value)
+        return string.format('<Axes name="%s">%d</Axes>', name, value.Value)
+    end,
+    
+    UDim = function(name, value)
+        return string.format('<UDim name="%s"><S>%.6f</S><O>%d</O></UDim>', name, value.Scale, value.Offset)
+    end,
+
+    ColorSequence = function(name, value)
+        local points = ""
+        for _, keypoint in ipairs(value.Keypoints) do
+            points = points .. string.format('<ColorSequenceKeypoint><Time>%.6f</Time><Value><R>%.6f</R><G>%.6f</G><B>%.6f</B></Value></ColorSequenceKeypoint>', keypoint.Time, keypoint.Value.R, keypoint.Value.G, keypoint.Value.B)
+        end
+        return string.format('<ColorSequence name="%s">%s</ColorSequence>', name, points)
+    end,
+
+    NumberSequence = function(name, value)
+        local points = ""
+        for _, keypoint in ipairs(value.Keypoints) do
+            points = points .. string.format('<NumberSequenceKeypoint><Time>%.6f</Time><Value>%.6f</Value><Envelope>%.6f</Envelope></NumberSequenceKeypoint>', keypoint.Time, keypoint.Value, keypoint.Envelope)
+        end
+        return string.format('<NumberSequence name="%s">%s</NumberSequence>', name, points)
+    end,
+
+    NumberRange = function(name, value)
+        return string.format('<NumberRange name="%s">%.6f %.6f</NumberRange>', name, value.Min, value.Max)
     end
 }
 local function CountInstances(instance, avoidPlayerCharacters)
