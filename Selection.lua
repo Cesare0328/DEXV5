@@ -161,7 +161,8 @@ local SaveMapSettings = {
 	SaveScripts = true,
 	AvoidPlayerCharacters = true,
 	SaveNilInstances = true,
-	CloseRobloxAfterSave = true
+	CloseRobloxAfterSave = true,
+    ProgressiveSave = false
 }
 
 local Settings = {
@@ -712,6 +713,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
+    local isGradual = SaveMapSettings.ProgressiveSave
 
     if isLocalPlayer then
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
@@ -847,7 +849,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-        task.wait(0)
+        if 
+        if isGradual then task.wait(0) end
     end
 
     table.insert(output, "</Item>")
@@ -1000,6 +1003,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end)
 end
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
+createMapSetting(SaveMapSettingFrame.ProgressiveSave, "ProgressiveSave", SaveMapSettings.ProgressiveSave)
 createMapSetting(SaveMapSettingFrame.SaveNilInstances, "SaveNilInstances", SaveMapSettings.SaveNilInstances)
 createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacters", SaveMapSettings.AvoidPlayerCharacters)
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
