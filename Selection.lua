@@ -418,7 +418,7 @@ local PropertySerializers = {
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
     end,
 
-        UDim2 = function(name, value)
+    UDim2 = function(name, value)
         return string.format('<UDim2 name="%s"><XS>%.6f</XS><XO>%d</XO><YS>%.6f</YS><YO>%d</YO></UDim2>', name, value.X.Scale, value.X.Offset, value.Y.Scale, value.Y.Offset)
     end,
 
@@ -431,7 +431,14 @@ local PropertySerializers = {
     end,
 
     Faces = function(name, value)
-        return string.format('<Faces name="%s">%d</Faces>', name, value)
+        local bitfield = 0
+        if value.Top then bitfield = bitfield + 1 end
+        if value.Bottom then bitfield = bitfield + 2 end
+        if value.Left then bitfield = bitfield + 4 end
+        if value.Right then bitfield = bitfield + 8 end
+        if value.Front then bitfield = bitfield + 16 end
+        if value.Back then bitfield = bitfield + 32 end
+        return string.format('<Faces name="%s"><faces>%d</faces></Faces>', name, bitfield)
     end,
 
     Axes = function(name, value)
