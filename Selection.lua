@@ -383,6 +383,10 @@ local PropertySerializers = {
         return string.format('<bool name="%s">%s</bool>', name, tostring(value):lower())
     end,
 
+    customfloat = function(name, value)
+        return string.format('<float name="%s">%s</float>', name, tostring(value))
+    end,
+
     number = function(name, value)
         local s_value = tostring(value)
         if s_value:find("[.eE]") then
@@ -831,7 +835,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
             if propName == "ScaleFactor" then
-                table.insert(output, PropertySerializers.float(propName, propValue))
+                table.insert(output, PropertySerializers.customfloat(propName, propValue))
             else
                 if serializer and propValue ~= nil then
                     table.insert(output, serializer(propName, propValue))
