@@ -835,7 +835,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         end
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
-            if success and val ~= nil and v ~= "Parent" and PropertySerializers[typeof(val)] then
+            if success and val ~= nil and (v ~= "Parent" and not instance:IsA("WrapTarget") or instance:IsA("BaseWrap")) and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
@@ -856,11 +856,13 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     end
 
     if SaveMapSettings.ProgressiveSave then
+        warn("1")
         for _, child in ipairs(instance:GetChildren()) do
             processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
             task.wait(0)
         end
     else
+        warn("2")
         for _, child in ipairs(instance:GetChildren()) do
             processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
         end
