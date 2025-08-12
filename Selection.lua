@@ -472,9 +472,9 @@ local PropertySerializers = {
     PhysicalProperties = function(name, value)
         local success, custom = pcall(function() return value.CustomPhysicalProperties end)
         if success and custom then
-            return string.format('<PhysicalProperties name="%s"><CustomPhysics>true</CustomPhysics><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.CurrentPhysicalProperties.Density, value.CurrentPhysicalProperties.Friction, value.CurrentPhysicalProperties.Elasticity, value.CurrentPhysicalProperties.FrictionWeight, value.CurrentPhysicalProperties.ElasticityWeight)
+            return string.format('<PhysicalProperties name="%s"><CustomPhysics>true</CustomPhysics><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight)
         end
-        return string.format('<PhysicalProperties name="%s"><CustomPhysics>false</CustomPhysics><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.CurrentPhysicalProperties.Density, value.CurrentPhysicalProperties.Friction, value.CurrentPhysicalProperties.Elasticity, value.CurrentPhysicalProperties.FrictionWeight, value.CurrentPhysicalProperties.ElasticityWeight)
+        return string.format('<PhysicalProperties name="%s"><CustomPhysics>false</CustomPhysics><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight)
     end,
 
     Font = function(name, value)
