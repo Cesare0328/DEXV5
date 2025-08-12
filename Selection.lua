@@ -469,12 +469,11 @@ local PropertySerializers = {
         return string.format('<NumberRange name="%s">%.6f %.6f</NumberRange>', name, value.Min, value.Max)
     end,
 
-        PhysicalProperties = function(name, value)
-        if value.CustomPhysics then
-            return string.format('<PhysicalProperties name="%s"><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight)
-        else
-            return string.format('<PhysicalProperties name="%s"><CustomPhysics>false</CustomPhysics></PhysicalProperties>', name)
+    PhysicalProperties = function(name, value)
+        if value.CustomPhysicalProperties then
+            return string.format('<PhysicalProperties name="%s"><CustomPhysics>true</CustomPhysics><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.CurrentPhysicalProperties.Density, value.CurrentPhysicalProperties.Friction, value.CurrentPhysicalProperties.Elasticity, value.CurrentPhysicalProperties.FrictionWeight, value.CurrentPhysicalProperties.ElasticityWeight)
         end
+        return string.format('<PhysicalProperties name="%s"><CustomPhysics>false</CustomPhysics><Density>%.6f</Density><Friction>%.6f</Friction><Elasticity>%.6f</Elasticity><FrictionWeight>%.6f</FrictionWeight><ElasticityWeight>%.6f</ElasticityWeight></PhysicalProperties>', name, value.CurrentPhysicalProperties.Density, value.CurrentPhysicalProperties.Friction, value.CurrentPhysicalProperties.Elasticity, value.CurrentPhysicalProperties.FrictionWeight, value.CurrentPhysicalProperties.ElasticityWeight)
     end,
 
     Font = function(name, value)
