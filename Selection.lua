@@ -368,39 +368,54 @@ local function GetRef(instance)
 end
 local PropertySerializers = {
     string = function(name, value)
-        return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
+        if name == "MeshId" or name == "TextureId" or name == "TextureID" or name == "Texture" then
+            if value == "" then
+                return string.format('<Content name="%s"><null></null></Content>', name)
+            else
+                return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
+            end
+        else
+            return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
+        end
     end,
-    bool = function(name, value)
+
+    boolean = function(name, value)
         return string.format('<bool name="%s">%s</bool>', name, tostring(value):lower())
     end,
+
     number = function(name, value)
-        return string.format('<float name="%s">%.6f</float>', name, value)
+        local s_value = tostring(value)
+        if s_value:find("[.eE]") then
+            local formatted_val = string.format('%.9f', value):gsub('0*$', ''):gsub('\\.$', '')
+            return string.format('<float name="%s">%s</float>', name, formatted_val)
+        else
+            return string.format('<int name="%s">%d</int>', name, value)
+        end
     end,
+
     Vector3 = function(name, value)
-        return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>',
-            name, value.X, value.Y, value.Z)
+        return string.format('<Vector3 name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z></Vector3>', name, value.X, value.Y, value.Z)
     end,
+
     CFrame = function(name, value)
         local c = {value:GetComponents()}
-        return string.format(
-            '<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z>' ..
-            '<R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02>' ..
-            '<R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12>' ..
-            '<R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CoordinateFrame>',
-            name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+        return string.format('<CoordinateFrame name="%s"><X>%.6f</X><Y>%.6f</Y><Z>%.6f</Z><R00>%.6f</R00><R01>%.6f</R01><R02>%.6f</R02><R10>%.6f</R10><R11>%.6f</R11><R12>%.6f</R12><R20>%.6f</R20><R21>%.6f</R21><R22>%.6f</R22></CoordinateFrame>', name, c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
     end,
+
+    EnumItem = function(name, value)
+        return string.format('<token name="%s">%s</token>', name, value.Value)
+    end,
+
     Color3 = function(name, value)
-        return string.format('<Color3 name="%s"><R>%.6f</R><G>%.6f</G><B>%.6f</B></Color3>',
-            name, value.R, value.G, value.B)
+        return string.format('<Color3 name="%s"><R>%.6f</R><G>%.6f</G><B>%.6f</B></Color3>', name, value.R, value.G, value.B)
     end,
+
     BrickColor = function(name, value)
         return string.format('<BrickColor name="%s">%d</BrickColor>', name, value.Number)
     end,
+
     Instance = function(name, value)
         return string.format('<Ref name="%s">%s</Ref>', name, value and GetRef(value) or "null")
-    end,
-    EnumItem = function(name, value)
-        return string.format('<token name="%s">%s</token>', name, tostring(value))
     end
 }
 local function CountInstances(instance, avoidPlayerCharacters)
