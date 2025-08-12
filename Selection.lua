@@ -369,7 +369,11 @@ end
 local PropertySerializers = {
     string = function(name, value)
         if name == "MeshId" or name == "TextureId" or name == "TextureID" or name == "Texture" then
-            return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
+            if value == "" then
+                return string.format('<Content name="%s"><null></null></Content>', name)
+            else
+                return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
+            end
         else
             return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
         end
@@ -385,7 +389,7 @@ local PropertySerializers = {
             local formatted_val = string.format('%.9f', value):gsub('0*$', ''):gsub('\\.$', '')
             return string.format('<float name="%s">%s</float>', name, formatted_val)
         else
-            return string.format('<int name="%s">%d</int>', name, value)
+            return string.format('<Int name="%s">%d</int>', name, value)
         end
     end,
 
