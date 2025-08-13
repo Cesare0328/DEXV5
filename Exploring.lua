@@ -1116,7 +1116,7 @@ local MatchWholeWord = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2.new(0, 14, 0, 14),
+    Size = UDim2.new(0, 16, 0, 16),
     Position = UDim2.new(1, -7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
@@ -1138,8 +1138,8 @@ local MatchCase = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2.new(0, 14, 0, 14),
-    Position = UDim2.new(1, -4 - 14 - 7, 0.5, 0),
+    Size = UDim2.new(0, 16, 0, 16),
+    Position = UDim2.new(1, -4 - 16 - 7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 MatchCase.Parent = explorerFilter
@@ -1164,7 +1164,7 @@ MatchWholeWord.MouseLeave:Connect(function()
 end)
 
 MatchWholeWord.MouseButton1Up:Connect(function()
-	MatchWholeWordStroke.Enabled = not MatchCaseStroke.Enabled
+	MatchWholeWordStroke.Enabled = not MatchWholeWordStroke.Enabled
 end)
 
 MatchCase.MouseEnter:Connect(function()
@@ -1178,7 +1178,6 @@ end)
 MatchCase.MouseButton1Up:Connect(function()
 	MatchCaseStroke.Enabled = not MatchCaseStroke.Enabled
 end)
-
 
 explorerFilter.Parent = headerFrame
 
