@@ -1090,7 +1090,7 @@ local headerFrame = Create('Frame',{
 	Position = UDim2_new(),
 	Size = UDim2_new(1,0,0,HEADER_SIZE),
 	Parent = explorerPanel,
-	MainExplorerTitle = Create('TextLabel',{
+	Create('TextLabel',{
 		Text = "Explorer",
 		BackgroundTransparency = 1,
 		TextColor3 = GuiColor.Text,
@@ -1101,7 +1101,7 @@ local headerFrame = Create('Frame',{
 		Size = UDim2_new(1,-4,.5,0)
 	})
 })
-
+MainExplorerTitle = headerFrame.TextLabel
 RunService.Heartbeat:Connect(function()
 MainExplorerTitle.Text = "Explorer | Instances: " .. Diagnostics.InstanceCount
 end)
