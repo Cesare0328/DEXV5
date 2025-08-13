@@ -1582,11 +1582,11 @@ do
 					end
 					if t[i].Expanded or filteringInstances() then
 						coroutine.wrap(function() r(t[i]) end)()
-						pollingwait(0.0001)
+						pollingwait(0.000001)
 					end
 				end
 			end)()
-			pollingwait(0.0001)
+			pollingwait(0.000001)
 		end
 	end
 
