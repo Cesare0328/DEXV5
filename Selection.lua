@@ -707,7 +707,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
 end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-    if SaveMapSettings.ProgressiveSave then task.wait(0) end
+    if SaveMapSettings.ProgressiveSave and not instance == workspace.CurrentCamera then task.wait(0) end
     if instance.ClassName:find("Wrap") then return processed end
     if instance:IsA("Bone") and (not instance.Parent or not instance.Parent:IsA("BasePart") or instance.Parent:IsA("Bone")) then return processed end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
