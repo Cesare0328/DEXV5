@@ -236,9 +236,11 @@ Connect(CloseToggleButton.MouseButton1Up, function()
 end)
 
 for _,v in ipairs(GetChildren(SlideFrame)) do
-	Connect(v.Activated, function()
-		switchWindows(tostring(v))
-	end)
+    if not v:IsA("TextLabel") then
+	    Connect(v.Activated, function()
+		    switchWindows(tostring(v))
+	    end)
+    end
 end
 
 local function createSettingTitle(p1)
