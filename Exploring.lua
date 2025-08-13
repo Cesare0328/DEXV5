@@ -1577,7 +1577,7 @@ do
 						nodeWidth = w
 					end
 					if t[i].Expanded or filteringInstances() then
-						coroutine.wrap(r(t[i]))()
+						coroutine.wrap(function() r(t[i]) )()
 					end
 				end
 			end)()
