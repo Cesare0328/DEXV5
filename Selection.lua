@@ -115,7 +115,7 @@ end
 
 local function AfterInitialization()
     for _, v in ipairs(Dex:GetDescendants()) do
-        if v:IsA("Frame") and v.Name ~= "Other" and v.Name ~= "SettingTemplate" and v.Name ~= "MapSettings" then
+        if v:IsA("Frame") and v.Name ~= "Other" and v.Name ~= "SettingTemplate" and v.Name ~= "MapSettings" and v.Name ~= "SettingList" then
             local TL = Instance.new("TextLabel")
             TL.Name = "InputBlocker"
             TL.Active = v.Visible
