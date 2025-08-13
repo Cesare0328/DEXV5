@@ -74,6 +74,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
 local Searched = false
 local ContextMenuHovered = false
+local MatchWholeWordToggle, MatchCaseToggle = false, false
 local OldMax, OldMin = nil, nil
 local Mouse = cloneref(LocalPlayer:GetMouse())
 local Option = {
@@ -1164,7 +1165,9 @@ MatchWholeWord.MouseLeave:Connect(function()
 end)
 
 MatchWholeWord.MouseButton1Up:Connect(function()
-	MatchWholeWordStroke.Enabled = not MatchWholeWordStroke.Enabled
+	local Val = not MatchWholeWordStroke.Enabled
+	MatchWholeWordStroke.Enabled = Val
+	MatchWholeWordToggle = Val
 end)
 
 MatchCase.MouseEnter:Connect(function()
@@ -1176,7 +1179,9 @@ MatchCase.MouseLeave:Connect(function()
 end)
 
 MatchCase.MouseButton1Up:Connect(function()
-	MatchCaseStroke.Enabled = not MatchCaseStroke.Enabled
+	local Val = not MatchCaseStroke.Enabled
+	MatchCaseStroke.Enabled = Val
+	MatchCaseToggle = Val
 end)
 
 explorerFilter.Parent = headerFrame
@@ -1518,30 +1523,44 @@ function filteringInstances()
 end
 
 function lookForAName(obj, name)
-	for _,v in ipairs(GetChildren(obj)) do
-		if string_find(string_lower(tostring(v)), string_lower(name)) then 
-			nameScanned = true 
-		end
-		lookForAName(v, name)
-	end
+    for _,v in ipairs(GetChildren(obj)) do
+        local objName = tostring(v.Name)
+        local filterText = name
+        if not MatchCaseToggle then
+            objName = string_lower(objName)
+            filterText = string_lower(filterText)
+        end
+        if (MatchWholeWordToggle and objName == filterText) or (not MatchWholeWordToggle and string_find(objName, filterText)) then
+            nameScanned = true
+            return
+        end
+        lookForAName(v, name)
+        if nameScanned then
+            return
+        end
+    end
 end
 
 function scanName(obj)
-	nameScanned = false
-	if string_find(string_lower(obj.Name),string_lower(explorerFilter.Text)) then
-		warn("CALLED")
-		nameScanned = true
-	else
-		warn("CALLED2")
-		lookForAName(obj,explorerFilter.Text)
-	end
-	return nameScanned
+    nameScanned = false
+    local objName = obj.Name
+    local filterText = explorerFilter.Text
+    if not MatchCaseToggle then
+        objName = string_lower(objName)
+        filterText = string_lower(filterText)
+    end
+    if (MatchWholeWordToggle and objName == filterText) or (not MatchWholeWordToggle and string_find(objName, filterText)) then
+        nameScanned = true
+    else
+        lookForAName(obj, explorerFilter.Text)
+    end
+    return nameScanned
 end
 
 function updateActions()
-	for _,v in next, QuickButtons do
-		v.Toggle(v.Cond() and true or false)
-	end
+    for _,v in next, QuickButtons do
+        v.Toggle(v.Cond() and true or false)
+    end
 end
 
 local updateList,rawUpdateList,updateScroll,rawUpdateSize do
