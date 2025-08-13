@@ -1112,10 +1112,9 @@ local explorerFilter =  Create('TextBox',{
 })
 
 local MatchCase = Create('ImageButton', {
-    Image = "rbxassetid://90870016760973", 
+    Image = "rbxassetid://116935671817195", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
-    ResampleMode = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2.new(0, 16, 0, 16),
     Position = UDim2.new(1, -7, 0.5, 0),
@@ -1126,13 +1125,17 @@ MatchCase.Parent = explorerFilter
 local MatchCaseCorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
 })
+local MatchCaseStroke = Create('UIStroke', {
+    Color = Color3.new(1, 1, 1),
+	Thickness = 2,
+	Enabled = false
+})
 MatchCaseCorner.Parent = MatchCase
 
 local MatchWholeWord = Create('ImageButton', {
-    Image = "rbxassetid://86281108620503", 
+    Image = "rbxassetid://115493127332361", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
-    ResampleMode = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2.new(0, 16, 0, 16),
     Position = UDim2.new(1, -4 - 16 - 7, 0.5, 0),
@@ -1142,6 +1145,11 @@ MatchWholeWord.Parent = explorerFilter
 
 local MatchWholeWordCorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
+})
+local MatchWholeWordStroke = Create('UIStroke', {
+    Color = Color3.new(1, 1, 1),
+	Thickness = 2,
+	Enabled = false
 })
 MatchWholeWordCorner.Parent = MatchWholeWord
 
@@ -1153,12 +1161,20 @@ MatchCase.MouseLeave:Connect(function()
     MatchCase.ImageTransparency = 0
 end)
 
+MatchCase.MouseButton1Up:Connect(function()
+	MatchCaseStroke.Enabled = not MatchWholeWordStroke.Enabled
+end)
+
 MatchWholeWord.MouseEnter:Connect(function()
     MatchWholeWord.ImageTransparency = 0.5
 end)
 
 MatchWholeWord.MouseLeave:Connect(function()
     MatchWholeWord.ImageTransparency = 0
+end)
+
+MatchWholeWord.MouseButton1Up:Connect(function()
+	MatchWholeWordStroke.Enabled = not MatchWholeWordStroke.Enabled
 end)
 
 
