@@ -3024,6 +3024,12 @@ do
 	local function dragReparent(object,dragGhost,clickPos,ghostOffset)
 		local conDrag, conUp, conUp2, parentIndex
 		local dragged = false
+		local canStartDrag = false
+
+		task.delay(0.25, function()
+        	canStartDrag = true
+    	end)
+
 		local parentHighlight = Create('Frame',{
 			Transparency = 1,
 			Visible = false,
@@ -3094,7 +3100,7 @@ do
 					end
 				end
 				dragGhost.Position = UDim2_new(0,dragPos.X+ghostOffset.X,0,dragPos.Y+ghostOffset.Y)
-			elseif (clickPos-dragPos).Magnitude > 6 then
+			elseif not dragged and canStartDrag and (clickPos-dragPos).Magnitude > 6 then
 				dragged = true
 				SetZIndex(dragGhost,9)
 				dragGhost.IndentFrame.Transparency = .25
