@@ -1579,6 +1579,7 @@ do
 					r(t[i])
 				end
 			end
+			task.wait()
 		end
 	end
 
