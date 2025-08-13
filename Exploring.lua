@@ -1168,6 +1168,7 @@ MatchWholeWord.MouseButton1Up:Connect(function()
 	local Val = not MatchWholeWordStroke.Enabled
 	MatchWholeWordStroke.Enabled = Val
 	MatchWholeWordToggle = Val
+	rawUpdateList()
 end)
 
 MatchCase.MouseEnter:Connect(function()
@@ -1182,6 +1183,7 @@ MatchCase.MouseButton1Up:Connect(function()
 	local Val = not MatchCaseStroke.Enabled
 	MatchCaseStroke.Enabled = Val
 	MatchCaseToggle = Val
+	rawUpdateList()
 end)
 
 explorerFilter.Parent = headerFrame
