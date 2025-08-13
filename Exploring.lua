@@ -1111,16 +1111,13 @@ local explorerFilter =  Create('TextBox',{
     ZIndex = 1
 })
 
-local iconSize = explorerFilter.AbsoluteSize.Y
-local padding = 7
-
 local iconBox1 = Create('ImageButton', {
     Image = "", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 0,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2.new(0, iconSize, 0, iconSize),
-    Position = UDim2.new(1, -padding, 0.5, 0),
+    Size = UDim2.new(0, 16, 0, 16),
+    Position = UDim2.new(1, -7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 iconBox1.Parent = explorerFilter
@@ -1130,8 +1127,8 @@ local iconBox2 = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 0,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2.new(0, iconSize, 0, iconSize),
-    Position = UDim2.new(1, -padding - iconSize - padding, 0.5, 0),
+    Size = UDim2.new(0, 16, 0, 16),
+    Position = UDim2.new(1, -7 - 16 - 7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 iconBox2.Parent = explorerFilter
