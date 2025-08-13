@@ -854,13 +854,14 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 PhysicsGrid = gethiddenproperty(instance, "PhysicsGrid"),
                 SmoothGrid = gethiddenproperty(instance, "SmoothGrid"),
                 GrassLength = gethiddenproperty(instance, "GrassLength"),
-                AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod"),
-                Decoration = gethiddenproperty(instance, "Decoration")
+                Decoration = gethiddenproperty(instance, "Decoration"),
+                AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
+            warn("TERRAIN LOGGED")
         end
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
-            if success and val ~= nil and v ~= "Parent" and v ~="Name" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
+            if success and val ~= nil and v ~= "Parent" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
