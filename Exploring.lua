@@ -1098,17 +1098,43 @@ local headerFrame = Create('Frame',{
 	})
 })
 
-local explorerFilter = 	Create('TextBox',{
-	PlaceholderText = "Filter Instances",
-	Text = "Filter Instances",
-	BackgroundTransparency = .8,
-	TextColor3 = GuiColor.Text,
-	TextXAlignment = 'Left',
-	Font = FONT,
-	FontSize = FONT_SIZE,
-	Position = UDim2_new(0,4,.5,0),
-	Size = UDim2_new(1,-8,.5,-2)
+local explorerFilter =  Create('TextBox',{
+    PlaceholderText = "Filter Instances",
+    Text = "Filter Instances",
+    BackgroundTransparency = .8,
+    TextColor3 = GuiColor.Text,
+    TextXAlignment = 'Left',
+    Font = FONT,
+    FontSize = FONT_SIZE,
+    Position = UDim2.new(0, 4, 0.5, 0),
+    Size = UDim2.new(1, -8, 0.5, -2),
+    ZIndex = 1
 })
+
+local iconSize = explorerFilter.AbsoluteSize.Y - 4 
+local padding = 4
+
+local iconBox1 = Create('ImageButton', {
+    Image = "", 
+    BackgroundColor3 = Color3.new(1, 1, 1),
+    BackgroundTransparency = 0,
+    AnchorPoint = Vector2.new(1, 0.5),
+    Size = UDim2.new(0, iconSize, 0, iconSize),
+    Position = UDim2.new(1, -padding, 0.5, 0),
+    ZIndex = explorerFilter.ZIndex + 1
+})
+iconBox1.Parent = explorerFilter
+
+local iconBox2 = Create('ImageButton', {
+    Image = "", 
+    BackgroundColor3 = Color3.new(1, 1, 1),
+    BackgroundTransparency = 0,
+    AnchorPoint = Vector2.new(1, 0.5),
+    Size = UDim2.new(0, iconSize, 0, iconSize),
+    Position = UDim2.new(1, -padding - iconSize - padding, 0.5, 0),
+    ZIndex = explorerFilter.ZIndex + 1
+})
+iconBox2.Parent = explorerFilter
 
 explorerFilter.Parent = headerFrame
 
