@@ -224,7 +224,7 @@ for _,v in ipairs(GetChildren(SlideFrame)) do
 	end)
 end
 
-for i,v in pairs(InputBlockers) do
+for i,v in pairs(getgenv().InputBlockers) do
     warn(i.Name)
     warn(v.Name)
     Connect(i.Changed, function()
