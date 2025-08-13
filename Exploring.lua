@@ -1111,27 +1111,56 @@ local explorerFilter =  Create('TextBox',{
     ZIndex = 1
 })
 
-local iconBox1 = Create('ImageButton', {
+local MatchCase = Create('ImageButton', {
     Image = "rbxassetid://90870016760973", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
+    ResampleMode = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2.new(0, 16, 0, 16),
     Position = UDim2.new(1, -7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
-iconBox1.Parent = explorerFilter
+MatchCase.Parent = explorerFilter
 
-local iconBox2 = Create('ImageButton', {
+local MatchCaseCorner = Create('UICorner', {
+    CornerRadius = UDim.new(0, 4)
+})
+MatchCaseCorner.Parent = MatchCase
+
+local MatchWholeWord = Create('ImageButton', {
     Image = "rbxassetid://86281108620503", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
+    ResampleMode = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2.new(0, 16, 0, 16),
-    Position = UDim2.new(1, -5 - 16 - 7, 0.5, 0),
+    Position = UDim2.new(1, -4 - 16 - 7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
-iconBox2.Parent = explorerFilter
+MatchWholeWord.Parent = explorerFilter
+
+local MatchWholeWordCorner = Create('UICorner', {
+    CornerRadius = UDim.new(0, 4)
+})
+MatchWholeWordCorner.Parent = MatchWholeWord
+
+MatchCase.MouseEnter:Connect(function()
+    MatchCase.ImageTransparency = 0.5
+end)
+
+MatchCase.MouseLeave:Connect(function()
+    MatchCase.ImageTransparency = 0
+end)
+
+MatchWholeWord.MouseEnter:Connect(function()
+    MatchWholeWord.ImageTransparency = 0.5
+end)
+
+MatchWholeWord.MouseLeave:Connect(function()
+    MatchWholeWord.ImageTransparency = 0
+end)
+
 
 explorerFilter.Parent = headerFrame
 
