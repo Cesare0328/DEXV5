@@ -224,19 +224,6 @@ for _,v in ipairs(GetChildren(SlideFrame)) do
 	end)
 end
 
-for _,v in pairs(getgenv().InputBlockers) do
-    for j,k in pairs(v:GetDescendants()) do
-        if k:IsA("Frame") then
-            Connect(k.Changed, function()
-                v.Active = i.Visible
-                v.Size = i.Size
-                v.Position = i.Position
-                v.AnchorPoint = i.AnchorPoint
-            end)
-        end
-    end
-end
-
 local function createSettingTitle(p1)
 	local A = Instance.new("TextLabel")
 	A.Name = "SettingLabel"
