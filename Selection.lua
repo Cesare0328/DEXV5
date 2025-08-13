@@ -113,9 +113,9 @@ local function BeforeLoad()
 	end
 end
 
-local function AfterInitilization()
+local function AfterInitialization()
     for _, v in ipairs(Dex:GetDescendants()) do
-        if v:IsA("Frame") and v.Name ~= "Other" then
+        if v:IsA("Frame") and v.Name ~= "Other" and v.Name ~= "SettingTemplate" and v.Name ~= "MapSettings" then
             local TL = Instance.new("TextLabel")
             TL.Name = "InputBlocker"
             TL.Active = v.Visible
@@ -128,7 +128,7 @@ local function AfterInitilization()
 end
 
 BeforeLoad()
-AfterInitilization()
+AfterInitialization()
 
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
