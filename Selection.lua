@@ -377,7 +377,7 @@ local PropertySerializers = {
                 return string.format('<Content name="%s"><url>%s</url></Content>', name, EscapeXml(value))
             end
         elseif name == "PhysicsGrid" or name == "SmoothGrid" then
-            return string.format('<BinaryString name="%s">%s</BinaryString>', name, EscapeXml(value))
+            return string.format('<BinaryString name="%s"><![CDATA[%s]]></BinaryString>', name, EscapeXml(value))
         else
             return string.format('<string name="%s">%s</string>', name, EscapeXml(value))
         end
@@ -852,8 +852,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         end
         if instance:IsA("Terrain") then
             properties = {
-                PhysicsGrid = gethiddenproperty(instance, "PhysicsGrid"),
-                SmoothGrid = gethiddenproperty(instance, "SmoothGrid"),
+                PhysicsGrid = base64.encode(gethiddenproperty(instance, "PhysicsGrid")),
+                SmoothGrid = base64.encode(gethiddenproperty(instance, "SmoothGrid")),
                 GrassLength = gethiddenproperty(instance, "GrassLength"),
                 Decoration = gethiddenproperty(instance, "Decoration"),
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
