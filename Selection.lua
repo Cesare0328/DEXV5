@@ -141,8 +141,10 @@ local function switchWindows(p1, p2)
 	if p1 ~= "Nothing c:" then
 		CurrentWindow = p1
 		for H, I in ipairs(GetChildren(SlideFrame)) do
-			I.BackgroundTransparency = 1
-			I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
+            if not v:IsA("TextLabel") then
+			    I.BackgroundTransparency = 1
+			    I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
+            end
 		end
 		local J = FindFirstChild(SlideFrame, p1)
 		if J then
