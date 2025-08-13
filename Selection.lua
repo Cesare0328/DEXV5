@@ -225,6 +225,8 @@ for _,v in ipairs(GetChildren(SlideFrame)) do
 end
 
 for i,v in pairs(InputBlockers) do
+    warn(i.Name)
+    warn(v.Name)
     Connect(i.Changed, function()
         v.Active = i.Visible
         v.Size = i.Size
