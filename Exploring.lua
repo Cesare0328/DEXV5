@@ -1585,7 +1585,7 @@ do
 					end
 				end
 			end)()
-			pollingwait(0.00001)
+			pollingwait(0.0001)
 		end
 	end
 
