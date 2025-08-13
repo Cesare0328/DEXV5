@@ -113,7 +113,22 @@ local function BeforeLoad()
 	end
 end
 
+local function AfterInitilization()
+    for _, v in ipairs(Dex:GetDescendants()) do
+        if v:IsA("Frame") and v.Name ~= "Other" then
+            local TL = Instance.new("TextLabel")
+            TL.Name = "InputBlocker"
+            TL.Active = v.Visible
+            TL.BackgroundTransparency = 1
+            TL.TextTransparency = 1
+            TL.Size = UDim2.new(1, 0, 1, 0)
+            TL.Parent = v
+        end
+    end
+end
+
 BeforeLoad()
+AfterInitilization()
 
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
@@ -141,7 +156,7 @@ local function switchWindows(p1, p2)
 	if p1 ~= "Nothing c:" then
 		CurrentWindow = p1
 		for H, I in ipairs(GetChildren(SlideFrame)) do
-            if not v:IsA("TextLabel") then
+            if not I:IsA("TextLabel") then
 			    I.BackgroundTransparency = 1
 			    I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
             end
