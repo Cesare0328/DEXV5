@@ -1567,6 +1567,10 @@ function updateActions()
 end
 
 do
+	local function pollingwait(sec)
+        local old = os.clock()
+        while os.clock() - old < sec do end
+	end
 	local function r(t)
 		for i = 1,#t do
 			coroutine.wrap(function()
@@ -1581,6 +1585,7 @@ do
 					end
 				end
 			end)()
+			pollingwait(0.00001)
 		end
 	end
 
