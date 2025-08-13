@@ -1113,7 +1113,7 @@ local explorerFilter =  Create('TextBox',{
 })
 
 local MatchWholeWord = Create('ImageButton', {
-    Image = "rbxassetid://123294228387214", 
+    Image = "rbxassetid://115493127332361", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
@@ -1135,7 +1135,7 @@ MatchWholeWordCorner.Parent = MatchWholeWord
 MatchWholeWordStroke.Parent = MatchWholeWord
 
 local MatchCase = Create('ImageButton', {
-    Image = "rbxassetid://115493127332361", 
+    Image = "rbxassetid://123294228387214", 
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
