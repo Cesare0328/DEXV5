@@ -75,6 +75,7 @@ local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
 local Searched = false
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
+local updateList,rawUpdateList,updateScroll,rawUpdateSize
 local OldMax, OldMin = nil, nil
 local Mouse = cloneref(LocalPlayer:GetMouse())
 local Option = {
@@ -1565,7 +1566,7 @@ function updateActions()
     end
 end
 
-local updateList,rawUpdateList,updateScroll,rawUpdateSize do
+do
 	local function r(t)
 		for i = 1,#t do
 			if not filteringInstances() or scanName(t[i].Object) then
