@@ -1112,9 +1112,9 @@ local explorerFilter =  Create('TextBox',{
 })
 
 local iconBox1 = Create('ImageButton', {
-    Image = "", 
+    Image = "rbxassetid://92688872187725", 
     BackgroundColor3 = Color3.new(1, 1, 1),
-    BackgroundTransparency = 0,
+    BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2.new(0, 16, 0, 16),
     Position = UDim2.new(1, -7, 0.5, 0),
@@ -1123,12 +1123,12 @@ local iconBox1 = Create('ImageButton', {
 iconBox1.Parent = explorerFilter
 
 local iconBox2 = Create('ImageButton', {
-    Image = "", 
+    Image = "rbxassetid://81154784805170", 
     BackgroundColor3 = Color3.new(1, 1, 1),
-    BackgroundTransparency = 0,
+    BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2.new(0, 16, 0, 16),
-    Position = UDim2.new(1, -7 - 16 - 7, 0.5, 0),
+    Position = UDim2.new(1, -5 - 16 - 7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 iconBox2.Parent = explorerFilter
