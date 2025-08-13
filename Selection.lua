@@ -849,7 +849,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Enabled = instance.Enabled,
                 Size = instance.Size
             }
-        elseif instance:IsA("Terrain") then
+        end
+        if instance:IsA("Terrain") then
             properties = {
                 PhysicsGrid = gethiddenproperty(instance, "PhysicsGrid"),
                 SmoothGrid = gethiddenproperty(instance, "SmoothGrid"),
@@ -857,7 +858,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 Decoration = gethiddenproperty(instance, "Decoration"),
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
-            warn("TERRAIN LOGGED")
         end
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
