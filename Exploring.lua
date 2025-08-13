@@ -1111,19 +1111,6 @@ local explorerFilter =  Create('TextBox',{
     ZIndex = 1
 })
 
-local explorerFilter =  Create('TextBox',{
-    PlaceholderText = "Filter Instances",
-    Text = "Filter Instances",
-    BackgroundTransparency = .8,
-    TextColor3 = GuiColor.Text,
-    TextXAlignment = 'Left',
-    Font = FONT,
-    FontSize = FONT_SIZE,
-    Position = UDim2.new(0, 4, 0.5, 0),
-    Size = UDim2.new(1, -8, 0.5, -2),
-    ZIndex = 1
-})
-
 local iconSize = explorerFilter.AbsoluteSize.Y
 local padding = 7
 
