@@ -1529,8 +1529,10 @@ end
 function scanName(obj)
 	nameScanned = false
 	if string_find(string_lower(obj.Name),string_lower(explorerFilter.Text)) then
+		warn("CALLED")
 		nameScanned = true
 	else
+		warn("CALLED2")
 		lookForAName(obj,explorerFilter.Text)
 	end
 	return nameScanned
