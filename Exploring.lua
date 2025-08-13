@@ -1131,6 +1131,7 @@ local MatchWholeWordStroke = Create('UIStroke', {
 	Enabled = false
 })
 MatchWholeWordCorner.Parent = MatchWholeWord
+MatchWholeWordStroke.Parent = MatchWholeWord
 
 local MatchCase = Create('ImageButton', {
     Image = "rbxassetid://115493127332361", 
@@ -1152,6 +1153,7 @@ local MatchCaseStroke = Create('UIStroke', {
 	Enabled = false
 })
 MatchCaseCorner.Parent = MatchCase
+MatchCaseStroke.Parent = MatchCase
 
 MatchWholeWord.MouseEnter:Connect(function()
     MatchWholeWord.ImageTransparency = 0.5
