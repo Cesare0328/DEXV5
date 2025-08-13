@@ -1111,8 +1111,8 @@ local explorerFilter =  Create('TextBox',{
     ZIndex = 1
 })
 
-local iconSize = explorerFilter.AbsoluteSize.Y - 4 
-local padding = 4
+local iconSize = (explorerFilter.AbsoluteSize.Y - 4) * 1.5
+local padding = 8
 
 local iconBox1 = Create('ImageButton', {
     Image = "", 
@@ -1135,6 +1135,7 @@ local iconBox2 = Create('ImageButton', {
     ZIndex = explorerFilter.ZIndex + 1
 })
 iconBox2.Parent = explorerFilter
+
 
 explorerFilter.Parent = headerFrame
 
