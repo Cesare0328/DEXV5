@@ -105,11 +105,8 @@ local function BeforeLoad()
 	local A, B = pcall(readfile, "dexv5_settings.json")
 	local C = A and JSONDecode(HttpService, B) or {}
     local D = "UUID : " .. string.gsub('xxxx-xxxx-xxxx-xxxx', '[x]', function() return string.format('%X', math.random(0, 15)) end) .. "\nVERSION : " .. settings()["Diagnostics"].RobloxVersion
-	local IUID, AUID = WaitForChild(IntroFrame, "UUID", 10), WaitForChild(AboutPanel, "UUID", 10)
-    IUID.TextWrapped = false
-	AUID.TextWrapped = false
-    IUID.Text = D
-	AUID.Text = D
+	WaitForChild(IntroFrame, "UUID", 10).Text = D
+	WaitForChild(AboutPanel, "UUID", 10).Text = D
 	if C.Save then
 		local E = C.Save
 		WaitForChild(SettingHeader, "TextLabel", 10).Text = string_format("Settings | Last Save - %s/%s/%s (%s:%s:%s.%s)", E.Day, E.Month, string_sub(E.Year, #E.Year - 1, #E.Year), E.Hours, E.Minutes, E.Seconds, E.Milliseconds)
@@ -118,7 +115,7 @@ end
 
 local function AfterInitialization()
     for _, v in ipairs(Dex:GetDescendants()) do
-        if v:IsA("Frame") and v.Name ~= "Other" and v.Name ~= "SettingTemplate" and v.Name ~= "MapSettings" and v.Name ~= "SettingList" and (v.Name ~= "MainWindow" and v.Parent.Name ~= "ModelViewer") then
+        if v:IsA("Frame") and v.Name ~= "Other" then
             local TL = Instance.new("TextLabel")
             TL.Name = "InputBlocker"
             TL.Active = v.Visible
@@ -159,7 +156,6 @@ local function switchWindows(p1, p2)
 	if p1 ~= "Nothing c:" then
 		CurrentWindow = p1
 		for H, I in ipairs(GetChildren(SlideFrame)) do
-            warn(I)
             if not I:IsA("TextLabel") then
 			    I.BackgroundTransparency = 1
 			    I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
@@ -240,7 +236,6 @@ Connect(CloseToggleButton.MouseButton1Up, function()
 end)
 
 for _,v in ipairs(GetChildren(SlideFrame)) do
-    warn(v)
     if not v:IsA("TextLabel") then
 	    Connect(v.Activated, function()
 		    switchWindows(tostring(v))
