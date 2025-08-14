@@ -1499,7 +1499,11 @@ local function openScript(o)
 		local decompiled
 		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
     		if string.len(getscriptbytecode(o)) == 0 then
-        		decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
+				if IsA(0, "LocalScript") then
+        			decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
+				else
+					decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
+				end
     		else
         		decompiled = decompile(o)
         		if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
