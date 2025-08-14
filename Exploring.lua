@@ -1372,8 +1372,8 @@ function GetCorrectIcon(Class)
 			return ExplorerIndex[Class]
 		end
 	elseif typeof(Class) == "Instance" then
-		if ExplorerIndex[Class.ClassName] then
-			return ExplorerIndex[Class.ClassName]
+		if ExplorerIndex[Class.className] then
+			return ExplorerIndex[Class.className]
 		end
 		for ClassIndex, ImageIndex in next, ExplorerIndex do
 			if IsA(Class, ClassIndex) then
