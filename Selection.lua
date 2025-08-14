@@ -136,7 +136,7 @@ BeforeLoad()
 AfterInitialization()
 
 -- < General Bypasses > --
-local hook; hook = hookfunction(UserInputService.GetFocusedTextBox, function(...) local a = hook(...) if a:IsDescendantOf(CoreGui) then return nil end return a end)
+local hook; hook = hookfunction(UserInputService.GetFocusedTextBox, function(...) local a = hook(...) if a and a:IsDescendantOf(CoreGui) then return nil end return a end)
 
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
