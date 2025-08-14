@@ -148,7 +148,7 @@ OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
         local a = OldNameCall(self, ...)
         if a and a:IsDescendantOf(CoreGui) then return nil end
         return a
-    elseif not checkcaller and getnamecallmethod == 'PreloadAsync' and self == ContentProvider and #args >= 2 then
+    elseif not checkcaller and getnamecallmethod == 'PreloadAsync' and self == ContentProvider then
         table.foreach(args, warn)
         if type(args[2]) == "function" then
             args[2] = nil
