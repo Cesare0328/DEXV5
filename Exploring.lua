@@ -167,15 +167,16 @@ local GuiColor = {
 	TitleBackground = Color3_fromRGB(10, 10, 15)
 }
 -- Icon map constants
+local Folder = "DEXV5\\Assets\\" 
 local ActionTextures = {
-	Copy = {"rbxasset://textures/TerrainTools/icon_regions_copy.png","rbxasset://textures/TerrainTools/icon_regions_copy.png"},
-	Paste = {"rbxasset://textures/TerrainTools/icon_regions_paste.png","rbxasset://textures/TerrainTools/icon_regions_paste.png"},
-	Delete = {"rbxasset://textures/TerrainTools/icon_regions_delete.png","rbxasset://textures/TerrainTools/icon_regions_delete.png"},
-	Starred = {"rbxasset://textures/StudioToolbox/AssetPreview/star_filled.png","rbxasset://textures/StudioToolbox/AssetPreview/star_filled.png"},
-	AddStar = {"rbxasset://textures/StudioToolbox/AssetPreview/star_stroke.png","rbxasset://textures/StudioToolbox/AssetPreview/star_stroke.png"}
+    Copy = {readfile(Folder .. "icon_regions_copy.png"), readfile(Folder .. "icon_regions_copy.png")},
+    Paste = {readfile(Folder .. "icon_regions_paste.png"), readfile(Folder .. "icon_regions_paste.png")},
+    Delete = {readfile(Folder .. "icon_regions_delete.png"), readfile(Folder .. "icon_regions_delete.png")},
+    Starred = {readfile(Folder .. "star_filled.png"), readfile(Folder .. "star_filled.png")},
+    AddStar = {readfile(Folder .. "star_stroke.png"), readfile(Folder .. "star_stroke.png")}
 }
 
-local NodeTextures = {"rbxasset://textures/AnimationEditor/btn_expand.png", "rbxasset://textures/AnimationEditor/btn_collapse.png"}
+local NodeTextures = {readfile(Folder .. "btn_expand.png"), readfile(Folder .. "btn_collapse.png")}
 
 local ExplorerIndex, ReflectionMetadata = {}, "https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/ReflectionMetadata.JSON"
 
