@@ -118,7 +118,7 @@ end
 
 local function AfterInitialization()
     for _, v in ipairs(Dex:GetDescendants()) do
-        if v:IsA("Frame") and v.Name ~= "Other" and v.Name ~= "SettingTemplate" and v.Name ~= "MapSettings" and v.Name ~= "SettingList" or (v:IsA("Frame") and v.Name ~= "MainWindow" and v.Parent.Name ~= "ModelViewer")  then
+        if v:IsA("Frame") and v.Name ~= "Other" and v.Name ~= "SettingTemplate" and v.Name ~= "MapSettings" and v.Name ~= "SettingList" and (v.Name ~= "MainWindow" and v.Parent.Name ~= "ModelViewer") then
             local TL = Instance.new("TextLabel")
             TL.Name = "InputBlocker"
             TL.Active = v.Visible
@@ -159,6 +159,7 @@ local function switchWindows(p1, p2)
 	if p1 ~= "Nothing c:" then
 		CurrentWindow = p1
 		for H, I in ipairs(GetChildren(SlideFrame)) do
+            warn(I)
             if not I:IsA("TextLabel") then
 			    I.BackgroundTransparency = 1
 			    I.Icon.ImageColor3 = Color3_new(.6, .6, .6)
@@ -239,6 +240,7 @@ Connect(CloseToggleButton.MouseButton1Up, function()
 end)
 
 for _,v in ipairs(GetChildren(SlideFrame)) do
+    warn(v)
     if not v:IsA("TextLabel") then
 	    Connect(v.Activated, function()
 		    switchWindows(tostring(v))
