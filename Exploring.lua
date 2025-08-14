@@ -1533,22 +1533,16 @@ function filteringInstances()
 	return (explorerFilter.Text ~= "" and explorerFilter.Text ~= "Filter Instances") and true or false
 end
 
-function lookForAName(obj, name)
-    for _,v in ipairs(GetChildren(obj)) do
-        local objName = tostring(v.Name)
-        local filterText = name
-        if not MatchCaseToggle then
-            objName = string_lower(objName)
-            filterText = string_lower(filterText)
-        end
-        if (MatchWholeWordToggle and objName == filterText) or (not MatchWholeWordToggle and string_find(objName, filterText)) then
+function lookForAName(obj, lowerName, originalName)
+    for _, v in ipairs(GetChildren(obj)) do
+        local vName = v.Name
+        local checkName = MatchCaseToggle and vName or string_lower(vName)
+        if (MatchWholeWordToggle and checkName == lowerName) or (not MatchWholeWordToggle and string_find(checkName, lowerName, 1, true)) then 
             nameScanned = true
             return
         end
-        lookForAName(v, name)
-        if nameScanned then
-            return
-        end
+        lookForAName(v, lowerName, originalName)
+        if nameScanned then return end
     end
 end
 
@@ -1556,14 +1550,12 @@ function scanName(obj)
     nameScanned = false
     local objName = obj.Name
     local filterText = explorerFilter.Text
-    if not MatchCaseToggle then
-        objName = string_lower(objName)
-        filterText = string_lower(filterText)
-    end
-    if (MatchWholeWordToggle and objName == filterText) or (not MatchWholeWordToggle and string_find(objName, filterText)) then
+    local lowerFilter = MatchCaseToggle and filterText or string_lower(filterText)
+    local checkName = MatchCaseToggle and objName or string_lower(objName)
+    if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string_find(checkName, lowerFilter, 1, true)) then
         nameScanned = true
     else
-        lookForAName(obj, explorerFilter.Text)
+        lookForAName(obj, lowerFilter, filterText)
     end
     return nameScanned
 end
