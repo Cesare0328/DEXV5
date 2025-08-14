@@ -33,6 +33,8 @@ local TweenSize, TweenPosition = (function()
 	local A = Instance_new("Frame")
 	return A.TweenSize, A.TweenPosition
 end)()
+-- < Globals > --
+getgenv().AssetsCached = false
 -- < Upvalues > --
 local Heartbeat = RunService.Heartbeat
 local SelectionBoxes = {}
