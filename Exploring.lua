@@ -167,6 +167,7 @@ local GuiColor = {
 	TitleBackground = Color3_fromRGB(10, 10, 15)
 }
 -- Icon map constants
+while not getgenv().AssetsCached do task.wait() end
 local Folder = "DEXV5\\Assets\\" 
 local ActionTextures = {
     Copy = {readfile(Folder .. "icon_regions_copy.png"), readfile(Folder .. "icon_regions_copy.png")},
