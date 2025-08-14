@@ -138,7 +138,6 @@ AfterInitialization()
 
 -- < General Bypasses > --
 local hook; hook = hookfunction(UserInputService.GetFocusedTextBox, function(...) local a = hook(...) if a and a:IsDescendantOf(CoreGui) then return nil end return a end)
-local hook2, hook2 = hookfunction(ContentProvider.PreloadAsync, function(...) local args = {...} if #args >= 2 and type(args[2]) == "function" then args[2] = nil end return hook2(unpack(args)) end)
 local OldNameCall
 OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
     local args = {...}
@@ -148,10 +147,6 @@ OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
         local a = OldNameCall(self, ...)
         if a and a:IsDescendantOf(CoreGui) then return nil end
         return a
-    elseif not checkcaller and getnamecallmethod == 'PreloadAsync' and self == game.ContentProvider then
-        if type(args[2]) == "function" then
-            args[2] = nil
-        end
     end
 return OldNameCall(self,unpack(args))
 end))
