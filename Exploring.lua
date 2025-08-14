@@ -170,14 +170,14 @@ local GuiColor = {
 while not getgenv().AssetsCached do task.wait() end
 local Folder = "DEXV5\\Assets\\" 
 local ActionTextures = {
-    Copy = {readfile(Folder .. "icon_regions_copy.png"), readfile(Folder .. "icon_regions_copy.png")},
-    Paste = {readfile(Folder .. "icon_regions_paste.png"), readfile(Folder .. "icon_regions_paste.png")},
-    Delete = {readfile(Folder .. "icon_regions_delete.png"), readfile(Folder .. "icon_regions_delete.png")},
-    Starred = {readfile(Folder .. "star_filled.png"), readfile(Folder .. "star_filled.png")},
-    AddStar = {readfile(Folder .. "star_stroke.png"), readfile(Folder .. "star_stroke.png")}
+    Copy = {getcustomasset(Folder .. "icon_regions_copy.png"), getcustomasset(Folder .. "icon_regions_copy.png")},
+    Paste = {getcustomasset(Folder .. "icon_regions_paste.png"), getcustomasset(Folder .. "icon_regions_paste.png")},
+    Delete = {getcustomasset(Folder .. "icon_regions_delete.png"), getcustomasset(Folder .. "icon_regions_delete.png")},
+    Starred = {getcustomasset(Folder .. "star_filled.png"), getcustomasset(Folder .. "star_filled.png")},
+    AddStar = {getcustomasset(Folder .. "star_stroke.png"), getcustomasset(Folder .. "star_stroke.png")}
 }
 
-local NodeTextures = {readfile(Folder .. "btn_expand.png"), readfile(Folder .. "btn_collapse.png")}
+local NodeTextures = {getcustomasset(Folder .. "btn_expand.png"), getcustomasset(Folder .. "btn_collapse.png")}
 
 local ExplorerIndex, ReflectionMetadata = {}, "https://raw.githubusercontent.com/Cesare0328/DEXV5/refs/heads/main/ReflectionMetadata.JSON"
 
