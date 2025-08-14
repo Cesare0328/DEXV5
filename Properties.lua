@@ -80,6 +80,7 @@ task.spawn(function()
     writefile("DEXV5\\Assets\\" .. v, game:HttpGet("https://raw.githubusercontent.com/Cesare0328/DEXV5/main/Assets/" .. v, true))
 end)
 end
+getgenv().AssetsCached = true
 end
 
 local apiChunks = splitStringIntoChunks(getCurrentApiJson())
