@@ -138,8 +138,24 @@ AfterInitialization()
 
 -- < General Bypasses > --
 local hook; hook = hookfunction(UserInputService.GetFocusedTextBox, function(...) local a = hook(...) if a and a:IsDescendantOf(CoreGui) then return nil end return a end)
-local hook2, hook2 = hookfunction(ContentProvider.PreloadAsync, function(...) local args = {...} table.foreach(args, warn) if #args >= 2 and type(args[2]) == "function" then args[2] = nil end return hook2(unpack(args)) end)
-
+local hook2, hook2 = hookfunction(ContentProvider.PreloadAsync, function(...) local args = {...} if #args >= 2 and type(args[2]) == "function" then args[2] = nil end return hook2(unpack(args)) end)
+local OldNameCall
+OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local args = {...}
+    local checkcaller = checkcaller()
+    local getnamecallmethod = getnamecallmethod()
+    if not checkcaller and getnamecallmethod == 'GetFocusedTextBox' and self == UserInputService then
+        local a = OldNameCall(self, ...)
+        if a and a:IsDescendantOf(CoreGui) then return nil end
+        return a
+    elseif not checkcaller and getnamecallmethod == 'PreloadAsync' and self == ContentProvider and #args >= 2 then
+        table.foreach(args, warn)
+        if type(args[2]) == "function" then
+            args[2] = nil
+        end
+    end
+return OldNameCall(self,unpack(args))
+end))
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
 	local A = 0
