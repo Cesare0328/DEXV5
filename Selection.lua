@@ -144,11 +144,11 @@ OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
     local args = {...}
     local checkcaller = checkcaller()
     local getnamecallmethod = getnamecallmethod()
-    if not checkcaller and getnamecallmethod == 'GetFocusedTextBox' and self == UserInputService then
+    if not checkcaller and getnamecallmethod == 'GetFocusedTextBox' and self == game.UserInputService then
         local a = OldNameCall(self, ...)
         if a and a:IsDescendantOf(CoreGui) then return nil end
         return a
-    elseif not checkcaller and getnamecallmethod == 'PreloadAsync' and self == ContentProvider then
+    elseif not checkcaller and getnamecallmethod == 'PreloadAsync' and self == game.ContentProvider then
         table.foreach(args, warn)
         if type(args[2]) == "function" then
             args[2] = nil
