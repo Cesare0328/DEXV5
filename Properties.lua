@@ -71,13 +71,13 @@ local function splitStringIntoChunks(jsonStr)
 	return t
 end
 
-local function TenebraCacheAssets()
-local Assets = {"Loading.png", "Finished.png"}
+local function DexCacheAssets()
+local Assets = {"Loading.png", "Finished.png", "icon_regions_copy.png", "icon_regions_paste.png", "icon_regions_delete.png", "star_filled.png", "star_stroke.png", "btn_expand.png", "btn_collapse.png"}
 if not isfolder("DEXV5") then makefolder("DEXV5") end
 if not isfolder("DEXV5\\Assets") then makefolder("DEXV5\\Assets") end
 for i,v in pairs(Assets) do
 task.spawn(function()
-    writefile("DEXV5\\Assets\\" .. v, game:HttpGet("https://raw.githubusercontent.com/Cesare0328/Tenebra/main/" .. v, true))
+    writefile("DEXV5\\Assets\\" .. v, game:HttpGet("https://raw.githubusercontent.com/Cesare0328/DEXV5/main/Assets/" .. v, true))
 end)
 end
 end
@@ -2207,7 +2207,7 @@ do
     	makefolder("DEXV5\\SaveInstances")
 	end
 	task.spawn(function()
-    	TenebraCacheAssets()
+    	DexCacheAssets()
 	end)
 	local listEntries,nameConnLookup = {},{}
 
