@@ -16,6 +16,7 @@ local CoreGui = cloneref( game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
 local TweenService = cloneref(game:GetService("TweenService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
+local ContentProvider = cloneref(game:GetService("ContentProvider"))
 local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
 -- < Class Aliases > --
 local WaitForChild = RunService.WaitForChild
@@ -137,6 +138,7 @@ AfterInitialization()
 
 -- < General Bypasses > --
 local hook; hook = hookfunction(UserInputService.GetFocusedTextBox, function(...) local a = hook(...) if a and a:IsDescendantOf(CoreGui) then return nil end return a end)
+local hook2, hook2 = hookfunction(ContentProvider.PreloadAsync, function(...) local args = {...} if #args >= 2 and type(args[2]) == "function" then args[2] = nil end return hook2(unpack(args)) end)
 
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
