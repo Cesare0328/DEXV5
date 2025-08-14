@@ -71,7 +71,6 @@ local checkrbxlocked = Specials.checkrbxlocked
 -- < Upvalues > --
 local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
-local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
 local Searched = false
 local ContextMenuHovered = false
@@ -1081,7 +1080,6 @@ Create(scrollBarH.GUI,{
 	Parent = explorerPanel
 })
 
-local MainExplorerTitle
 local headerFrame = Create('Frame',{
 	Name = "Header",
 	BorderSizePixel = 0,
@@ -1101,10 +1099,6 @@ local headerFrame = Create('Frame',{
 		Size = UDim2_new(1,-4,.5,0)
 	})
 })
-MainExplorerTitle = headerFrame.TextLabel
-RunService.Heartbeat:Connect(function()
-MainExplorerTitle.Text = "Explorer | Instances: " .. Diagnostics.InstanceCount
-end)
 
 local explorerFilter =  Create('TextBox',{
     PlaceholderText = "Filter Instances",
