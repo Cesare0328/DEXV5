@@ -4113,14 +4113,12 @@ do
 		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson and not FPSDebounce then
 			FPSDebounce = true
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
-			FPSDebounce = false
 		end
 	end)
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMaxZoomDistance"), function()
 		if Players.LocalPlayer.CameraMaxZoomDistance == 0 and not FPSDebounce then
 			FPSDebounce = true
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
-			FPSDebounce = false
 		end
 	end)
 	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehavior"), function()
@@ -4138,6 +4136,7 @@ Connect(UserInputService.InputBegan, function(p1)
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
 		FFTextbutton.Modal = not FFTextbutton.Modal
 		FFTextbutton.Visible = not FFTextbutton.Visible
+		UserInputService.MouseIconEnabled = (UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal) or (not FFTextbutton.Modal and UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None) or true
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
