@@ -1132,14 +1132,8 @@ local FilterInstance = Create('Frame', {
 })
 FilterInstance.Parent = explorerFilter
 
-local MaskedFilterInstance = Create('Frame', {
-    BackgroundTransparency = 1,
-    Size = UDim2.new(1, 0, 1, 0),
-    Visible = false,
-    ZIndex = 2
-})
-MaskedFilterInstance.Parent = FilterInstance
-
+local MaskedFilterInstance = Clone(FilterInstance)
+MaskedFilterInstance.Parent = explorerFilter
 
 local InputBlocker = Create('TextLabel', {
     Name = "InputBlocker",
