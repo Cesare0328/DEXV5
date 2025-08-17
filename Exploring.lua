@@ -1644,16 +1644,16 @@ function scanName(Obj)
     nameScanned = false
     local ObjName = Obj.Name
     local Filter = explorerFilter.Text
-    local LowerFilter = MatchCaseToggle and Filter or string.lower(Filter)
-    local CheckName = MatchCaseToggle and ObjName or string.lower(ObjName)
-    local IsPropSearch = string.find(Filter, "=") ~= nil
+    local LowerFilter = MatchCaseToggle and Filter or string_lower(Filter)
+    local CheckName = MatchCaseToggle and ObjName or string_lower(ObjName)
+    local IsPropSearch = string_find(Filter, "=") ~= nil
 
     if IsPropSearch then
-        local Prop, Value = string.match(Filter, "([^=]+)=(.+)")
+        local Prop, Value = string_match(Filter, "([^=]+)=(.+)")
         if Prop and Value then
             Prop = Prop:match("^%s*(.-)%s*$")
             Value = Value:match("^%s*(.-)%s*$")
-            local LowerProp = string.lower(Prop)
+            local LowerProp = string_lower(Prop)
             if LowerProp == "tag" then
                 if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
@@ -1677,7 +1677,7 @@ function scanName(Obj)
             else
                 local success, result = pcall(function()
                     local ParsedValue
-                    local LowerValue = string.lower(Value)
+                    local LowerValue = string_lower(Value)
                     if LowerValue == "true" then
                         ParsedValue = true
                     elseif LowerValue == "false" then
@@ -1697,7 +1697,7 @@ function scanName(Obj)
                 for _, v in ipairs(GetChildren(Obj)) do
                     local success, result = pcall(function()
                         local ParsedValue
-                        local LowerValue = string.lower(Value)
+                        local LowerValue = string_lower(Value)
                         if LowerValue == "true" then
                             ParsedValue = true
                         elseif LowerValue == "false" then
@@ -1726,14 +1726,14 @@ function scanName(Obj)
                 end
             end
         else
-            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
             else
                 lookForAName(Obj, LowerFilter, Filter)
             end
         end
     else
-        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
+        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
         else
             lookForAName(Obj, LowerFilter, Filter)
