@@ -4136,12 +4136,11 @@ Connect(UserInputService.InputBegan, function(p1)
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
 		FFTextbutton.Modal = not FFTextbutton.Modal
 		FFTextbutton.Visible = not FFTextbutton.Visible
-		if UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None or (UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal) then
+		if UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None then
 			UserInputService.MouseIconEnabled = true
-		else
+		elseif UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal then
 			UserInputService.MouseIconEnabled = false
 		end
-		--UserInputService.MouseIconEnabled = UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None or (UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal)
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
