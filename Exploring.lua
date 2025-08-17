@@ -3256,7 +3256,7 @@ do
 			Create('TextLabel',{
 				Name = "EntryText",
 				BackgroundTransparency = 1,
-				TextColor3 = GuiColor.Text,
+				TextColor3 = Color3.new(1, 1, 1),
 				TextXAlignment = 'Left',
 				TextYAlignment = 'Center',
 				Font = FONT,
