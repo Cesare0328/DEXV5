@@ -4053,7 +4053,7 @@ end
 
 Connect(explorerFilter.FocusLost, function()
 	Searched = true
-	if not explorerFilter.Text:find("=") and not explorerFilter.Text == "" then warn("first") explorerFilter.ClearTextOnFocus = true end
+	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
 	rawUpdateList()
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
@@ -4065,12 +4065,12 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
-if WhitelistedFocus then warn("WL Dtc") WhitelistedFocus = false return end
+if WhitelistedFocus then WhitelistedFocus = false return end
 explorerFilter.ClearTextOnFocus = false
 if not Searched or explorerFilter.Text == "" or table.find(SuggestedFilterNames, explorerFilter.Text) ~= nil then
 	FilterInstance.Visible = true
 end
-if not explorerFilter.Text:find("=") and not explorerFilter.Text == "" then warn("sec") explorerFilter.Text = "" end
+if not explorerFilter.Text:find("=") then explorerFilter.Text = "" end
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
