@@ -27,6 +27,7 @@ local math_random = math.random
 local math_huge = math.huge
 -- < Services > --
 local UserInputService = cloneref(game:GetService("UserInputService"))
+local CollectionService = cloneref(game:GetService("CollectionService"))
 local HttpService = cloneref(game:GetService("HttpService"))
 local RunService = cloneref(game:GetService("RunService"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -1138,7 +1139,7 @@ local UICorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
 })
 local UIStroke = Create('UIStroke', {
-	Thickness = 0.75,
+	Thickness = 1.5,
 	Color = GuiColor.FrameBorder
 })
 UIStroke.Parent = FilterInstance
@@ -1611,6 +1612,15 @@ local getTextWidth do
 end
 
 local nameScanned, TreeList, NodeLookup, QuickButtons, nodeWidth = false, {}, {}, {}, 0
+local PropertyMap = {
+    ["tag"] = "tag" -- Manual entry for tags
+}
+
+for _, class in ipairs(ReflectionMetadata.Classes) do
+    for _, prop in ipairs(class.Properties or {}) do
+        PropertyMap[string_lower(prop.Name)] = prop.Name
+    end
+end
 
 function findObjectIndex(targetObject)
     for i = 1, #TreeList do
@@ -1642,12 +1652,78 @@ function scanName(obj)
     nameScanned = false
     local objName = obj.Name
     local filterText = explorerFilter.Text
-    local lowerFilter = MatchCaseToggle and filterText or string_lower(filterText)
-    local checkName = MatchCaseToggle and objName or string_lower(objName)
-    if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string_find(checkName, lowerFilter, 1, true)) then
-        nameScanned = true
+    local lowerFilter = MatchCaseToggle and filterText or string.lower(filterText)
+    local checkName = MatchCaseToggle and objName or string.lower(objName)
+    local isPropertySearch = string.find(filterText, "=") ~= nil
+
+    if isPropertySearch then
+        local propStr, valueStr = string.match(filterText, "(.+)=(.+)")
+        if propStr and valueStr then
+            local lowerProp = string.lower(propStr)
+            local realProp = PropertyMap[lowerProp]
+            if realProp then
+                local value
+                local lowerValue = string.lower(valueStr)
+                if lowerValue == "true" then
+                    value = true
+                elseif lowerValue == "false" then
+                    value = false
+                else
+                    value = tonumber(valueStr) or valueStr
+                end
+
+                if realProp == "tag" then
+                    if CollectionService:HasTag(obj, value) then
+                        nameScanned = true
+                    end
+                else
+                    local success, result = pcall(function()
+                        return obj[realProp] == value
+                    end)
+                    if success and result then
+                        nameScanned = true
+                    end
+                end
+                if not nameScanned then
+                    for _, v in ipairs(GetChildren(obj)) do
+                        if realProp == "tag" then
+                            if CollectionService:HasTag(v, value) then
+                                nameScanned = true
+                                return
+                            end
+                        else
+                            local success, result = pcall(function()
+                                return v[realProp] == value
+                            end)
+                            if success and result then
+                                nameScanned = true
+                                return
+                            end
+                        end
+                        lookForAName(v, lowerFilter, filterText)
+                        if nameScanned then return end
+                    end
+                end
+            else
+                if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string.find(checkName, lowerFilter, 1, true)) then
+                    nameScanned = true
+                else
+                    lookForAName(obj, lowerFilter, filterText)
+                end
+            end
+        else
+            if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string.find(checkName, lowerFilter, 1, true)) then
+                nameScanned = true
+            else
+                lookForAName(obj, lowerFilter, filterText)
+            end
+        end
     else
-        lookForAName(obj, lowerFilter, filterText)
+        if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string.find(checkName, lowerFilter, 1, true)) then
+            nameScanned = true
+        else
+            lookForAName(obj, lowerFilter, filterText)
+        end
     end
     return nameScanned
 end
