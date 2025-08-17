@@ -3947,7 +3947,7 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
-if not Searched or explorerFilter.Text == "" then
+if not Searched or explorerFilter.Text == "" or table.find(SuggestedFilterNames, explorerFilter.Text) ~= nil then
 	FilterInstance.Visible = true
 end
 task.spawn(function() task.wait() explorerFilter.Text = "" end)
