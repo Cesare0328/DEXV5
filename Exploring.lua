@@ -230,8 +230,8 @@ Temp.UIStroke.Color = GuiColor[Type]
 Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
-local pos = UDim2.new(1, -280, 0, -45)
-local Info = TweenInfo.new(Duration, Enum.EasingStyle.Bounce, Enum.EasingDirection.In)
+local pos = UDim2.new(1, -330, 0, -45)
+local Info = TweenInfo.new(Duration, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
 
 Tween:Play()
@@ -4070,7 +4070,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		SendNotification("Information", "Hello, this is a test", 3, 5)
+		SendNotification("Information", "Hello, this is a test", 1.5, 5)
 		--if theres any other uses in the future
     end
 end)
