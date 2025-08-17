@@ -1125,12 +1125,46 @@ local FilterInstance =  Create('Frame',{
     BackgroundTransparency = 0,
 	BackgroundColor3 = GuiColor.Field,
 	BorderColor3 = GuiColor.Border,
-	Position = UDim2.new(1, 0, 2, 0),
+	Position = UDim2.new(0, 0, 1.1, 0)
 	Size = UDim2.new(1, 0, 16, 0),
 	Visible = true,
     ZIndex = 2
 })
 FilterInstance.Parent = explorerFilter
+
+local ListLayout = Create('UIListLayout', {
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    FillDirection = Enum.FillDirection.Vertical,
+    Padding = UDim.new(0, 5)
+})
+ListLayout.Parent = FilterInstance
+
+local TitleLabel = Create('TextLabel', {
+    Text = "Filter Options",
+    Size = UDim2.new(1, 0, 0, 30),
+    BackgroundTransparency = 1,
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.SourceSansBold,
+    TextSize = 20,
+    ZIndex = 2,
+    LayoutOrder = 0
+})
+TitleLabel.Parent = FilterInstance
+
+for i = 1, 7 do
+    local FilterButton = Create('TextButton', {
+        Text = "Filter",
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
+        BorderColor3 = GuiColor.Border,
+        TextColor3 = Color3.new(1, 1, 1),
+        Font = Enum.Font.SourceSans,
+        TextSize = 18,
+        ZIndex = 2,
+        LayoutOrder = i
+    })
+    FilterButton.Parent = FilterInstance
+end
 
 local MatchWholeWord = Create('ImageButton', {
     Image = "rbxassetid://115493127332361", 
