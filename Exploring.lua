@@ -1140,7 +1140,7 @@ local ListLayout = Create('UIListLayout', {
 ListLayout.Parent = FilterInstance
 
 local TitleLabel = Create('TextLabel', {
-    Text = "Filter Options",
+    Text = "Suggested Filters",
     Size = UDim2.new(1, 0, 0, 30),
     BackgroundTransparency = 1,
     TextColor3 = GuiColor.Text,
@@ -1152,9 +1152,10 @@ local TitleLabel = Create('TextLabel', {
 })
 TitleLabel.Parent = FilterInstance
 
+local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material=", "meshId=", "textureId=", "tag:"}
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
-        Text = "Filter",
+        Text = SuggestedFilterNames[i],
         Size = UDim2.new(1, 0, 0, 20),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
