@@ -1126,7 +1126,7 @@ local FilterInstance = Create('Frame', {
     BackgroundColor3 = GuiColor.Field,
     BorderColor3 = GuiColor.Border,
     Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 8, 0),
+    Size = UDim2.new(1, 0, 14, 0),
     Visible = true,
     ZIndex = 2
 })
@@ -1155,7 +1155,7 @@ TitleLabel.Parent = FilterInstance
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = "Filter",
-        Size = UDim2.new(1, 0, 0, 30),
+        Size = UDim2.new(1, 0, 0, 20),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
