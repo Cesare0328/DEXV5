@@ -216,7 +216,7 @@ local function Create(p1, p2)
 	return A
 end
 
-local function SendNotification(Type, Message, Duration)
+local function SendNotification(Type, Message, Duration, ActiveFor)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = CoreGui
 
@@ -227,17 +227,17 @@ Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .
 Temp.TextLabel.Text = Message
 Temp.UIStroke.Color = GuiColor[Type]
 
-Temp.Position = UDim2.new(1, 30, 0, -45)
+Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
-local targetPosition = UDim2.new(1, Temp.Size.X.Offset + 30, 0, -45)
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-local tween = TweenService:Create(Temp, tweenInfo, {Position = targetPosition})
+local pos = UDim2.new(1, -280, 0, -45)
+local Info = TweenInfo.new(Duration, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+local Tween = TweenService:Create(Temp, Info, {Position = pos})
 
-tween:Play()
-tween.Completed:Wait()
+Tween:Play()
+Tween.Completed:Wait()
 
-task.delay(Duration, function()
+task.delay(ActiveFor, function()
 	ScreenGui:Destroy()
 end)
 end
@@ -4071,7 +4071,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		SendNotification("Information", "Hello, this is a test", 3)
+		SendNotification("Information", "Hello, this is a test", 3, 5)
 		--if theres any other uses in the future
     end
 end)
