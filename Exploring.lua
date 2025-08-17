@@ -4099,7 +4099,7 @@ do
 			task.wait(2)
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
 		end)
-	elseif UserInputService.MouseBehaviour ~= Enum.MouseBehaviour.Default then
+	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
 		task.spawn(function()
 			task.wait(2)
 			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 1, 3)
@@ -4115,8 +4115,8 @@ do
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
 		end
 	end)
-	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehaviour"), function()
-		if UserInputService.MouseBehaviour ~= Enum.MouseBehaviour.Default then
+	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehavior"), function()
+		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
 			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 1, 3)
 		end
 	end)
