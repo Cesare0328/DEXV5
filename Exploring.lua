@@ -1210,8 +1210,7 @@ for i = 1, 7 do
     FilterImage.Parent = FilterButton
 	Connect(FilterButton.MouseButton1Down, function()
 		setthreadidentity(8)
-		--explorerFilter:CaptureFocus()
-		--task.wait()
+		task.wait()
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
 	end)
@@ -4014,6 +4013,7 @@ end
 
 Connect(explorerFilter.FocusLost, function()
 	Searched = true
+	if not explorerFilter.Text:find("=") and not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
 	rawUpdateList()
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
@@ -4025,10 +4025,11 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
+explorerFilter.ClearTextOnFocus = false
 if not Searched or explorerFilter.Text == "" or table.find(SuggestedFilterNames, explorerFilter.Text) ~= nil then
 	FilterInstance.Visible = true
 end
-task.spawn(function() task.wait() if not explorerFilter:find("=") then explorerFilter.Text = "" end end)
+task.spawn(function() task.wait() if not explorerFilter.Text:find("=") then explorerFilter.Text = "" end end)
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
