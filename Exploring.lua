@@ -1126,8 +1126,10 @@ local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
     BackgroundColor3 = GuiColor.Field,
     BorderColor3 = GuiColor.Border,
+	BorderSizePixel = 3,
+	BorderTr
     Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 15.15, 0),
+    Size = UDim2.new(1, 0, 15.25, 0),
     Visible = false,
     ZIndex = 2
 })
