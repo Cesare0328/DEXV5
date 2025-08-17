@@ -1138,7 +1138,7 @@ local InputBlocker = Create('TextLabel', {
     BackgroundTransparency = 1,
 	TextTransparency = 1,
     Size = UDim2.new(1, 0, 1, 0),
-    Visible = false
+    Visible = true
 })
 InputBlocker.Parent = FilterInstance
 
@@ -1211,7 +1211,6 @@ for i = 1, 7 do
     })
     FilterImage.Parent = FilterButton
 	Connect(FilterButton.MouseButton1Up, function()
-		InputBlocker.Active = false
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
 	end)
@@ -3958,7 +3957,6 @@ end)
 Connect(explorerFilter.Focused, function()
 if explorerFilter.Text ~= "" then return end
 FilterInstance.Visible = true
-InputBlocker.Active = true
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
