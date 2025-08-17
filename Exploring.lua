@@ -157,6 +157,7 @@ local GuiColor = {
 	Selected = Color3_fromRGB(5, 100, 145),
 	BorderSelected = Color3_fromRGB(2, 125, 145),
 	Text = Color3_fromRGB(245, 245, 250),
+	FrameBorder = Color3_fromRGB(49, 49, 53),
 	TextDisabled = Color3_fromRGB(190, 190, 195),
 	TextSelected = Color3_fromRGB(255, 255, 255),
 	Button = Color3_fromRGB(31, 31, 35),
@@ -1136,11 +1137,11 @@ FilterInstance.Parent = explorerFilter
 local UICorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
 })
---local UIStroke = Create('UIStroke', {
-	--Thickness = 0.75,
-	--Color = GuiColor.TextDisabled
---})
---UIStroke.Parent = FilterInstance --| if you want white border around filter
+local UIStroke = Create('UIStroke', {
+	Thickness = 0.75,
+	Color = GuiColor.FrameBorder
+})
+UIStroke.Parent = FilterInstance
 UICorner.Parent = FilterInstance
 
 local ListLayout = Create('UIListLayout', {
