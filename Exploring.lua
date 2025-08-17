@@ -1653,14 +1653,14 @@ function scanName(Obj)
         if Prop and Value then
             Prop = Prop:match("^%s*(.-)%s*$")
             Value = Value:match("^%s*(.-)%s*$")
-            print("Property search: Prop =", Prop, "Value =", Value)
+            warn("Property search: Prop =", Prop, "Value =", Value)
 
             local LowerProp = string_lower(Prop)
             if LowerProp == "tag" then
-                print("Checking tag:", Value, "on", ObjName)
+                warn("Checking tag:", Value, "on", ObjName)
                 if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
-                    print("Tag match found for", ObjName)
+                    warn("Tag match found for", ObjName)
                 end
             else
                 local success, result = pcall(function()
@@ -1673,25 +1673,25 @@ function scanName(Obj)
                     else
                         ParsedValue = tonumber(Value) or Value
                     end
-                    print("Checking", Prop, "=", ParsedValue, "on", ObjName)
+                    warn("Checking", Prop, "=", ParsedValue, "on", ObjName)
                     return Obj[Prop] == ParsedValue
                 end)
                 if success then
                     if result then
                         nameScanned = true
-                        print("Property match found for", ObjName)
+                        warn("Property match found for", ObjName)
                     end
                 else
-                    print("Error accessing", Prop, "on", ObjName, ":", result)
+                    warn("Error accessing", Prop, "on", ObjName, ":", result)
                 end
             end
             if not nameScanned then
                 for _, v in ipairs(GetChildren(Obj)) do
                     if LowerProp == "tag" then
-                        print("Checking tag:", Value, "on child", v.Name)
+                        warn("Checking tag:", Value, "on child", v.Name)
                         if CollectionService:HasTag(v, Value) then
                             nameScanned = true
-                            print("Tag match found for child", v.Name)
+                            warn("Tag match found for child", v.Name)
                             return
                         end
                     else
@@ -1705,44 +1705,44 @@ function scanName(Obj)
                             else
                                 ParsedValue = tonumber(Value) or Value
                             end
-                            print("Checking", Prop, "=", ParsedValue, "on child", v.Name)
+                            warn("Checking", Prop, "=", ParsedValue, "on child", v.Name)
                             return v[Prop] == ParsedValue
                         end)
                         if success and result then
                             nameScanned = true
-                            print("Property match found for child", v.Name)
+                            warn("Property match found for child", v.Name)
                             return
                         elseif not success then
-                            print("Error accessing", Prop, "on child", v.Name, ":", result)
+                            warn("Error accessing", Prop, "on child", v.Name, ":", result)
                         end
                     end
                     lookForAName(v, LowerFilter, Filter)
                     if nameScanned then
-                        print("Name match found for child", v.Name)
+                        warn("Name match found for child", v.Name)
                         return
                     end
                 end
             end
         else
-            print("Invalid property search format:", Filter)
+            warn("Invalid property search format:", Filter)
             if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
-                print("Name match found for", ObjName)
+                warn("Name match found for", ObjName)
             else
                 lookForAName(Obj, LowerFilter, Filter)
                 if nameScanned then
-                    print("Name match found in children of", ObjName)
+                    warn("Name match found in children of", ObjName)
                 end
             end
         end
     else
         if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
-            print("Name match found for", ObjName)
+            warn("Name match found for", ObjName)
         else
             lookForAName(Obj, LowerFilter, Filter)
             if nameScanned then
-                print("Name match found in children of", ObjName)
+                warn("Name match found in children of", ObjName)
             end
         end
     end
