@@ -1136,11 +1136,11 @@ FilterInstance.Parent = explorerFilter
 local UICorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
 })
-local UIStroke = Create('UIStroke', {
-	Thickness = 0.75,
-	Color = GuiColor.TextDisabled
-})
-UIStroke.Parent = FilterInstance
+--local UIStroke = Create('UIStroke', {
+	--Thickness = 0.75,
+	--Color = GuiColor.TextDisabled
+--})
+--UIStroke.Parent = FilterInstance --| if you want white border around filter
 UICorner.Parent = FilterInstance
 
 local ListLayout = Create('UIListLayout', {
