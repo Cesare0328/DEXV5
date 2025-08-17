@@ -1127,7 +1127,7 @@ local FilterInstance = Create('Frame', {
     BorderColor3 = GuiColor.Border,
     Position = UDim2.new(0, 0, 1.1, 0),
     Size = UDim2.new(1, 0, 16, 0),
-    Visible = true,
+    Visible = false,
     ZIndex = 2
 })
 FilterInstance.Parent = explorerFilter
@@ -1174,7 +1174,7 @@ for i = 1, 7 do
     FilterButton.Parent = FilterInstance
 
     local UICorner = Create('UICorner', {
-        CornerRadius = UDim.new(0, 8)
+        CornerRadius = UDim.new(0, 4)
     })
     UICorner.Parent = FilterButton
 
@@ -1191,7 +1191,7 @@ for i = 1, 7 do
         BackgroundTransparency = 1,
         Size = UDim2.new(0, 16, 0, 16),
         AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(0, 2, 0.5, 0),
+        Position = UDim2.new(0, -20, 0.5, 0),
         ZIndex = 2
     })
     FilterImage.Parent = FilterButton
@@ -3923,8 +3923,9 @@ while not RbxApi do
 	task.wait()
 end
 
-Connect(explorerFilter.FocusLost, function(p1)
+Connect(explorerFilter.FocusLost, function()
 	Searched = true
+	FilterInstance.Visible = false
 	rawUpdateList()
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
         if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
@@ -3933,6 +3934,9 @@ Connect(explorerFilter.FocusLost, function(p1)
             scrollBar:ScrollTo(ScrollIndex)
 		end
 	end
+end)
+Connect(explorerFilter.Focused, function()
+FilterInstance.Visible = true
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
