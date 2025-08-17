@@ -1183,8 +1183,10 @@ for i = 1, 7 do
     })
     ButtonPadding.Parent = FilterButton
 
+	local ImageAsset = string.gsub(SuggestedFilterNames[i], "=", "")
+	ImageAsset = string.gsub(ImageAsset, "Id", "")
     local FilterImage = Create('ImageLabel', {
-        Image = getcustomasset("DEXV5\\Assets\\" .. string.gsub(SuggestedFilterNames[i], "[Id=]", "")),
+        Image = getcustomasset("DEXV5\\Assets\\" .. ImageAsset),
         BackgroundTransparency = 1,
         Size = UDim2.new(0, 16, 0, 16),
         AnchorPoint = Vector2.new(0, 0.5),
