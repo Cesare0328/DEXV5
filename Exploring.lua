@@ -1178,7 +1178,8 @@ local SG = Create('ScreenGui', {})
 SG.Parent = CoreGui
 local FFrame = Create('Frame', {
 	BackgroundTransparency = 1,
-	Visible = false
+	Visible = true,
+	Size = UDim2.new(1, 0, 1, 0)
 })
 FFrame.Parent = SG
 local FilterInstance = Create('Frame', {
