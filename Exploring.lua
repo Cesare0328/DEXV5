@@ -1126,7 +1126,7 @@ local FilterInstance = Create('Frame', {
     BackgroundColor3 = GuiColor.Field,
     BorderColor3 = GuiColor.Border,
     Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 14, 0),
+    Size = UDim2.new(1, 0, 16, 0),
     Visible = true,
     ZIndex = 2
 })
@@ -1182,8 +1182,17 @@ for i = 1, 7 do
         PaddingLeft = UDim.new(0, 20)
     })
     ButtonPadding.Parent = FilterButton
-end
 
+    local FilterImage = Create('ImageLabel', {
+        Image = getcustomasset("DEXV5\\Assets\\" .. string.gsub(SuggestedFilterNames[i], "[Id=]", "")),
+        BackgroundTransparency = 1,
+        Size = UDim2.new(0, 16, 0, 16),
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 2, 0.5, 0),
+        ZIndex = 2
+    })
+    FilterImage.Parent = FilterButton
+end
 local MatchWholeWord = Create('ImageButton', {
     Image = "rbxassetid://115493127332361", 
     BackgroundColor3 = Color3.new(1, 1, 1),
