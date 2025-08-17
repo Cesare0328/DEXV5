@@ -1144,9 +1144,9 @@ local TitleLabel = Create('TextLabel', {
     Size = UDim2.new(1, 0, 0, 30),
     BackgroundTransparency = 1,
     TextColor3 = GuiColor.Text,
+	TextXAlignment = 'Left',
     Font = FONT,
     FontSize = FONT_SIZE,
-    TextSize = 20,
     ZIndex = 2,
     LayoutOrder = 0
 })
@@ -1159,9 +1159,9 @@ for i = 1, 7 do
         BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
+		TextXAlignment = 'Left',
         Font = FONT,
     	FontSize = FONT_SIZE,
-        TextSize = 18,
         ZIndex = 2,
         LayoutOrder = i
     })
