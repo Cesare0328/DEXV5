@@ -1185,6 +1185,7 @@ for i = 1, 7 do
 
 	local ImageAsset = string.gsub(SuggestedFilterNames[i], "=", "")
 	ImageAsset = string.gsub(ImageAsset, "Id", "")
+	ImageAsset = string.gsub(ImageAsset, ":", "")
     local FilterImage = Create('ImageLabel', {
         Image = getcustomasset("DEXV5\\Assets\\" .. ImageAsset .. ".png"),
         BackgroundTransparency = 1,
