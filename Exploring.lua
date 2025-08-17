@@ -1133,6 +1133,7 @@ local FilterInstance = Create('Frame', {
 FilterInstance.Parent = explorerFilter
 
 local MaskedFilterInstance = Clone(FilterInstance)
+MaskedFilterInstance.BackgroundTransparency = 1
 MaskedFilterInstance.Parent = explorerFilter
 
 local InputBlocker = Create('TextLabel', {
@@ -1141,7 +1142,7 @@ local InputBlocker = Create('TextLabel', {
     BackgroundTransparency = 1,
 	TextTransparency = 1,
     Size = UDim2.new(1, 0, 1, 0),
-    Visible = true
+    Visible = MaskedFilterInstance.Visible
 })
 InputBlocker.Parent = MaskedFilterInstance
 
@@ -1214,7 +1215,9 @@ for i = 1, 7 do
     })
     FilterImage.Parent = FilterButton
 	Connect(FilterButton.MouseButton1Up, function()
+		setthreadidentity(8)
 		FilterInstance.Visible = false
+		MaskedFilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
 	end)
 end
@@ -3948,6 +3951,7 @@ end
 Connect(explorerFilter.FocusLost, function()
 	Searched = true
 	FilterInstance.Visible = false
+	MaskedFilterInstance.Visible = false
 	rawUpdateList()
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
         if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
@@ -3958,8 +3962,9 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
-if explorerFilter.Text ~= "" or FilterInstance.Visible then return end
+if explorerFilter.Text ~= "" then return end
 FilterInstance.Visible = true
+MaskedFilterInstance.Visible = true
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
