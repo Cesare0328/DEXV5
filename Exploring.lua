@@ -1132,6 +1132,15 @@ local FilterInstance = Create('Frame', {
 })
 FilterInstance.Parent = explorerFilter
 
+local MaskedFilterInstance = Create('Frame', {
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1, 0, 1, 0),
+    Visible = false,
+    ZIndex = 2
+})
+MaskedFilterInstance.Parent = FilterInstance
+
+
 local InputBlocker = Create('TextLabel', {
     Name = "InputBlocker",
     Active = false,
@@ -1140,7 +1149,7 @@ local InputBlocker = Create('TextLabel', {
     Size = UDim2.new(1, 0, 1, 0),
     Visible = true
 })
-InputBlocker.Parent = FilterInstance
+InputBlocker.Parent = MaskedFilterInstance
 
 local UICorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
