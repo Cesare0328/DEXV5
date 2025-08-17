@@ -1138,7 +1138,7 @@ MaskedFilterInstance.Parent = explorerFilter
 
 local InputBlocker = Create('TextLabel', {
     Name = "InputBlocker",
-    Active = true
+    Active = true,
     BackgroundTransparency = 1,
 	TextTransparency = 1,
     Size = UDim2.new(1, 0, 1, 0),
