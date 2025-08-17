@@ -4070,6 +4070,7 @@ explorerFilter.ClearTextOnFocus = false
 if not Searched or explorerFilter.Text == "" or table.find(SuggestedFilterNames, explorerFilter.Text) ~= nil then
 	FilterInstance.Visible = true
 end
+if not explorerFilter.Text:find("=") and not explorerFilter.Text == "" then explorerFilter.Text = "" end
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
