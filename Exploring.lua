@@ -1125,7 +1125,8 @@ local FilterInstance =  Create('Frame',{
     BackgroundTransparency = 0,
 	BackgroundColor3 = GuiColor.Field,
 	BorderColor3 = GuiColor.Border,
-	Size = UDim2.new(1, 0, 25, 0),
+	Position = explorerFilter.Position + UDim2.new(0, 0, 3, 0),
+	Size = UDim2.new(1, 0, 16, 0),
 	Visible = true,
     ZIndex = 2
 })
