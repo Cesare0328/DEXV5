@@ -1174,6 +1174,13 @@ local explorerFilter = Create('TextBox', {
     ZIndex = 1
 })
 
+local SG = Create('ScreenGui', {})
+SG.Parent = CoreGui
+local FFrame = Create('Frame', {
+	BackgroundTransparency = 1,
+	Visible = false
+})
+FFrame.Parent = SG
 local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
     BackgroundColor3 = GuiColor.Field,
@@ -4078,12 +4085,23 @@ do
 			return A
 		end
 	end
+	if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+		SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+	end
+	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMode"), function()
+		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+		end
+	end)
 end
 
 Connect(UserInputService.InputBegan, function(p1)
 	local A = p1.KeyCode
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
+	end
+	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
+		FFrame.Modal = true
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
