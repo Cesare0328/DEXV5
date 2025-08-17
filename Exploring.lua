@@ -29,6 +29,7 @@ local math_huge = math.huge
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local CollectionService = cloneref(game:GetService("CollectionService"))
 local HttpService = cloneref(game:GetService("HttpService"))
+local TweenService = cloneref(game:GetService("TweenService"))
 local RunService = cloneref(game:GetService("RunService"))
 local CoreGui = cloneref(game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
@@ -208,6 +209,29 @@ local function Create(p1, p2)
 		end
 	end
 	return A
+end
+
+local function SendNotification(Type, Message, Duration)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = CoreGui
+
+local Temp = Dex.Notification:Clone()
+Temp.Parent = ScreenGui
+Temp.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
+Temp.Text = Message
+
+Temp.Position = UDim2.new(1, 30, 0, -45)
+
+local targetPosition = UDim2.new(1, Temp.Size.X.Offset + 30, 0, -45)
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+local tween = TweenService:Create(Temp, tweenInfo, {Position = targetPosition})
+
+tween:Play()
+tween.Completed:Wait()
+
+task.delay(Duration, function()
+	ScreenGui:Destroy()
+end)
 end
 
 local function FindFirstParentAfterScreenGui(Instance)
@@ -2434,8 +2458,12 @@ function PromptRemoteCaller(inst)
 						inst:InvokeServer(unpack(MyArguments))
 					end)
 				end
-			else
+			elseif IsA(inst, "RemoteEvent") then
 				inst:FireServer(unpack(MyArguments))
+			elseif IsA(inst, "BindableEvent") then
+				inst:Fire(unpack(MyArguments))
+			elseif IsA(inst, "BindableFunction") then
+				inst:Invoke(unpack(MyArguments)) --for anything new
 			end
 			Destroy(CurrentRemoteWindow)
 			CurrentRemoteWindow = nil
@@ -2678,7 +2706,7 @@ function rightClickMenu(sObj)
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
 		table_insert(actions, 1, "Refresh Instances")
 	end
-    if IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") then
+    if IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") or IsA(sObj, "BindableEvent") or IsA(sObj, "BindableFunction") then
 		table_insert(actions, 10, "Call Remote")
 	end
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") and not sObj == workspace then
@@ -4035,6 +4063,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
+		SendNotification("Information", "Hello, this is a test", 3)
 		--if theres any other uses in the future
     end
 end)
