@@ -1108,12 +1108,12 @@ RunService.Heartbeat:Connect(function()
 	MainExplorerTitle.Text = "Explorer | Instances: " .. Diagnostics.InstanceCount
 end)
 
-local explorerFilter =  Create('TextBox',{
+local explorerFilter = Create('TextBox', {
     PlaceholderText = "Filter Instances",
     Text = "Filter Instances",
-    BackgroundTransparency = .8,
+    BackgroundTransparency = 0.8,
     TextColor3 = GuiColor.Text,
-    TextXAlignment = 'Left',
+    TextXAlignment = Enum.TextXAlignment.Left,
     Font = FONT,
     FontSize = FONT_SIZE,
     Position = UDim2.new(0, 4, 0.5, 0),
@@ -1121,13 +1121,13 @@ local explorerFilter =  Create('TextBox',{
     ZIndex = 1
 })
 
-local FilterInstance =  Create('Frame',{
+local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
-	BackgroundColor3 = GuiColor.Field,
-	BorderColor3 = GuiColor.Border,
-	Position = UDim2.new(0, 0, 1.1, 0),
-	Size = UDim2.new(1, 0, 16, 0),
-	Visible = true,
+    BackgroundColor3 = GuiColor.Field,
+    BorderColor3 = GuiColor.Border,
+    Position = UDim2.new(0, 0, 1.1, 0),
+    Size = UDim2.new(1, 0, 8, 0),
+    Visible = true,
     ZIndex = 2
 })
 FilterInstance.Parent = explorerFilter
@@ -1144,7 +1144,7 @@ local TitleLabel = Create('TextLabel', {
     Size = UDim2.new(1, 0, 0, 30),
     BackgroundTransparency = 1,
     TextColor3 = GuiColor.Text,
-	TextXAlignment = 'Left',
+    TextXAlignment = Enum.TextXAlignment.Left,
     Font = FONT,
     FontSize = FONT_SIZE,
     ZIndex = 2,
@@ -1156,16 +1156,21 @@ for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = "Filter",
         Size = UDim2.new(1, 0, 0, 30),
-        BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
+        BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
-		TextXAlignment = 'Left',
+        TextXAlignment = Enum.TextXAlignment.Left,
         Font = FONT,
-    	FontSize = FONT_SIZE,
+        FontSize = FONT_SIZE,
         ZIndex = 2,
         LayoutOrder = i
     })
     FilterButton.Parent = FilterInstance
+
+    local UICorner = Create('UICorner', {
+        CornerRadius = UDim.new(0, 8)
+    })
+    UICorner.Parent = FilterButton
 end
 
 local MatchWholeWord = Create('ImageButton', {
