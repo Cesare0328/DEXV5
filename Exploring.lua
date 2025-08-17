@@ -1138,11 +1138,11 @@ MaskedFilterInstance.Parent = explorerFilter
 
 local InputBlocker = Create('TextLabel', {
     Name = "InputBlocker",
-    Active = false,
+    Active = true
     BackgroundTransparency = 1,
 	TextTransparency = 1,
     Size = UDim2.new(1, 0, 1, 0),
-    Visible = MaskedFilterInstance.Visible
+	Position = MaskedFilterInstance.Position
 })
 InputBlocker.Parent = MaskedFilterInstance
 
@@ -1180,7 +1180,7 @@ local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = SuggestedFilterNames[i],
-        Size = UDim2.new(0.95, 0, 0, 25),
+        Size = UDim2.new(0.985, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
