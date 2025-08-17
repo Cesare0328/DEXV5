@@ -1170,7 +1170,7 @@ local TitleLabel = Create('TextLabel', {
 })
 TitleLabel.Parent = FilterInstance
 
-local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material=", "meshId=", "textureId=", "tag:"}
+local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material=", "meshId=", "textureId=", "tag="}
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = string.upper(string.sub(SuggestedFilterNames[i], 1, 1)) .. string.sub(SuggestedFilterNames[i], 2),
@@ -1650,10 +1650,13 @@ function scanName(Obj)
     local IsPropSearch = string_find(Filter, "=") ~= nil
 
     if IsPropSearch then
-        local Prop, Value = string_match(Filter, "([^=]+)=(.+)")
+        local Prop, Value
+        if string_find(Filter, "^%s*[Tt][Aa][Gg]=") or string_find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
+            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
+        else
+            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
+        end
         if Prop and Value then
-            Prop = Prop:match("^%s*(.-)%s*$")
-            Value = Value:match("^%s*(.-)%s*$")
             local LowerProp = string_lower(Prop)
             if LowerProp == "tag" then
                 if CollectionService:HasTag(Obj, Value) then
@@ -1677,10 +1680,15 @@ function scanName(Obj)
                 end
             elseif LowerProp == "attribute" then
                 local success, result = pcall(function()
-                    return GetAttribute(Obj, Value) ~= nil
+                    local attrValue = GetAttribute(Obj, Value)
+                    return attrValue ~= nil
                 end)
-                if success and result then
-                    nameScanned = true
+                if success then
+                    if result then
+                        nameScanned = true
+                    end
+                else
+                    warn("GetAttribute failed for object: " .. ObjName .. ", attribute: " .. Value)
                 end
             else
                 local success, result = pcall(function()
