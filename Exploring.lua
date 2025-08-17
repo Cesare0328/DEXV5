@@ -4094,10 +4094,15 @@ do
 			return A
 		end
 	end
-	if (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0 or UserInputService.MouseBehaviour ~= Enum.MouseBehaviour.Default then
+	if (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0 then
 		task.spawn(function()
 			task.wait(2)
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+		end)
+	elseif UserInputService.MouseBehaviour ~= Enum.MouseBehaviour.Default then
+		task.spawn(function()
+			task.wait(2)
+			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 1, 3)
 		end)
 	end
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMode"), function()
