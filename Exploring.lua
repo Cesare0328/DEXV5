@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification = false, false, false
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce = false, false, false, false
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4095,29 +4095,37 @@ do
 		end
 	end
 	if (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0 then
+		FPSDebounce = true
 		task.spawn(function()
-			task.wait(2)
-			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+			task.wait(0.5)
+			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+			FPSDebounce = false
 		end)
 	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
+		FPSDebounce = true
 		task.spawn(function()
-			task.wait(2)
-			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 1, 3)
+			task.wait(0.5)
+			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 0.5, 2)
+			FPSDebounce = false
 		end)
 	end
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMode"), function()
-		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson and not FPSDebounce then
+			FPSDebounce = true
+			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+			FPSDebounce = false
 		end
 	end)
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMaxZoomDistance"), function()
-		if Players.LocalPlayer.CameraMaxZoomDistance == 0 then
-			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+		if Players.LocalPlayer.CameraMaxZoomDistance == 0 and not FPSDebounce then
+			FPSDebounce = true
+			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+			FPSDebounce = false
 		end
 	end)
 	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehavior"), function()
-		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
-			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 1, 3)
+		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default and not FPSDebounce then
+			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 0.5, 2)
 		end
 	end)
 end
