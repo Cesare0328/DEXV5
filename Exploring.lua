@@ -3917,11 +3917,6 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		if explorerFilter.Text == "" then
-			DefaultView = true
-		else
-			DefaultView = false
-		end
 		--if theres any other uses in the future
     end
 end)
@@ -3950,10 +3945,19 @@ Connect(explorerFilter.FocusLost, function()
 		end
 	end
 end)
+
 Connect(explorerFilter.Focused, function()
 if not Searched or DefaultView then
 	FilterInstance.Visible = true
 end
+end)
+
+Connect(GetPropertyChangedSignal(explorerFilter, "Text"), function()
+	if explorerFilter.Text == "" then
+		DefaultView = true
+	else
+		DefaultView = false
+	end
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
