@@ -1616,7 +1616,7 @@ local PropertyMap = {
     ["tag"] = "tag" -- Manual entry for tags
 }
 
-for _, class in ipairs(ReflectionMetadata.Classes) do
+for _, class in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).Classes) do
     for _, prop in ipairs(class.Properties or {}) do
         PropertyMap[string_lower(prop.Name)] = prop.Name
     end
