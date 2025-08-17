@@ -1210,9 +1210,10 @@ for i = 1, 7 do
     FilterImage.Parent = FilterButton
 	Connect(FilterButton.MouseButton1Down, function()
 		setthreadidentity(8)
-		task.wait()
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
+		task.wait()
+		explorerFilter:CaptureFocus()
 	end)
 end
 local MatchWholeWord = Create('ImageButton', {
