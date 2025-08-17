@@ -1662,15 +1662,22 @@ function scanName(Obj)
             elseif LowerProp == "locked" then
                 local success, result = pcall(function()
                     local ParsedValue
-                    local LowerValue = string.lower(Value)
+                    local LowerValue = string_lower(Value)
                     if LowerValue == "true" then
                         ParsedValue = true
                     elseif LowerValue == "false" then
                         ParsedValue = false
                     else
-                        return false -- Invalid value for Locked
+                        return false
                     end
                     return checkrbxlocked(Obj) == ParsedValue
+                end)
+                if success and result then
+                    nameScanned = true
+                end
+            elseif LowerProp == "attribute" then
+                local success, result = pcall(function()
+                    return GetAttribute(Obj, Value) ~= nil
                 end)
                 if success and result then
                     nameScanned = true
@@ -1694,6 +1701,9 @@ function scanName(Obj)
                     nameScanned = true
                 end
             end
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+                nameScanned = true
+            end
             if not nameScanned then
                 for _, v in ipairs(GetChildren(Obj)) do
                     local success, result = pcall(function()
@@ -1712,11 +1722,18 @@ function scanName(Obj)
                             return CollectionService:HasTag(v, Value)
                         elseif LowerProp == "locked" then
                             return checkrbxlocked(v) == ParsedValue
+                        elseif LowerProp == "attribute" then
+                            return GetAttribute(v, Value) ~= nil
                         else
                             return v[Prop] == ParsedValue
                         end
                     end)
                     if success and result then
+                        nameScanned = true
+                        break
+                    end
+                    local ChildCheckName = MatchCaseToggle and v.Name or string_lower(v.Name)
+                    if (MatchWholeWordToggle and ChildCheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(ChildCheckName, LowerFilter, 1, true)) then
                         nameScanned = true
                         break
                     end
