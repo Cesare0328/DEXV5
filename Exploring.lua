@@ -1210,8 +1210,8 @@ for i = 1, 7 do
     FilterImage.Parent = FilterButton
 	Connect(FilterButton.MouseButton1Down, function()
 		setthreadidentity(8)
-		explorerFilter:CaptureFocus()
-		task.wait()
+		--explorerFilter:CaptureFocus()
+		--task.wait()
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
 	end)
@@ -1645,28 +1645,24 @@ function scanName(Obj)
     nameScanned = false
     local ObjName = Obj.Name
     local Filter = explorerFilter.Text
-    local LowerFilter = MatchCaseToggle and Filter or string_lower(Filter)
-    local CheckName = MatchCaseToggle and ObjName or string_lower(ObjName)
-    local IsPropSearch = string_find(Filter, "=") ~= nil
+    local LowerFilter = MatchCaseToggle and Filter or string.lower(Filter)
+    local CheckName = MatchCaseToggle and ObjName or string.lower(ObjName)
+    local IsPropSearch = string.find(Filter, "=") ~= nil
 
     if IsPropSearch then
-        local Prop, Value = string_match(Filter, "([^=]+)=(.+)")
+        local Prop, Value = string.match(Filter, "([^=]+)=(.+)")
         if Prop and Value then
             Prop = Prop:match("^%s*(.-)%s*$")
             Value = Value:match("^%s*(.-)%s*$")
-            warn("Property search: Prop =", Prop, "Value =", Value)
-
-            local LowerProp = string_lower(Prop)
+            local LowerProp = string.lower(Prop)
             if LowerProp == "tag" then
-                warn("Checking tag:", Value, "on", ObjName)
                 if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
-                    warn("Tag match found for", ObjName)
                 end
             else
                 local success, result = pcall(function()
                     local ParsedValue
-                    local LowerValue = string_lower(Value)
+                    local LowerValue = string.lower(Value)
                     if LowerValue == "true" then
                         ParsedValue = true
                     elseif LowerValue == "false" then
@@ -1674,31 +1670,23 @@ function scanName(Obj)
                     else
                         ParsedValue = tonumber(Value) or Value
                     end
-                    warn("Checking", Prop, "=", ParsedValue, "on", ObjName)
                     return Obj[Prop] == ParsedValue
                 end)
-                if success then
-                    if result then
-                        nameScanned = true
-                        warn("Property match found for", ObjName)
-                    end
-                else
-                    warn("Error accessing", Prop, "on", ObjName, ":", result)
+                if success and result then
+                    nameScanned = true
                 end
             end
             if not nameScanned then
                 for _, v in ipairs(GetChildren(Obj)) do
                     if LowerProp == "tag" then
-                        warn("Checking tag:", Value, "on child", v.Name)
                         if CollectionService:HasTag(v, Value) then
                             nameScanned = true
-                            warn("Tag match found for child", v.Name)
-                            return
+                            break
                         end
                     else
                         local success, result = pcall(function()
                             local ParsedValue
-                            local LowerValue = string_lower(Value)
+                            local LowerValue = string.lower(Value)
                             if LowerValue == "true" then
                                 ParsedValue = true
                             elseif LowerValue == "false" then
@@ -1706,45 +1694,31 @@ function scanName(Obj)
                             else
                                 ParsedValue = tonumber(Value) or Value
                             end
-                            warn("Checking", Prop, "=", ParsedValue, "on child", v.Name)
                             return v[Prop] == ParsedValue
                         end)
                         if success and result then
                             nameScanned = true
-                            warn("Property match found for child", v.Name)
-                            return
-                        elseif not success then
-                            warn("Error accessing", Prop, "on child", v.Name, ":", result)
+                            break
                         end
                     end
                     lookForAName(v, LowerFilter, Filter)
                     if nameScanned then
-                        warn("Name match found for child", v.Name)
-                        return
+                        break
                     end
                 end
             end
         else
-            warn("Invalid property search format:", Filter)
-            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
-                warn("Name match found for", ObjName)
             else
                 lookForAName(Obj, LowerFilter, Filter)
-                if nameScanned then
-                    warn("Name match found in children of", ObjName)
-                end
             end
         end
     else
-        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
-            warn("Name match found for", ObjName)
         else
             lookForAName(Obj, LowerFilter, Filter)
-            if nameScanned then
-                warn("Name match found in children of", ObjName)
-            end
         end
     end
     return nameScanned
