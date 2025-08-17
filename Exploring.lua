@@ -73,7 +73,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched = false
+local Searched, DefaultView = false, true
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -3917,6 +3917,11 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
+		if explorerFilter.Text == "" then
+			DefaultView = true
+		else
+			DefaultView = false
+		end
 		--if theres any other uses in the future
     end
 end)
@@ -3946,8 +3951,9 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
-if explorerFilter.Text ~= "" then return end
-FilterInstance.Visible = true
+if not Searched or DefaultView then
+	FilterInstance.Visible = true
+end
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
