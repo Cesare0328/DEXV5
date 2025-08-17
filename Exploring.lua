@@ -1185,7 +1185,7 @@ local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = SuggestedFilterNames[i],
-        Size = UDim2.new(1, 0, 0, 25),
+        Size = UDim2.new(1, 0, 0, 21),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
