@@ -1173,7 +1173,7 @@ TitleLabel.Parent = FilterInstance
 local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material=", "meshId=", "textureId=", "tag:"}
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
-        Text = SuggestedFilterNames[i],
+        Text = string.upper(string.sub(SuggestedFilterNames[i], 1, 1)) .. string.sub(SuggestedFilterNames[i], 2),
         Size = UDim2.new(0.985, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
@@ -4014,7 +4014,7 @@ end
 
 Connect(explorerFilter.FocusLost, function()
 	Searched = true
-	if not explorerFilter.Text:find("=") and not explorerFilter.Text == "" or (explorerFilter.Text:find("=") and explorerFilter.Text:match("=.*")) then explorerFilter.ClearTextOnFocus = true end
+	if not explorerFilter.Text:find("=") and not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
 	rawUpdateList()
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
@@ -4030,7 +4030,6 @@ explorerFilter.ClearTextOnFocus = false
 if not Searched or explorerFilter.Text == "" or table.find(SuggestedFilterNames, explorerFilter.Text) ~= nil then
 	FilterInstance.Visible = true
 end
-task.spawn(function() task.wait() if not explorerFilter.Text:find("=") or (explorerFilter.Text:find("=") and explorerFilter.Text:match("=.*")) then explorerFilter.Text = "" end end)
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
