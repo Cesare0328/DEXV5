@@ -220,7 +220,7 @@ local function SendNotification(Type, Message, Duration, ActiveFor)
 if ActiveNotification then
 for i,v in pairs(CoreGui:GetChildren()) do
 	if v.Name == "ScreenGui" and v:FindFirstChild("Notification") then
-		local Info2 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		local Info2 = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 		local Tween2 = TweenService:Create(v, Info2, {BackgroundTransparency = 1})
 		Tween2:Play()
 		Tween2.Completed:Wait()
@@ -242,10 +242,10 @@ Temp.UIStroke.Color = GuiColor[Type]
 Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
-local pos = UDim2.new(1, -330, 0, -45)
+local pos = UDim2.new(1, -327.5, 0, -45)
 local Info = TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
-local Info2 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local Info2 = TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 local Tween2 = TweenService:Create(Temp, Info2, {BackgroundTransparency = 1})
 
 Tween:Play()
@@ -4089,7 +4089,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		SendNotification("Information", "Hello, this is a test", 1.5, 5)
+		SendNotification("Information", "Hello, this is a test", 0.75, 3)
 		--if theres any other uses in the future
     end
 end)
