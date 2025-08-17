@@ -1125,7 +1125,6 @@ local explorerFilter = Create('TextBox', {
 local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
     BackgroundColor3 = GuiColor.Field,
-    BorderColor3 = GuiColor.Border,
 	BorderSizePixel = 3,
     Position = UDim2.new(0, 0, 1.1, 0),
     Size = UDim2.new(1, 0, 15.25, 0),
@@ -1137,6 +1136,11 @@ FilterInstance.Parent = explorerFilter
 local UICorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
 })
+local UIStroke = Create('UIStroke', {
+	Thickness = 0.75,
+	Color = GuiColor.Border
+})
+UIStroke.Parent = FilterInstance
 UICorner.Parent = FilterInstance
 
 local ListLayout = Create('UIListLayout', {
