@@ -4141,6 +4141,12 @@ Connect(UserInputService.InputBegan, function(p1)
 		elseif UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal then
 			UserInputService.MouseIconEnabled = false
 		end
+		task.spawn(function()
+		task.wait()
+		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None then
+			UserInputService.MouseIconEnabled = false
+		end
+		end)
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
