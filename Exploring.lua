@@ -1680,15 +1680,10 @@ function scanName(Obj)
                 end
             elseif LowerProp == "attribute" then
                 local success, result = pcall(function()
-                    local attrValue = GetAttribute(Obj, Value)
-                    return attrValue ~= nil
+                    return Obj:GetAttribute(Value) ~= nil
                 end)
-                if success then
-                    if result then
-                        nameScanned = true
-                    end
-                else
-                    warn("GetAttribute failed for object: " .. ObjName .. ", attribute: " .. Value)
+                if success and result then
+                    nameScanned = true
                 end
             else
                 local success, result = pcall(function()
@@ -1731,7 +1726,7 @@ function scanName(Obj)
                         elseif LowerProp == "locked" then
                             return checkrbxlocked(v) == ParsedValue
                         elseif LowerProp == "attribute" then
-                            return GetAttribute(v, Value) ~= nil
+                            return v:GetAttribute(Value) ~= nil
                         else
                             return v[Prop] == ParsedValue
                         end
