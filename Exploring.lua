@@ -3955,7 +3955,7 @@ Connect(explorerFilter.Focused, function()
 if not Searched or DefaultView then
 	FilterInstance.Visible = true
 end
-task.spawn(function() task.wait() explorerFilter.Text = "" end)
+task.spawn(function() task.wait() task.wait() explorerFilter.Text = "" end)
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
