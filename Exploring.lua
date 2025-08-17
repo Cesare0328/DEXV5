@@ -1138,7 +1138,7 @@ local UICorner = Create('UICorner', {
 })
 local UIStroke = Create('UIStroke', {
 	Thickness = 0.75,
-	Color = GuiColor.Border
+	Color = GuiColor.TextDisabled
 })
 UIStroke.Parent = FilterInstance
 UICorner.Parent = FilterInstance
