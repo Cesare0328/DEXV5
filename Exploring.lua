@@ -1212,6 +1212,7 @@ for i = 1, 7 do
 		setthreadidentity(8)
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
+		explorerFilter:CaptureFocus()
 	end)
 end
 local MatchWholeWord = Create('ImageButton', {
