@@ -221,7 +221,7 @@ if ActiveNotification then
 for i,v in pairs(CoreGui:GetChildren()) do
 	if v.Name == "ScreenGui" and v:FindFirstChild("Notification") then
 		local Info2 = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-		local Tween2 = TweenService:Create(v, Info2, {BackgroundTransparency = 1})
+		local Tween2 = TweenService:Create(v.Notification, Info2, {BackgroundTransparency = 1})
 		Tween2:Play()
 		Tween2.Completed:Wait()
 		v:Destroy()
@@ -4089,7 +4089,6 @@ Connect(UserInputService.InputBegan, function(p1)
 		if not ContextMenuHovered then
         	DestroyRightClick()
 		end
-		SendNotification("Information", "Hello, this is a test", 0.75, 3)
 		--if theres any other uses in the future
     end
 end)
