@@ -1179,7 +1179,7 @@ local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = SuggestedFilterNames[i],
-        Size = UDim2.new(1, 0, 0, 21),
+        Size = UDim2.new(0.95, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
@@ -3958,7 +3958,7 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
-if explorerFilter.Text ~= "" then return end
+if explorerFilter.Text ~= "" or FilterInstance.Visible then return end
 FilterInstance.Visible = true
 end)
 
