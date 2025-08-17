@@ -74,7 +74,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched = false
+local Searched, WhitelistedFocus = false, false
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -1212,7 +1212,7 @@ for i = 1, 7 do
 		setthreadidentity(8)
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
-		task.wait()
+		WhitelistedFocus = true
 		explorerFilter:CaptureFocus()
 	end)
 end
@@ -4062,6 +4062,7 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
+if WhitelistedFocus then WhitelistedFocus = false return end
 explorerFilter.ClearTextOnFocus = false
 if not Searched or explorerFilter.Text == "" or table.find(SuggestedFilterNames, explorerFilter.Text) ~= nil then
 	FilterInstance.Visible = true
