@@ -1126,7 +1126,7 @@ local FilterInstance = Create('Frame', {
     BackgroundColor3 = GuiColor.Field,
     BorderColor3 = GuiColor.Border,
     Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 12, 0),
+    Size = UDim2.new(1, 0, 14, 0),
     Visible = true,
     ZIndex = 2
 })
@@ -1179,7 +1179,7 @@ for i = 1, 7 do
     UICorner.Parent = FilterButton
 
     local ButtonPadding = Create('UIPadding', {
-        PaddingLeft = UDim.new(0, 10)
+        PaddingLeft = UDim.new(0, 20)
     })
     ButtonPadding.Parent = FilterButton
 end
