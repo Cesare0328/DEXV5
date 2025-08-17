@@ -217,7 +217,8 @@ ScreenGui.Parent = CoreGui
 
 local Temp = Dex.Notification:Clone()
 Temp.Parent = ScreenGui
-Temp.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
+Temp.ImageLabel.BackgroundTransparency = 1
+Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
 Temp.Text = Message
 
 Temp.Position = UDim2.new(1, 30, 0, -45)
