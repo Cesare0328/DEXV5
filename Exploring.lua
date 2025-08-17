@@ -237,9 +237,8 @@ local Tween = TweenService:Create(Temp, Info, {Position = pos})
 Tween:Play()
 Tween.Completed:Wait()
 
-task.delay(ActiveFor, function()
-	ScreenGui:Destroy()
-end)
+task.wait(ActiveFor)
+ScreenGui:Destroy()
 end
 
 local function FindFirstParentAfterScreenGui(Instance)
@@ -4072,6 +4071,14 @@ Connect(UserInputService.InputBegan, function(p1)
         	DestroyRightClick()
 		end
 		SendNotification("Information", "Hello, this is a test", 3, 5)
+		task.wait(3)
+		SendNotification("Warning", "Hello, this is a test", 3, 5)
+		task.wait(3)
+		SendNotification("Error", "Hello, this is a test", 3, 5)
+		task.wait(3)
+		SendNotification("Question", "Hello, this is a test", 3, 5)
+		task.wait(3)
+		SendNotification("Success", "Hello, this is a test", 3, 5)
 		--if theres any other uses in the future
     end
 end)
