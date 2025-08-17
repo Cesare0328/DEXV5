@@ -1643,6 +1643,9 @@ end
 
 task.spawn(function()
 extractProperties(ReflectionMetadata.roblox)
+for i,v in pairs(PropertyMap) do
+	warn(i,v)
+end
 end)
 
 function findObjectIndex(targetObject)
