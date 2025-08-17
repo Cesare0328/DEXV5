@@ -1211,6 +1211,7 @@ for i = 1, 7 do
 	Connect(FilterButton.MouseButton1Down, function()
 		setthreadidentity(8)
 		explorerFilter:CaptureFocus()
+		task.wait()
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
 	end)
@@ -1627,15 +1628,15 @@ function filteringInstances()
 	return (explorerFilter.Text ~= "" and explorerFilter.Text ~= "Filter Instances") and true or false
 end
 
-function lookForAName(Obj, LowerName, OriginalName)
-    for _, v in ipairs(GetChildren(Obj)) do
-        local VName = v.Name
-        local CheckName = MatchCaseToggle and VName or string_lower(VName)
-        if (MatchWholeWordToggle and CheckName == LowerName) or (not MatchWholeWordToggle and string_find(CheckName, LowerName, 1, true)) then 
+function lookForAName(obj, lowerName, originalName)
+    for _, v in ipairs(GetChildren(obj)) do
+        local vName = v.Name
+        local checkName = MatchCaseToggle and vName or string_lower(vName)
+        if (MatchWholeWordToggle and checkName == lowerName) or (not MatchWholeWordToggle and string_find(checkName, lowerName, 1, true)) then 
             nameScanned = true
             return
         end
-        lookForAName(v, LowerName, OriginalName)
+        lookForAName(v, lowerName, originalName)
         if nameScanned then return end
     end
 end
@@ -1653,10 +1654,14 @@ function scanName(Obj)
         if Prop and Value then
             Prop = Prop:match("^%s*(.-)%s*$")
             Value = Value:match("^%s*(.-)%s*$")
+            warn("Property search: Prop =", Prop, "Value =", Value)
+
             local LowerProp = string_lower(Prop)
             if LowerProp == "tag" then
+                warn("Checking tag:", Value, "on", ObjName)
                 if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
+                    warn("Tag match found for", ObjName)
                 end
             else
                 local success, result = pcall(function()
@@ -1669,17 +1674,25 @@ function scanName(Obj)
                     else
                         ParsedValue = tonumber(Value) or Value
                     end
+                    warn("Checking", Prop, "=", ParsedValue, "on", ObjName)
                     return Obj[Prop] == ParsedValue
                 end)
-                if success and result then
-                    nameScanned = true
+                if success then
+                    if result then
+                        nameScanned = true
+                        warn("Property match found for", ObjName)
+                    end
+                else
+                    warn("Error accessing", Prop, "on", ObjName, ":", result)
                 end
             end
             if not nameScanned then
                 for _, v in ipairs(GetChildren(Obj)) do
                     if LowerProp == "tag" then
+                        warn("Checking tag:", Value, "on child", v.Name)
                         if CollectionService:HasTag(v, Value) then
                             nameScanned = true
+                            warn("Tag match found for child", v.Name)
                             return
                         end
                     else
@@ -1693,99 +1706,110 @@ function scanName(Obj)
                             else
                                 ParsedValue = tonumber(Value) or Value
                             end
+                            warn("Checking", Prop, "=", ParsedValue, "on child", v.Name)
                             return v[Prop] == ParsedValue
                         end)
                         if success and result then
                             nameScanned = true
+                            warn("Property match found for child", v.Name)
                             return
+                        elseif not success then
+                            warn("Error accessing", Prop, "on child", v.Name, ":", result)
                         end
                     end
                     lookForAName(v, LowerFilter, Filter)
                     if nameScanned then
+                        warn("Name match found for child", v.Name)
                         return
                     end
                 end
             end
         else
+            warn("Invalid property search format:", Filter)
             if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
+                warn("Name match found for", ObjName)
             else
                 lookForAName(Obj, LowerFilter, Filter)
+                if nameScanned then
+                    warn("Name match found in children of", ObjName)
+                end
             end
         end
     else
         if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
+            warn("Name match found for", ObjName)
         else
             lookForAName(Obj, LowerFilter, Filter)
+            if nameScanned then
+                warn("Name match found in children of", ObjName)
+            end
         end
     end
     return nameScanned
 end
 
 function updateActions()
-    for _, v in next, QuickButtons do
+    for _,v in next, QuickButtons do
         v.Toggle(v.Cond() and true or false)
     end
 end
 
 do
-    local function pollingwait(Sec)
-        local Old = os.clock()
-        while os.clock() - Old < Sec do end
-    end
+	local function pollingwait(sec)
+        local old = os.clock()
+        while os.clock() - old < sec do end
+	end
+	local function r(t)
+		for i = 1,#t do
+			coroutine.wrap(function()
+				if not filteringInstances() or scanName(t[i].Object) then
+					table_insert(TreeList, t[i])
+					local w = (t[i].Depth)*(2+ENTRY_PADDING+GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(t[i].Object.Name) + 4
+					if w > nodeWidth then
+						nodeWidth = w
+					end
+					if t[i].Expanded or filteringInstances() then
+						coroutine.wrap(function() r(t[i]) end)()
+						pollingwait(0.00000001)
+					end
+				end
+			end)()
+			pollingwait(0.00000001)
+		end
+	end
 
-    local function r(T)
-        for i = 1, #T do
-            coroutine.wrap(function()
-                local Node = T[i]
-                local Obj = Node.Object
-                if not filteringInstances() or scanName(Obj) then
-                    table.insert(TreeList, Node)
-                    local W = (Node.Depth) * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(Node.Object.Name) + 4
-                    if W > nodeWidth then
-                        nodeWidth = W
-                    end
-                    if Node.Expanded or filteringInstances() then
-                        coroutine.wrap(function() r(Node) end)()
-                        pollingwait(0.00000001)
-                    end
-                end
-            end)()
-            pollingwait(0.00000001)
-        end
-    end
+	function rawUpdateSize()
+		scrollBarH.TotalSpace = nodeWidth
+		scrollBarH.VisibleSpace = listFrame.AbsoluteSize.X
+		scrollBarH:Update()
+		local visible = scrollBarH:CanScrollDown() or scrollBarH:CanScrollUp()
+		scrollBarH.GUI.Visible = visible
 
-    function rawUpdateSize()
-        scrollBarH.TotalSpace = nodeWidth
-        scrollBarH.VisibleSpace = listFrame.AbsoluteSize.X
-        scrollBarH:Update()
-        local Visible = scrollBarH:CanScrollDown() or scrollBarH:CanScrollUp()
-        scrollBarH.GUI.Visible = Visible
+		listFrame.Size = UDim2_new(1,-GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
 
-        listFrame.Size = UDim2.new(1, -GUI_SIZE, 1, -GUI_SIZE * (Visible and 1 or 0) - HEADER_SIZE)
+		scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
+		scrollBar.GUI.Size = UDim2_new(0,GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
 
-        scrollBar.VisibleSpace = math.ceil(listFrame.AbsoluteSize.Y / ENTRY_BOUND)
-        scrollBar.GUI.Size = UDim2.new(0, GUI_SIZE, 1, -GUI_SIZE * (Visible and 1 or 0) - HEADER_SIZE)
+		scrollBar.TotalSpace = #TreeList+1
+		scrollBar:Update()
+	end
 
-        scrollBar.TotalSpace = #TreeList + 1
-        scrollBar:Update()
-    end
-
-    function rawUpdateList()
-        TreeList = {}
-        nodeWidth = 0
-        r(NodeLookup[workspace.Parent])
-        r(NodeLookup[DexOutput])
-        if NilStorageEnabled then
-            r(NodeLookup[NilStorage])
-        end
-        if RunningScriptsStorageEnabled then
-            r(NodeLookup[RunningScriptsStorage])
-        end
-        rawUpdateSize()
-        updateActions()
-    end
+	function rawUpdateList()
+		TreeList = {}
+		nodeWidth = 0
+		r(NodeLookup[workspace.Parent])
+		r(NodeLookup[DexOutput])
+		if NilStorageEnabled then
+			r(NodeLookup[NilStorage])
+		end
+		if RunningScriptsStorageEnabled then
+			r(NodeLookup[RunningScriptsStorage])
+		end
+		rawUpdateSize()
+		updateActions()
+	end
 
 	local updatingList = false
 	function updateList()
