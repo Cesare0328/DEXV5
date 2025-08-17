@@ -1123,8 +1123,8 @@ local explorerFilter =  Create('TextBox',{
 
 local FilterInstance =  Create('Frame',{
     BackgroundTransparency = 0,
-	Color3 = GuiColor.Field,
-	BackgroundColor3 = GuiColor.Border,
+	BackgroundColor3 = GuiColor.Field,
+	BorderColor3 = GuiColor.Border,
 	Size = UDim2.new(1, 0, 25, 0),
 	Visible = true,
     ZIndex = 2
