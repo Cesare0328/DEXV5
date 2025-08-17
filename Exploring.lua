@@ -1182,6 +1182,14 @@ local FFrame = Create('Frame', {
 	Size = UDim2.new(1, 0, 1, 0)
 })
 FFrame.Parent = SG
+local FFTextbutton = Create('TextButton', {
+	BackgroundTransparency = 1,
+	TextTransparency = 1,
+	Visible = false,
+	Modal = false,
+	Size = UDim2.new(1, 0, 1, 0)
+})
+FFTextbutton.Parent = FFrame
 local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
     BackgroundColor3 = GuiColor.Field,
@@ -4102,7 +4110,7 @@ Connect(UserInputService.InputBegan, function(p1)
 		HoldingCtrl = true
 	end
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
-		FFrame.Modal = true
+		FFTextbutton.Modal = true
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
