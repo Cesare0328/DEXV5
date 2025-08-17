@@ -4094,12 +4094,22 @@ do
 			return A
 		end
 	end
-	if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+	if (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0 or UserInputService.MouseBehaviour ~= Enum.MouseBehaviour.Default then
 		SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
 	end
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMode"), function()
 		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+		end
+	end)
+	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMaxZoomDistance"), function()
+		if Players.LocalPlayer.CameraMaxZoomDistance == 0 then
+			SendNotification("Information", "First person lock detected, press Insert to unlock.", 1, 3)
+		end
+	end)
+	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehaviour"), function()
+		if UserInputService.MouseBehaviour ~= Enum.MouseBehaviour.Default then
+			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 1, 3)
 		end
 	end)
 end
@@ -4110,7 +4120,8 @@ Connect(UserInputService.InputBegan, function(p1)
 		HoldingCtrl = true
 	end
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
-		FFTextbutton.Modal = true
+		FFTextbutton.Modal = not FFTextbutton.Modal
+		FFTextbutton.Visible = not FFTextbutton.Visible
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
