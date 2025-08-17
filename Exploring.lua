@@ -1613,41 +1613,6 @@ local getTextWidth do
 end
 
 local nameScanned, TreeList, NodeLookup, QuickButtons, nodeWidth = false, {}, {}, {}, 0
-local PropertyMap = {
-    ["tag"] = "tag" -- Manual entry for tags
-}
-
-local function extractProperties(node)
-    if type(node) == "table" then
-        if node.Properties and node.Properties.string then
-            for _, prop in ipairs(node.Properties.string) do
-                if prop.__text then
-                    PropertyMap[string.lower(prop.__text)] = prop.__text
-                end
-            end
-        end
-        if node.Item then
-            if type(node.Item) == "table" then
-                if node.Item.__text then
-                    return
-                elseif node.Item[0] then
-                    for _, item in ipairs(node.Item) do
-                        extractProperties(item)
-                    end
-                else
-                    extractProperties(node.Item)
-                end
-            end
-        end
-    end
-end
-
-task.spawn(function()
-extractProperties(ReflectionMetadata.roblox)
-for i,v in pairs(PropertyMap) do
-	warn(i,v)
-end
-end)
 
 function findObjectIndex(targetObject)
     for i = 1, #TreeList do
@@ -1687,55 +1652,54 @@ function scanName(obj)
         local propStr, valueStr = string.match(filterText, "(.+)=(.+)")
         if propStr and valueStr then
             local lowerProp = string.lower(propStr)
-            local realProp = PropertyMap[lowerProp]
-            if realProp then
-                local value
-                local lowerValue = string.lower(valueStr)
-                if lowerValue == "true" then
-                    value = true
-                elseif lowerValue == "false" then
-                    value = false
-                else
-                    value = tonumber(valueStr) or valueStr
-                end
-
-                if realProp == "tag" then
-                    if CollectionService:HasTag(obj, value) then
-                        nameScanned = true
-                    end
-                else
-                    local success, result = pcall(function()
-                        return obj[realProp] == value
-                    end)
-                    if success and result then
-                        nameScanned = true
-                    end
-                end
-                if not nameScanned then
-                    for _, v in ipairs(GetChildren(obj)) do
-                        if realProp == "tag" then
-                            if CollectionService:HasTag(v, value) then
-                                nameScanned = true
-                                return
-                            end
-                        else
-                            local success, result = pcall(function()
-                                return v[realProp] == value
-                            end)
-                            if success and result then
-                                nameScanned = true
-                                return
-                            end
-                        end
-                        lookForAName(v, lowerFilter, filterText)
-                        if nameScanned then return end
-                    end
+            if lowerProp == "tag" then
+                if CollectionService:HasTag(obj, valueStr) then
+                    nameScanned = true
                 end
             else
-                if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string.find(checkName, lowerFilter, 1, true)) then
+                local success, result = pcall(function()
+                    local value
+                    local lowerValue = string.lower(valueStr)
+                    if lowerValue == "true" then
+                        value = true
+                    elseif lowerValue == "false" then
+                        value = false
+                    else
+                        value = tonumber(valueStr) or valueStr
+                    end
+                    return obj[propStr] == value
+                end)
+                if success and result then
                     nameScanned = true
-                else
-                    lookForAName(obj, lowerFilter, filterText)
+                end
+            end
+            if not nameScanned then
+                for _, v in ipairs(GetChildren(obj)) do
+                    if lowerProp == "tag" then
+                        if CollectionService:HasTag(v, valueStr) then
+                            nameScanned = true
+                            return
+                        end
+                    else
+                        local success, result = pcall(function()
+                            local value
+                            local lowerValue = string.lower(valueStr)
+                            if lowerValue == "true" then
+                                value = true
+                            elseif lowerValue == "false" then
+                                value = false
+                            else
+                                value = tonumber(valueStr) or valueStr
+                            end
+                            return v[propStr] == value
+                        end)
+                        if success and result then
+                            nameScanned = true
+                            return
+                        end
+                    end
+                    lookForAName(v, lowerFilter, filterText)
+                    if nameScanned then return end
                 end
             end
         else
