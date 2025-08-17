@@ -231,7 +231,7 @@ Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
 local pos = UDim2.new(1, -280, 0, -45)
-local Info = TweenInfo.new(Duration, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+local Info = TweenInfo.new(Duration, Enum.EasingStyle.Bounce, Enum.EasingDirection.In)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
 
 Tween:Play()
