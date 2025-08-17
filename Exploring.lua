@@ -1616,11 +1616,34 @@ local PropertyMap = {
     ["tag"] = "tag" -- Manual entry for tags
 }
 
-for _, class in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata, true)).Classes) do
-    for _, prop in ipairs(class.Properties or {}) do
-        PropertyMap[string_lower(prop.Name)] = prop.Name
+local function extractProperties(node)
+    if type(node) == "table" then
+        if node.Properties and node.Properties.string then
+            for _, prop in ipairs(node.Properties.string) do
+                if prop.__text then
+                    PropertyMap[string.lower(prop.__text)] = prop.__text
+                end
+            end
+        end
+        if node.Item then
+            if type(node.Item) == "table" then
+                if node.Item.__text then
+                    return
+                elseif node.Item[0] then
+                    for _, item in ipairs(node.Item) do
+                        extractProperties(item)
+                    end
+                else
+                    extractProperties(node.Item)
+                end
+            end
+        end
     end
 end
+
+task.spawn(function()
+extractProperties(ReflectionMetadata.roblox)
+end)
 
 function findObjectIndex(targetObject)
     for i = 1, #TreeList do
