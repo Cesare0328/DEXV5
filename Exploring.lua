@@ -1640,80 +1640,110 @@ function lookForAName(obj, lowerName, originalName)
     end
 end
 
-function scanName(obj)
+function scanName(Obj)
     nameScanned = false
-    local objName = obj.Name
-    local filterText = explorerFilter.Text
-    local lowerFilter = MatchCaseToggle and filterText or string.lower(filterText)
-    local checkName = MatchCaseToggle and objName or string.lower(objName)
-    local isPropertySearch = string.find(filterText, "=") ~= nil
+    local ObjName = Obj.Name
+    local Filter = explorerFilter.Text
+    local LowerFilter = MatchCaseToggle and Filter or string_lower(Filter)
+    local CheckName = MatchCaseToggle and ObjName or string_lower(ObjName)
+    local IsPropSearch = string_find(Filter, "=") ~= nil
 
-    if isPropertySearch then
-        local propStr, valueStr = string.match(filterText, "(.+)=(.+)")
-        if propStr and valueStr then
-            local lowerProp = string.lower(propStr)
-            if lowerProp == "tag" then
-                if CollectionService:HasTag(obj, valueStr) then
+    if IsPropSearch then
+        local Prop, Value = string_match(Filter, "([^=]+)=(.+)")
+        if Prop and Value then
+            Prop = Prop:match("^%s*(.-)%s*$")
+            Value = Value:match("^%s*(.-)%s*$")
+            print("Property search: Prop =", Prop, "Value =", Value)
+
+            local LowerProp = string_lower(Prop)
+            if LowerProp == "tag" then
+                print("Checking tag:", Value, "on", ObjName)
+                if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
+                    print("Tag match found for", ObjName)
                 end
             else
                 local success, result = pcall(function()
-                    local value
-                    local lowerValue = string.lower(valueStr)
-                    if lowerValue == "true" then
-                        value = true
-                    elseif lowerValue == "false" then
-                        value = false
+                    local ParsedValue
+                    local LowerValue = string_lower(Value)
+                    if LowerValue == "true" then
+                        ParsedValue = true
+                    elseif LowerValue == "false" then
+                        ParsedValue = false
                     else
-                        value = tonumber(valueStr) or valueStr
+                        ParsedValue = tonumber(Value) or Value
                     end
-                    return obj[propStr] == value
+                    print("Checking", Prop, "=", ParsedValue, "on", ObjName)
+                    return Obj[Prop] == ParsedValue
                 end)
-                if success and result then
-                    nameScanned = true
+                if success then
+                    if result then
+                        nameScanned = true
+                        print("Property match found for", ObjName)
+                    end
+                else
+                    print("Error accessing", Prop, "on", ObjName, ":", result)
                 end
             end
             if not nameScanned then
-                for _, v in ipairs(GetChildren(obj)) do
-                    if lowerProp == "tag" then
-                        if CollectionService:HasTag(v, valueStr) then
+                for _, v in ipairs(GetChildren(Obj)) do
+                    if LowerProp == "tag" then
+                        print("Checking tag:", Value, "on child", v.Name)
+                        if CollectionService:HasTag(v, Value) then
                             nameScanned = true
+                            print("Tag match found for child", v.Name)
                             return
                         end
                     else
                         local success, result = pcall(function()
-                            local value
-                            local lowerValue = string.lower(valueStr)
-                            if lowerValue == "true" then
-                                value = true
-                            elseif lowerValue == "false" then
-                                value = false
+                            local ParsedValue
+                            local LowerValue = string_lower(Value)
+                            if LowerValue == "true" then
+                                ParsedValue = true
+                            elseif LowerValue == "false" then
+                                ParsedValue = false
                             else
-                                value = tonumber(valueStr) or valueStr
+                                ParsedValue = tonumber(Value) or Value
                             end
-                            return v[propStr] == value
+                            print("Checking", Prop, "=", ParsedValue, "on child", v.Name)
+                            return v[Prop] == ParsedValue
                         end)
                         if success and result then
                             nameScanned = true
+                            print("Property match found for child", v.Name)
                             return
+                        elseif not success then
+                            print("Error accessing", Prop, "on child", v.Name, ":", result)
                         end
                     end
-                    lookForAName(v, lowerFilter, filterText)
-                    if nameScanned then return end
+                    lookForAName(v, LowerFilter, Filter)
+                    if nameScanned then
+                        print("Name match found for child", v.Name)
+                        return
+                    end
                 end
             end
         else
-            if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string.find(checkName, lowerFilter, 1, true)) then
+            print("Invalid property search format:", Filter)
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
+                print("Name match found for", ObjName)
             else
-                lookForAName(obj, lowerFilter, filterText)
+                lookForAName(Obj, LowerFilter, Filter)
+                if nameScanned then
+                    print("Name match found in children of", ObjName)
+                end
             end
         end
     else
-        if (MatchWholeWordToggle and checkName == lowerFilter) or (not MatchWholeWordToggle and string.find(checkName, lowerFilter, 1, true)) then
+        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
+            print("Name match found for", ObjName)
         else
-            lookForAName(obj, lowerFilter, filterText)
+            lookForAName(Obj, LowerFilter, Filter)
+            if nameScanned then
+                print("Name match found in children of", ObjName)
+            end
         end
     end
     return nameScanned
