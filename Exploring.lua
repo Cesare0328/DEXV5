@@ -1126,7 +1126,7 @@ local FilterInstance = Create('Frame', {
     BackgroundColor3 = GuiColor.Field,
     BorderColor3 = GuiColor.Border,
     Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 14, 0),
+    Size = UDim2.new(1, 0, 12, 0),
     Visible = true,
     ZIndex = 2
 })
@@ -1138,6 +1138,11 @@ local ListLayout = Create('UIListLayout', {
     Padding = UDim.new(0, 5)
 })
 ListLayout.Parent = FilterInstance
+
+local FramePadding = Create('UIPadding', {
+    PaddingLeft = UDim.new(0, 5)
+})
+FramePadding.Parent = FilterInstance
 
 local TitleLabel = Create('TextLabel', {
     Text = "Suggested Filters",
@@ -1156,7 +1161,7 @@ local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = SuggestedFilterNames[i],
-        Size = UDim2.new(1, 0, 0, 20),
+        Size = UDim2.new(1, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
@@ -1172,6 +1177,11 @@ for i = 1, 7 do
         CornerRadius = UDim.new(0, 8)
     })
     UICorner.Parent = FilterButton
+
+    local ButtonPadding = Create('UIPadding', {
+        PaddingLeft = UDim.new(0, 10)
+    })
+    ButtonPadding.Parent = FilterButton
 end
 
 local MatchWholeWord = Create('ImageButton', {
