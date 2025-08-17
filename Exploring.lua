@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus = false, false
+local Searched, WhitelistedFocus, ActiveNotification = false, false, false
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -217,6 +217,18 @@ local function Create(p1, p2)
 end
 
 local function SendNotification(Type, Message, Duration, ActiveFor)
+if ActiveNotification then
+for i,v in pairs(CoreGui:GetChildren()) do
+	if v.Name == "ScreenGui" and v:FindFirstChild("Notification") then
+		local Info2 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		local Tween2 = TweenService:Create(Temp, Info2, {BackgroundTransparency = 1})
+		Tween2:Play()
+		Tween2.Completed:Wait()
+		v:Destroy()
+	end
+end
+end
+ActiveNotification = true
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = CoreGui
 
@@ -231,14 +243,21 @@ Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
 local pos = UDim2.new(1, -330, 0, -45)
-local Info = TweenInfo.new(Duration, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+local Info = TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
+local Info2 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local Tween2 = TweenService:Create(Temp, Info2, {BackgroundTransparency = 1})
 
 Tween:Play()
 Tween.Completed:Wait()
 
 task.wait(ActiveFor)
-ScreenGui:Destroy()
+Tween2:Play()
+Tween2.Completed:Wait()
+if ScreenGui and ScreenGui.Parent then
+	ActiveNotification = false
+	ScreenGui:Destroy()
+end
 end
 
 local function FindFirstParentAfterScreenGui(Instance)
