@@ -1126,11 +1126,22 @@ local FilterInstance = Create('Frame', {
     BackgroundColor3 = GuiColor.Field,
     BorderColor3 = GuiColor.Border,
     Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 16, 0),
+    Size = UDim2.new(1, 0, 15, 0),
     Visible = false,
     ZIndex = 2
 })
 FilterInstance.Parent = explorerFilter
+
+local InputBlocker = Create('TextLabel', {
+    Name = "InputBlocker",
+    Active = false,
+    BackgroundTransparency = 1,
+	TextTransparency = 1,
+    Size = UDim2.new(1, 0, 1, 0),
+    Visible = false,
+    ZIndex = 2
+})
+InputBlocker.Parent = FilterInstance
 
 local UICorner = Create('UICorner', {
     CornerRadius = UDim.new(0, 4)
@@ -1200,6 +1211,11 @@ for i = 1, 7 do
         ZIndex = 2
     })
     FilterImage.Parent = FilterButton
+	Connect(FilterButton.MouseButton1Up, function()
+		InputBlocker.Active = false
+		FilterInstance.Visible = false
+		explorerFilter.Text = FilterButton.Text
+	end)
 end
 local MatchWholeWord = Create('ImageButton', {
     Image = "rbxassetid://115493127332361", 
@@ -3941,7 +3957,9 @@ Connect(explorerFilter.FocusLost, function()
 	end
 end)
 Connect(explorerFilter.Focused, function()
+if explorerFilter.Text ~= "" then return end
 FilterInstance.Visible = true
+InputBlocker.Active = true
 end)
 
 CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, function(option)
