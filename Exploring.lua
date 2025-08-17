@@ -156,6 +156,11 @@ end
 local GuiColor = {
 	Background = Color3_fromRGB(37, 37, 42),
 	Border = Color3_fromRGB(20, 20, 25),
+	Warning = Color3_fromRGB(255, 206, 11),
+	Information = Color3_fromRGB(120, 169, 255),
+	Error = Color3_fromRGB(255, 116, 116),
+	Success = Color3_fromRGB(38, 255, 156),
+	Question = Color3_fromRGB(120, 169, 255)
 	Selected = Color3_fromRGB(5, 100, 145),
 	BorderSelected = Color3_fromRGB(2, 125, 145),
 	Text = Color3_fromRGB(245, 245, 250),
@@ -219,9 +224,11 @@ local Temp = Dex.Notification:Clone()
 Temp.Parent = ScreenGui
 Temp.ImageLabel.BackgroundTransparency = 1
 Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
-Temp.Text = Message
+Temp.TextLabel.Text = Message
+UIStroke.Color = GuiColor[Type]
 
 Temp.Position = UDim2.new(1, 30, 0, -45)
+Temp.Visible = true
 
 local targetPosition = UDim2.new(1, Temp.Size.X.Offset + 30, 0, -45)
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
