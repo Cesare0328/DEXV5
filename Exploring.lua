@@ -1200,7 +1200,7 @@ for i = 1, 7 do
         ZIndex = 2
     })
     FilterImage.Parent = FilterButton
-	Connect(FilterButton.MouseButton1Up, function()
+	Connect(FilterButton.MouseButton1Down, function()
 		setthreadidentity(8)
 		FilterInstance.Visible = false
 		explorerFilter.Text = FilterButton.Text
