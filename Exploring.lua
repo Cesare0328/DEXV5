@@ -1121,6 +1121,16 @@ local explorerFilter =  Create('TextBox',{
     ZIndex = 1
 })
 
+local FilterInstance =  Create('Frame',{
+    BackgroundTransparency = 0,
+	Color3 = GuiColor.Field,
+	BackgroundColor3 = GuiColor.Border,
+	Size = UDim2.new(1, 0, 25, 0),
+	Visible = true,
+    ZIndex = 2
+})
+FilterInstance.Parent = explorerFilter
+
 local MatchWholeWord = Create('ImageButton', {
     Image = "rbxassetid://115493127332361", 
     BackgroundColor3 = Color3.new(1, 1, 1),
