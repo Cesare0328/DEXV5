@@ -225,7 +225,7 @@ Temp.Parent = ScreenGui
 Temp.ImageLabel.BackgroundTransparency = 1
 Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
 Temp.TextLabel.Text = Message
-UIStroke.Color = GuiColor[Type]
+Temp.UIStroke.Color = GuiColor[Type]
 
 Temp.Position = UDim2.new(1, 30, 0, -45)
 Temp.Visible = true
