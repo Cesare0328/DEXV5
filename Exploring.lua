@@ -1132,6 +1132,11 @@ local FilterInstance = Create('Frame', {
 })
 FilterInstance.Parent = explorerFilter
 
+local UICorner = Create('UICorner', {
+    CornerRadius = UDim.new(0, 4)
+})
+UICorner.Parent = FilterInstance
+
 local ListLayout = Create('UIListLayout', {
     SortOrder = Enum.SortOrder.LayoutOrder,
     FillDirection = Enum.FillDirection.Vertical,
