@@ -4126,6 +4126,11 @@ do
 			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 0.5, 2)
 		end
 	end)
+	Connect(GetPropertyChangedSignal(UserInputService, "OverrideMouseIconBehavior"), function()
+		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal then
+			UserInputService.MouseIconEnabled = false
+		end
+	end)
 end
 
 Connect(UserInputService.InputBegan, function(p1)
@@ -4141,12 +4146,6 @@ Connect(UserInputService.InputBegan, function(p1)
 		else
 			UserInputService.MouseIconEnabled = false
 		end
-		task.spawn(function()
-		task.wait(1)
-		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal then
-			UserInputService.MouseIconEnabled = false
-		end
-		end)
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
 		if not ContextMenuHovered then
