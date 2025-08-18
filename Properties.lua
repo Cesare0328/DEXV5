@@ -48,6 +48,8 @@ local Gui = script.Parent.Parent
 local PropertiesFrame = script.Parent
 local ExplorerFrame = Gui:WaitForChild("ExplorerPanel")
 local print = GetPrint_Bindable:Invoke()
+-- < Globals > --
+getgenv().AssetsCached = false
 -- RbxApi Stuff
 local maxChunkSize = 100 * 1000
 
