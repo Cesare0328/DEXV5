@@ -4058,7 +4058,7 @@ do
 	makeButton(ActionTextures.Starred[1], ActionTextures.Starred[2], "Starred", true, function()
 		return true
 	end)
-	makeButton(ActionTextures.MouseLock[1], ActionTextures.MouseLock[2], "MouseLock", true, function()
+	local MouseLockButton = makeButton(ActionTextures.MouseLock[1], ActionTextures.MouseLock[2], "MouseLock", true, function()
 		return true
 	end)
 end
@@ -4099,6 +4099,7 @@ do
 		end
 	end
 	if (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0 then
+		MouseLockButton.Image = ActionTextures.MouseLock[2]
 		FPSDebounce = true
 		task.spawn(function()
 			task.wait(0.5)
@@ -4106,6 +4107,7 @@ do
 			FPSDebounce = false
 		end)
 	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
+		MouseLockButton.Image = ActionTextures.MouseLock[2]
 		FPSDebounce = true
 		task.spawn(function()
 			task.wait(0.5)
@@ -4114,20 +4116,36 @@ do
 		end)
 	end
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMode"), function()
-		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson and not FPSDebounce then
-			FPSDebounce = true
-			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+		if Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+			MouseLockButton.Image = ActionTextures.MouseLock[2]
+			if not FPSDebounce then
+				FPSDebounce = true
+				SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+			end
+		else
+			MouseLockButton.Image = ActionTextures.MouseLock[1]
 		end
 	end)
 	Connect(GetPropertyChangedSignal(Players.LocalPlayer, "CameraMaxZoomDistance"), function()
-		if Players.LocalPlayer.CameraMaxZoomDistance == 0 and not FPSDebounce then
-			FPSDebounce = true
-			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+		if Players.LocalPlayer.CameraMaxZoomDistance == 0 then
+			MouseLockButton.Image = ActionTextures.MouseLock[2]
+			if not FPSDebounce then
+				FPSDebounce = true
+				SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
+			end
+		else
+			MouseLockButton.Image = ActionTextures.MouseLock[1]
 		end
 	end)
 	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehavior"), function()
-		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default and not FPSDebounce then
-			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 0.5, 2)
+		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
+			MouseLockButton.Image = ActionTextures.MouseLock[2]
+			if not FPSDebounce then
+				FPSDebounce = true
+				SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 0.5, 2)
+			end
+		else
+			MouseLockButton.Image = ActionTextures.MouseLock[1]
 		end
 	end)
 end
