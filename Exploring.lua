@@ -182,7 +182,8 @@ local ActionTextures = {
     Paste = {getcustomasset(Folder .. "icon_regions_paste.png"), getcustomasset(Folder .. "icon_regions_paste.png")},
     Delete = {getcustomasset(Folder .. "icon_regions_delete.png"), getcustomasset(Folder .. "icon_regions_delete.png")},
     Starred = {getcustomasset(Folder .. "star_filled.png"), getcustomasset(Folder .. "star_filled.png")},
-    AddStar = {getcustomasset(Folder .. "star_stroke.png"), getcustomasset(Folder .. "star_stroke.png")}
+    AddStar = {getcustomasset(Folder .. "star_stroke.png"), getcustomasset(Folder .. "star_stroke.png")},
+	MouseLock = {getcustomasset(Folder .. "mouselock_off.png"), getcustomasset(Folder .. "mouselock_on.png")}
 }
 
 local NodeTextures = {getcustomasset(Folder .. "btn_expand.png"), getcustomasset(Folder .. "btn_collapse.png")}
@@ -4057,7 +4058,7 @@ do
 	makeButton(ActionTextures.Starred[1], ActionTextures.Starred[2], "Starred", true, function()
 		return true
 	end)
-	makeButton(ActionTextures.Starred[1], ActionTextures.Starred[2], "Starred", true, function()
+	makeButton(ActionTextures.MouseLock[1], ActionTextures.MouseLock[2], "MouseLock", true, function()
 		return true
 	end)
 end
