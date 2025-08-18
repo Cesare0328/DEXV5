@@ -4143,9 +4143,12 @@ Connect(UserInputService.InputBegan, function(p1)
 		end
 		if not FFTextbutton.Modal then
 			task.spawn(function()
-				task.wait()
+				for i = 1, 10 do
+					task.wait()
+				end
+				local Old = UserInputService.OverrideMouseIconBehavior
 				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+				UserInputService.OverrideMouseIconBehavior = Old
 			end)
 		end
 	end
