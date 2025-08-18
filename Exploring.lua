@@ -4136,13 +4136,13 @@ Connect(UserInputService.InputBegan, function(p1)
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
 		FFTextbutton.Modal = not FFTextbutton.Modal
 		FFTextbutton.Visible = not FFTextbutton.Visible
-		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal then
+		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal or UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None then
 			UserInputService.MouseIconEnabled = true
 		else
 			UserInputService.MouseIconEnabled = false
 		end
 		task.spawn(function()
-		task.wait()
+		task.wait(1)
 		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal then
 			UserInputService.MouseIconEnabled = false
 		end
