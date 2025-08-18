@@ -4127,7 +4127,7 @@ do
 		end
 	end)
 	Connect(GetPropertyChangedSignal(UserInputService, "OverrideMouseIconBehavior"), function()
-		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal then
+		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal and (UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default or (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0) then
 			UserInputService.MouseIconEnabled = false
 		end
 	end)
