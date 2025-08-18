@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco = false, false, false, false, UserInputService.MouseIconEnabled
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton = false, false, false, false, UserInputService.MouseIconEnabled, nil
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4058,7 +4058,7 @@ do
 	makeButton(ActionTextures.Starred[1], ActionTextures.Starred[2], "Starred", true, function()
 		return true
 	end)
-	local MouseLockButton = makeButton(ActionTextures.MouseLock[1], ActionTextures.MouseLock[2], "MouseLock", true, function()
+	MouseLockButton = makeButton(ActionTextures.MouseLock[1], ActionTextures.MouseLock[2], "MouseLock", true, function()
 		return true
 	end)
 end
