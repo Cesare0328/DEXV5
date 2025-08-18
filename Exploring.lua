@@ -4057,6 +4057,9 @@ do
 	makeButton(ActionTextures.Starred[1], ActionTextures.Starred[2], "Starred", true, function()
 		return true
 	end)
+	makeButton(ActionTextures.Starred[1], ActionTextures.Starred[2], "Starred", true, function()
+		return true
+	end)
 end
 
 do
