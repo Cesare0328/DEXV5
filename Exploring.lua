@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce = false, false, false, false
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco = false, false, false, false, UserInputService.MouseIconEnabled
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4134,22 +4134,14 @@ Connect(UserInputService.InputBegan, function(p1)
 		HoldingCtrl = true
 	end
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
+		if not FFTextbutton.Modal then OldMouseIco = UserInputService.MouseIconEnabled end
 		FFTextbutton.Modal = not FFTextbutton.Modal
 		FFTextbutton.Visible = not FFTextbutton.Visible
 		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal or UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None then
 			UserInputService.MouseIconEnabled = true
-		else
-			UserInputService.MouseIconEnabled = false
 		end
 		if not FFTextbutton.Modal then
-			task.spawn(function()
-				for i = 1, 10 do
-					task.wait()
-				end
-				local Old = UserInputService.OverrideMouseIconBehavior
-				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-				UserInputService.OverrideMouseIconBehavior = Old
-			end)
+			UserInputService.MouseIconEnabled = OldMouseIco
 		end
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
