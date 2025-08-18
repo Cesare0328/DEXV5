@@ -221,7 +221,7 @@ local function SendNotification(Type, Message, Duration, ActiveFor)
 if ActiveNotification then
 for i,v in pairs(CoreGui:GetChildren()) do
 	if v.Name == "ScreenGui" and v:FindFirstChild("Notification") then
-		local Info2 = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		local Info2 = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 		local Tween2 = TweenService:Create(v.Notification, Info2, {BackgroundTransparency = 1})
 		Tween2:Play()
 		Tween2.Completed:Wait()
@@ -244,9 +244,9 @@ Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
 local pos = UDim2.new(1, -327.5, 0, -45)
-local Info = TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
+local Info = TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
-local Info2 = TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local Info2 = TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 local Tween2 = TweenService:Create(Temp, Info2, {BackgroundTransparency = 1})
 
 Tween:Play()
