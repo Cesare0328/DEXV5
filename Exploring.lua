@@ -4142,8 +4142,11 @@ Connect(UserInputService.InputBegan, function(p1)
 			UserInputService.MouseIconEnabled = false
 		end
 		if not FFTextbutton.Modal then
-			UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-			UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+			task.spawn(function()
+				task.wait()
+				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+			end)
 		end
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
