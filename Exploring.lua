@@ -4126,11 +4126,6 @@ do
 			SendNotification("Information", "Mouse lock detected, press Insert to unlock.", 0.5, 2)
 		end
 	end)
-	Connect(GetPropertyChangedSignal(UserInputService, "OverrideMouseIconBehavior"), function()
-		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and not FFTextbutton.Modal and (UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default or (Players.LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson) or Players.LocalPlayer.CameraMaxZoomDistance == 0) then
-			UserInputService.MouseIconEnabled = false
-		end
-	end)
 end
 
 Connect(UserInputService.InputBegan, function(p1)
@@ -4145,6 +4140,10 @@ Connect(UserInputService.InputBegan, function(p1)
 			UserInputService.MouseIconEnabled = true
 		else
 			UserInputService.MouseIconEnabled = false
+		end
+		if not FFTextbutton.Modal then
+			UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+			UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
 		end
 	end
 	if p1.UserInputType == Enum.UserInputType.MouseButton1 then
