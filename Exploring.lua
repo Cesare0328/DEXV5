@@ -4157,6 +4157,7 @@ Connect(UserInputService.InputBegan, function(p1)
 	end
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
 		if not FFTextbutton.Modal then OldMouseIco = UserInputService.MouseIconEnabled end
+		MouseLockButton.Image = FFTextbutton.Modal and ActionTextures.MouseLock[1] or not FFTextbutton.Modal and ActionTextures.MouseLock[2]
 		FFTextbutton.Modal = not FFTextbutton.Modal
 		FFTextbutton.Visible = not FFTextbutton.Visible
 		if UserInputService.OverrideMouseIconBehavior ~= Enum.OverrideMouseIconBehavior.None and FFTextbutton.Modal or UserInputService.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.None then
