@@ -4106,7 +4106,7 @@ do
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
 			FPSDebounce = false
 		end)
-	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
+	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.LockCenter then
 		MouseLockButton.Image = ActionTextures.MouseLock[2]
 		FPSDebounce = true
 		task.spawn(function()
@@ -4138,7 +4138,7 @@ do
 		end
 	end)
 	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehavior"), function()
-		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
+		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.LockCenter then
 			MouseLockButton.Image = ActionTextures.MouseLock[2]
 			if not FPSDebounce then
 				FPSDebounce = true
