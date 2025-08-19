@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton = false, false, false, false, UserInputService.MouseIconEnabled, nil
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, FakeLock = false, false, false, false, UserInputService.MouseIconEnabled, nil, false
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -2988,6 +2988,9 @@ function rightClickMenu(sObj)
             			LocalPlayer.CameraMaxZoomDistance = OldMax
        				end
     			end
+				if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+					FakeLock = false
+				end
 			end)
 
 			Events.InputChanged = UserInputService.InputChanged:Connect(function(Input)
@@ -4106,7 +4109,7 @@ do
 			SendNotification("Information", "First person lock detected, press Insert to unlock.", 0.5, 2)
 			FPSDebounce = false
 		end)
-	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.LockCenter then
+	elseif UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
 		MouseLockButton.Image = ActionTextures.MouseLock[2]
 		FPSDebounce = true
 		task.spawn(function()
@@ -4138,7 +4141,7 @@ do
 		end
 	end)
 	Connect(GetPropertyChangedSignal(UserInputService, "MouseBehavior"), function()
-		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.LockCenter then
+		if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then
 			MouseLockButton.Image = ActionTextures.MouseLock[2]
 			if not FPSDebounce then
 				FPSDebounce = true
@@ -4154,6 +4157,9 @@ Connect(UserInputService.InputBegan, function(p1)
 	local A = p1.KeyCode
 	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
 		HoldingCtrl = true
+	end
+	if p1.UserInputType == Enum.UserInputType.MouseButton2 then
+		FakeLock = true
 	end
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
 		if not FFTextbutton.Modal then OldMouseIco = UserInputService.MouseIconEnabled end
