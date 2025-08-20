@@ -87,7 +87,7 @@ else
 	Count += 1
 end
 end
-while Count ~= #Assets task.wait() end
+while Count ~= #Assets do task.wait() end
 getgenv().AssetsCached = true
 end
 
