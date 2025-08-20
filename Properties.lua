@@ -74,7 +74,7 @@ local function splitStringIntoChunks(jsonStr)
 end
 
 local function DexCacheAssets()
-local Assets = {"Loading.png", "Finished.png", "icon_regions_copy.png", "icon_regions_paste.png", "icon_regions_delete.png", "star_filled.png", "star_stroke.png", "btn_expand.png", "btn_collapse.png", "tag.png", "locked.png", "anchored.png", "transparency.png", "material.png", "mesh.png", "texture.png", "error.png", "warning.png", "success.png", "question.png", "information.png", "mouselock_on.png", "mouselock_off.png", "search.png", "close.png"}
+local Assets = {"Loading.png", "Finished.png", "icon_regions_copy.png", "icon_regions_paste.png", "icon_regions_delete.png", "star_filled.png", "star_stroke.png", "btn_expand.png", "btn_collapse.png", "tag.png", "locked.png", "anchored.png", "transparency.png", "material.png", "mesh.png", "texture.png", "error.png", "warning.png", "success.png", "question.png", "information.png", "mouselock_on.png", "mouselock_off.png", "search.png", "close.png", "settings.png", "save.png"}
 if not isfolder("DEXV5") then makefolder("DEXV5") end
 if not isfolder("DEXV5\\Assets") then makefolder("DEXV5\\Assets") end
 for i,v in pairs(Assets) do
