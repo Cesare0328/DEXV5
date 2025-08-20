@@ -155,6 +155,8 @@ end
 
 local GuiColor = {
 	Background = Color3_fromRGB(37, 37, 42),
+	Console = Color3_fromRGB(11,13,13),
+	ConsoleBorder = Color3_fromRGB(26,30,31),
 	Border = Color3_fromRGB(20, 20, 25),
 	Warning = Color3_fromRGB(255, 206, 11),
 	Information = Color3_fromRGB(120, 169, 255),
@@ -1282,6 +1284,10 @@ for i = 1, 7 do
 		WhitelistedFocus = true
 		explorerFilter:CaptureFocus()
 	end)
+	Dex.Console.Close.Image = getcustomasset("DEXV5\\Assets\\close.png")
+	Dex.Console.Save.Image = getcustomasset("DEXV5\\Assets\\save.png")
+	Dex.Console.Search.Image = getcustomasset("DEXV5\\Assets\\search.png")
+	Dex.Console.Settings.Image = getcustomasset("DEXV5\\Assets\\settings.png")
 end
 local MatchWholeWord = Create('ImageButton', {
     Image = "rbxassetid://115493127332361", 
