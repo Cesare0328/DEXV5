@@ -73,9 +73,9 @@ local checkrbxlocked = Specials.checkrbxlocked
 -- < Upvalues > --
 local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
-local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
 local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil
+local DebounceTask = nil
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -1182,7 +1182,7 @@ local headerFrame = Create('Frame',{
 })
 MainExplorerTitle = headerFrame.TextLabel
 RunService.Heartbeat:Connect(function()
-	MainExplorerTitle.Text = "Explorer | Instances: " .. Diagnostics.InstanceCount
+	MainExplorerTitle.Text = "Explorer | Instances: " .. settings()["Diagnostics"].InstanceCount
 end)
 
 local explorerFilter = Create('TextBox', {
@@ -4225,9 +4225,7 @@ local function StartBlink()
         task.wait(0.5)
         Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
     end)
-	task.delay(1, function()
-		Dex.Console.Blinker.Visible = false
-	end)
+	Dex.Console.Blinker.Visible = false
 end
 
 StartBlink()
@@ -4238,9 +4236,10 @@ GetPropertyChangedSignal(Dex.Console.TextBox, "Text"):Connect(function()
     local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
     Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
     Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
-	task.spawn(function()
-    	StartBlink()
-	end)
+	if DebounceTask then task.cancel(DebounceTask) end
+	DebounceTask = task.delay(1, function()
+        StartBlink()
+    end)
 end)
 
 local old_print = hookfunction(print, function(...)
