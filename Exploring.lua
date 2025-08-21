@@ -4221,16 +4221,16 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 end)
 
 local function StartBlink(A)
-if DebounceTask and BlinkerConnection then return end
+if A == 1 and DebounceTask and BlinkerConnection then return end
 DebounceTask = false
 if A then task.wait(0.5) end
 BlinkerConnection = Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
-Dex.Console.Blinker.Visible = false
 end
-StartBlink()
+StartBlink(0)
+Dex.Console.Blinker.Visible = false
 
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	if BlinkerConnection then BlinkerConnection:Disconnect() end
@@ -4238,7 +4238,7 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
-	StartBlink(true)
+	StartBlink(1)
 	DebounceTask = true
 end)
 
