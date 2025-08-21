@@ -4231,7 +4231,7 @@ for i,v in pairs(Children) do
 	end
 end
 for i = 1, #Children do
-	if IsA(Children[i], "ImageLabel") then
+	if IsA(Children[i], "ImageButton") then
 		A = Children[i]
 	end
 	if IsA(Children[i], "TextLabel") then
