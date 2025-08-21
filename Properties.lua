@@ -1424,6 +1424,7 @@ local function CreateAttributeRow(object, name, value, isAlternateRow)
 				input.Position.Y > rowFrame.AbsolutePosition.Y and
 				input.Position.X < rowFrame.AbsolutePosition.X + rowFrame.AbsoluteSize.X and
 				input.Position.Y < rowFrame.AbsolutePosition.Y + rowFrame.AbsoluteSize.Y then 
+				print(pcall(setclipboard, tostring(object:GetAttribute(name))))
 			end
 		end
 	end)
