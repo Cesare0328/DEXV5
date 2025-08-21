@@ -4230,7 +4230,6 @@ BlinkerConnection = Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visib
 end)
 end
 StartBlink(0)
-Dex.Console.Blinker.Visible = false
 
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	if BlinkerConnection then BlinkerConnection:Disconnect() end
