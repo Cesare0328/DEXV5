@@ -4221,10 +4221,12 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 end)
 
 local function StartBlink()
+coroutine.create(function()
 BlinkerConnection = Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
+end)()
 end
 StartBlink()
 Dex.Console.Blinker.Visible = false
@@ -4235,15 +4237,11 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
-	if not DebounceTask then
-        DebounceTask = true
-        coroutine.resume(coroutine.create(function()
-            task.wait(0.5)
-            DebounceTask = false
-            StartBlink()
-            Dex.Console.Blinker.Visible = false
-        end))
-    end
+	if DebounceTask then task.cancel(DebounceTask) end
+	DebounceTask = task.delay(0.5, function()
+		StartBlink()
+		Dex.Console.Blinker.Visible = false
+	end)
 end)
 
 local old_print = hookfunction(print, function(...)
