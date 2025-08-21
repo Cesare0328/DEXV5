@@ -4220,7 +4220,7 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 	end
 end)
 
-Connect(GetPropertyChangedSignal(Dex.Console.Search, "Text"), function()
+Connect(GetPropertyChangedSignal(Dex.Console.SearchBar.TextBox, "Text"), function()
 local A, B, Children, OutputCount = nil, nil, Dex.Console.Output:GetChildren(), 0
 for i,v in pairs(Children) do
 	if IsA(v, "TextLabel") then
