@@ -4221,15 +4221,16 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 end)
 
 local function StartBlink()
-    if BlinkerConnection then BlinkerConnection:Disconnect() end
     BlinkerConnection = GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"):Connect(function()
         task.wait(0.5)
         Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
     end)
+	task.delay(1, function()
+		Dex.Console.Blinker.Visible = false
+	end)
 end
 
 StartBlink()
-Dex.Console.Blinker.Visible = false
 
 GetPropertyChangedSignal(Dex.Console.TextBox, "Text"):Connect(function()
     if BlinkerConnection then BlinkerConnection:Disconnect() end
@@ -4237,10 +4238,9 @@ GetPropertyChangedSignal(Dex.Console.TextBox, "Text"):Connect(function()
     local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
     Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
     Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
-    task.delay(1, function()
-        StartBlink()
-		Dex.Console.Blinker.Visible = false
-    end)
+	task.spawn(function()
+    	StartBlink()
+	end)
 end)
 
 local old_print = hookfunction(print, function(...)
