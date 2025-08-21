@@ -1131,7 +1131,7 @@ TweenPosition(SlideFrame, UDim2_new(), Enum.EasingDirection.Out, Enum.EasingStyl
 TweenPosition(OpenScriptEditorButton, UDim2_new(0,0,0,150), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 TweenPosition(ConsoleButton, UDim2_new(0,0,0,180), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 TweenPosition(CloseToggleButton, UDim2_new(0,0,0,210), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-TweenPosition(Slant, UDim2_new(0,0,0,230), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
+TweenPosition(Slant, UDim2_new(0,0,0,240), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 
 task.wait(.5)
 
