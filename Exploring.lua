@@ -4237,6 +4237,10 @@ GetPropertyChangedSignal(Dex.Console.TextBox, "Text"):Connect(function()
     local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
     Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
     Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
+    task.delay(1, function()
+        StartBlink()
+		Dex.Console.Blinker.Visible = false
+    end)
 end)
 
 local old_print = hookfunction(print, function(...)
