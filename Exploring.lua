@@ -4232,6 +4232,7 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	Dex.Console.Blinker.Visible = true
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
+	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 end)
 
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "CursorPosition"), function()
