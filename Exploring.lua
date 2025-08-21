@@ -117,7 +117,6 @@ local writeinstance = Specials.writeinstance
 local fireclickdetector = Specials.fireclickdetector
 local firetouchinterest = Specials.firetouchinterest
 local fireproximityprompt = Specials.fireproximityprompt
-local wait = task.wait
 -- < Source > --
 local DexOutput, DexOutputMain = Instance_new("Folder"), Instance_new("ScreenGui")
 DexOutput.Name = "Output"
