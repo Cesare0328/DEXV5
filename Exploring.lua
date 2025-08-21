@@ -4221,7 +4221,7 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 end)
 
 local function StartBlink()
-coroutine.create(function()
+coroutine.wrap(function()
 BlinkerConnection = Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
