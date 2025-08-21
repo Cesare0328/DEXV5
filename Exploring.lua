@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, LastConsole = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4222,13 +4222,11 @@ end)
 
 Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
-	if LastConsole then while tick() - LastConsole < 1 do task.wait() end end
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
 
 Dex.Console.Blinker.Visible = false
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
-	LastConsole = tick()
 	Dex.Console.Blinker.Visible = true
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
