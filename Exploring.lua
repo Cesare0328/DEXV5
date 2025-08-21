@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton = false, false, false, false, UserInputService.MouseIconEnabled, nil
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -242,10 +242,10 @@ Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .
 Temp.TextLabel.Text = Message
 Temp.UIStroke.Color = GuiColor[Type]
 
-Temp.Position = UDim2.new(1, 0, 0, -45)
+Temp.Position = UDim2_new(1, 0, 0, -45)
 Temp.Visible = true
 
-local pos = UDim2.new(1, -327.5, 0, -45)
+local pos = UDim2_new(1, -327.5, 0, -45)
 local Info = TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
 local Info2 = TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
@@ -262,6 +262,26 @@ if ScreenGui and ScreenGui.Parent then
 	ScreenGui:Destroy()
 end
 end
+
+local function AddToOutput(Type, Message)
+local MessageLabel = Dex.Console.TextLabel:Clone()
+local ImageType = Dex.Console.ImageLabel:Clone()
+local ColorType = GuiColor[Type]
+local Color = string.format("rgb(%d,%d,%d)", math.floor(ColorType.R * 255), math.floor(ColorType.G * 255), math.floor(ColorType.B * 255))
+MessageLabel.Text = string.format('<font color="%s">' .. Message .. '</font>', Color)
+MessageLabel.TextTransparency = 0
+ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
+OutputCount += MessageLabel.TextBounds.Y
+MessageLabel.Position = UDim2_new(25, 0, 0, OutputCount)
+ImageType.Position = UDim2_new(1, 0, 0, OutputCount)
+end
+
+AddToOutput("Warning", "Hi this is a warn message")
+AddToOutput("Error", "Hi this is an error message")
+AddToOutput("Information", "Hi this is an output message")
+AddToOutput("Success", "Hi this is a sucess message")
+
+Dex.Console.Visible = true
 
 local function FindFirstParentAfterScreenGui(Instance)
     if not Instance then
@@ -366,7 +386,7 @@ local function SetSelectionBox2D(TargetGui)
             return
         end
         local AbsoluteSize = TargetGui.AbsoluteSize
-        HighlightFrame.Size = UDim2.new(0, AbsoluteSize.X, TargetGui.Size.Y.Scale, TargetGui.Size.Y.Offset)
+        HighlightFrame.Size = UDim2_new(0, AbsoluteSize.X, TargetGui.Size.Y.Scale, TargetGui.Size.Y.Offset)
         HighlightFrame.Position = TargetGui.Position
         HighlightFrame.AnchorPoint = TargetGui.AnchorPoint
         HighlightFrame.ZIndex = TargetGui.ZIndex + 10
@@ -1172,8 +1192,8 @@ local explorerFilter = Create('TextBox', {
     TextXAlignment = Enum.TextXAlignment.Left,
     Font = FONT,
     FontSize = FONT_SIZE,
-    Position = UDim2.new(0, 4, 0.5, 0),
-    Size = UDim2.new(1, -8, 0.5, -2),
+    Position = UDim2_new(0, 4, 0.5, 0),
+    Size = UDim2_new(1, -8, 0.5, -2),
     ZIndex = 1
 })
 
@@ -1182,7 +1202,7 @@ SG.Parent = CoreGui
 local FFrame = Create('Frame', {
 	BackgroundTransparency = 1,
 	Visible = true,
-	Size = UDim2.new(1, 0, 1, 0)
+	Size = UDim2_new(1, 0, 1, 0)
 })
 FFrame.Parent = SG
 local FFTextbutton = Create('TextButton', {
@@ -1190,15 +1210,15 @@ local FFTextbutton = Create('TextButton', {
 	TextTransparency = 1,
 	Visible = false,
 	Modal = false,
-	Size = UDim2.new(1, 0, 1, 0)
+	Size = UDim2_new(1, 0, 1, 0)
 })
 FFTextbutton.Parent = FFrame
 local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
     BackgroundColor3 = GuiColor.Field,
 	BorderSizePixel = 3,
-    Position = UDim2.new(0, 0, 1.1, 0),
-    Size = UDim2.new(1, 0, 15.25, 0),
+    Position = UDim2_new(0, 0, 1.1, 0),
+    Size = UDim2_new(1, 0, 15.25, 0),
     Visible = false,
     ZIndex = 2
 })
@@ -1228,7 +1248,7 @@ FramePadding.Parent = FilterInstance
 
 local TitleLabel = Create('TextLabel', {
     Text = "Suggested Filters",
-    Size = UDim2.new(1, 0, 0, 30),
+    Size = UDim2_new(1, 0, 0, 30),
     BackgroundTransparency = 1,
     TextColor3 = GuiColor.Text,
     TextXAlignment = Enum.TextXAlignment.Left,
@@ -1243,7 +1263,7 @@ local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
         Text = string.upper(string.sub(SuggestedFilterNames[i], 1, 1)) .. string.sub(SuggestedFilterNames[i], 2),
-        Size = UDim2.new(0.985, 0, 0, 25),
+        Size = UDim2_new(0.985, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
@@ -1271,9 +1291,9 @@ for i = 1, 7 do
     local FilterImage = Create('ImageLabel', {
         Image = getcustomasset("DEXV5\\Assets\\" .. ImageAsset .. ".png"),
         BackgroundTransparency = 1,
-        Size = UDim2.new(0, 16, 0, 16),
+        Size = UDim2_new(0, 16, 0, 16),
         AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(0, -20, 0.5, 0),
+        Position = UDim2_new(0, -20, 0.5, 0),
         ZIndex = 2
     })
     FilterImage.Parent = FilterButton
@@ -1294,8 +1314,8 @@ local MatchWholeWord = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2.new(0, 16, 0, 16),
-    Position = UDim2.new(1, -7, 0.5, 0),
+    Size = UDim2_new(0, 16, 0, 16),
+    Position = UDim2_new(1, -7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 MatchWholeWord.Parent = explorerFilter
@@ -1316,8 +1336,8 @@ local MatchCase = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2.new(0, 16, 0, 16),
-    Position = UDim2.new(1, -4 - 16 - 7, 0.5, 0),
+    Size = UDim2_new(0, 16, 0, 16),
+    Position = UDim2_new(1, -4 - 16 - 7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 MatchCase.Parent = explorerFilter
@@ -2883,7 +2903,7 @@ function rightClickMenu(sObj)
 				end
 			end
 			local ViewportFrame = Instance.new("ViewportFrame")
-			ViewportFrame.Size = UDim2.new(1, 0, 1, 0)
+			ViewportFrame.Size = UDim2_new(1, 0, 1, 0)
 			ViewportFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 			ViewportFrame.BorderColor3 = Color3.fromRGB(149, 149, 149)
 			ViewportFrame.ZIndex = 10
