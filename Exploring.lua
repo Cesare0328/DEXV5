@@ -4209,7 +4209,7 @@ end)
 Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 	if not Dex.Console.SearchBar.UIStroke.Enabled then
 		Dex.Console.SearchBar.UIStroke.Enabled = true
-		local Info = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+		local Info = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
     	local Tween = TweenService:Create(Dex.Console.SearchBar, Info, {Position = UDim2.new(0, 575, 0, 5), Size = UDim2.new(0, 165, 0, 20)})
     	Tween:Play()
 		Tween.Completed:Wait()
