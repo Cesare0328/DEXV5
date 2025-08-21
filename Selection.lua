@@ -252,7 +252,7 @@ Connect(OpenScriptEditorButton.MouseButton1Up, function()
 	ScriptEditor.Visible = OpenScriptEditorButton.Active 
 end)
 
-Connect(Console.Button.MouseButton1Up, function()
+Connect(ConsoleButton.MouseButton1Up, function()
     Dex.Console.Visible = not Dex.Console.Visible
 end)
 
