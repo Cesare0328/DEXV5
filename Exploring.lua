@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4220,17 +4220,25 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 	end
 end)
 
-Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
+local function StartBlink()
+BlinkerConnection = Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
-
+end
+StartBlink()
 Dex.Console.Blinker.Visible = false
+
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
+	if BlinkerConnection then BlinkerConnection:Disconnect() end
 	Dex.Console.Blinker.Visible = true
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
+	task.delay(1, function()
+	StartBlink()
+	Dex.Console.Blinker.Visible = false
+	end)
 end)
 
 local old_print = hookfunction(print, function(...)
