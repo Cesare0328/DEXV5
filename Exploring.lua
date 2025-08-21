@@ -282,7 +282,7 @@ end
 
 local function GetScriptName()
     local success, info = pcall(debug.getinfo, 2)
-    return success and info and info.func and getfenv(info.func).script or "Unknown"
+    return success and info and info.func and tostring(getfenv(info.func).script) or "Unknown"
 end
 
 local function FindFirstParentAfterScreenGui(Instance)
