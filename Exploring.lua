@@ -277,6 +277,7 @@ ImageType.ImageTransparency = 0
 ImageType.Parent = Dex.Console.Output
 MessageLabel.Parent = Dex.Console.Output
 OutputSize += (MessageLabel.TextBounds.Y + 5)
+Dex.Console.Output.CanvasSize = UDim2.new(0, 0, 0, OutputSize)
 end
 
 local function FindFirstParentAfterScreenGui(Instance)
