@@ -4225,7 +4225,7 @@ local function StartBlink()
         task.wait(0.5)
         Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
     end)
-	Dex.Console.Blinker.Visible = false
+	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end
 
 StartBlink()
