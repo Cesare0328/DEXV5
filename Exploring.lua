@@ -4233,8 +4233,7 @@ end
 for i = 1, #Children do
 	if IsA(Children[i], "ImageButton") then
 		A = Children[i]
-	end
-	if IsA(Children[i], "TextLabel") then
+	elseif IsA(Children[i], "TextLabel") then
 		B = Children[i]
 	end
 	if 2 % i == 0 then
@@ -4244,8 +4243,8 @@ for i = 1, #Children do
 		end
 		A.Position = UDim2_new(0, 25, 0, OutputCount)
 		A.ImageTransparency = 0
-	end
 	OutputCount += (B.TextBounds.Y + 5)
+	end
 end
 end)
 
