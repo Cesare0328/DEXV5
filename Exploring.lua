@@ -4202,6 +4202,23 @@ Connect(UserInputService.InputBegan, function(p1)
     end
 end)
 
+Connect(Dex.Console.Close.MouseButton1Up, function(p1)
+	Dex.Console.Visible = false
+end)
+Connect(Dex.Console.Search.MouseButton1Up, function(p1)
+	if not Dex.Console.SearchBar.UIStroke.Enabled then
+		Dex.Console.SearchBar.UIStroke.Enabled = true
+		Dex.Console.SearchBar
+		local Info = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+    	local Tween = TweenService:Create(Dex.Console.SearchBar, Info, {Size = UDim2.new(0, 575, 0, 5), Position = UDim2.new(0, 165, 0, 20)})
+    	Tween:Play()
+		Tween.Completed:Wait()
+		Dex.Console.SearchBar.TextBox.PlaceholderText = "Search"
+		Dex.Console.SearchBar.TextBox:CaptureFocus()
+	else
+		Dex.Console.SearchBar.TextBox:CaptureFocus()
+	end
+end)
 local old_print = hookfunction(print, function(...)
     if not checkcaller() then
         return old_print(...)
