@@ -4235,12 +4235,15 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
-	if DebounceTask then task.cancel(DebounceTask) end
-	DebounceTask = task.spawn(function()
-		task.wait(0.5)
-		StartBlink()
-		Dex.Console.Blinker.Visible = false
-	end)
+	if not DebounceTask then
+        DebounceTask = true
+        coroutine.resume(coroutine.create(function()
+            task.wait(0.5)
+            DebounceTask = false
+            StartBlink()
+            Dex.Console.Blinker.Visible = false
+        end))
+    end
 end)
 
 local old_print = hookfunction(print, function(...)
