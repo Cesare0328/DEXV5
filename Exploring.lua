@@ -4220,6 +4220,35 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 	end
 end)
 
+Connect(GetPropertyChangedSignal(Dex.Console.Search, "Text"), function()
+local A, B, Children, OutputCount = nil, nil, Dex.Console.Output:GetChildren(), 0
+for i,v in pairs(Children) do
+	if IsA(v, "TextLabel") then
+		v.TextTransparency = 1
+	end
+	if IsA(v, "ImageLabel") then
+		v.ImageTransparency = 1
+	end
+end
+for i = 1, #Children do
+	if IsA(Children[i], "ImageLabel") then
+		A = Children[i]
+	end
+	if IsA(Children[i], "TextLabel") then
+		B = Children[i]
+	end
+	if 2 % i == 0 then
+		if B.Text:find(Dex.Console.Search.Text) then
+			B.Position = UDim2_new(0, 0, 0, OutputCount)
+			B.TextTransparency = 0
+		end
+		A.Position = UDim2_new(0, 25, 0, OutputCount)
+		A.ImageTransparency = 0
+	end
+	OutputCount += (B.TextBounds.Y + 5)
+end
+end)
+
 local function StartBlink()
     BlinkerConnection = GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"):Connect(function()
         task.wait(0.5)
