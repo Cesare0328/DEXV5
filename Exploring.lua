@@ -4236,7 +4236,7 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	if DebounceTask then task.cancel(DebounceTask) do
-	DebounceTask = task.delay(1, function()
+	DebounceTask = task.delay(0.5, function()
 	StartBlink()
 	Dex.Console.Blinker.Visible = false
 	end)
