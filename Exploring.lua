@@ -271,9 +271,9 @@ local Color = string.format("rgb(%d,%d,%d)", math.floor(ColorType.R * 255), math
 MessageLabel.Text = string.format('<font color="%s">' .. Message .. '</font>', Color)
 MessageLabel.TextTransparency = 0
 ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
-OutputCount += MessageLabel.TextBounds.Y
-MessageLabel.Position = UDim2_new(25, 0, 0, OutputCount)
-ImageType.Position = UDim2_new(1, 0, 0, OutputCount)
+OutputSize += MessageLabel.TextBounds.Y
+MessageLabel.Position = UDim2_new(25, 0, 0, OutputSize)
+ImageType.Position = UDim2_new(1, 0, 0, OutputSize)
 ImageType.Parent = Dex.Console.Output
 MessageLabel.Parent = Dex.Console.Output
 end
