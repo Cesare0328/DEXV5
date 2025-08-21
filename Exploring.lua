@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, LastConsole = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, tick()
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, LastConsole = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4222,7 +4222,7 @@ end)
 
 Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
-	while tick() - LastConsole > 1 do task.wait() end
+	if LastConsole then while tick() - LastConsole < 1 do task.wait() end end
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
 
