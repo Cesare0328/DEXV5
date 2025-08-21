@@ -93,6 +93,20 @@ local SpecialSettingPaths = {
 	["SMechs"]   = {"Physics",   "AreMechanismsShown"},
 	["AAnims"]   = {"Network",   "ShowActiveAnimationAsset"}
 }
+local MonthNames = {
+    [1] = "January",
+    [2] = "February",
+    [3] = "March",
+    [4] = "April",
+    [5] = "May",
+    [6] = "June",
+    [7] = "July",
+    [8] = "August",
+    [9] = "September",
+    [10] = "October",
+    [11] = "November",
+    [12] = "December"
+}
 local GUI_SIZE = 16 -- general size of GUI objects, in pixels
 local ENTRY_PADDING, ENTRY_MARGIN = 1, 1 -- padding between items within each entry and padding between each entry
 local explorerPanel = script.Parent
@@ -359,6 +373,15 @@ local function CanBeSelectionBoxed(Instance)
         Current = Current.Parent
     end
     return true, "Instance is valid for selection-boxing"
+end
+
+local function GetFormattedDateTime()
+    local date = os.date("*t")
+    local day = date.day
+    local month = MonthNames[date.month]
+    local year = date.year
+    local time = os.date("%H:%M:%S")
+    return string.format("%d %s, %d | %s", day, month, year, time)
 end
 
 local function SetSelectionBox2D(TargetGui)
@@ -1183,6 +1206,7 @@ local headerFrame = Create('Frame',{
 MainExplorerTitle = headerFrame.TextLabel
 RunService.Heartbeat:Connect(function()
 	MainExplorerTitle.Text = "Explorer | Instances: " .. settings()["Diagnostics"].InstanceCount
+	Dex.Console.Data.Text = GetFormattedDateTime()
 end)
 
 local explorerFilter = Create('TextBox', {
