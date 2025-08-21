@@ -279,13 +279,6 @@ MessageLabel.Parent = Dex.Console.Output
 OutputSize += (MessageLabel.TextBounds.Y + 5)
 end
 
-AddToOutput("Warning", "Hi this is a warn message")
-AddToOutput("Error", "Hi this is an error message")
-AddToOutput("Information", "Hi this is an output message")
-AddToOutput("Success", "Hi this is a sucess message")
-
-Dex.Console.Visible = true
-
 local function FindFirstParentAfterScreenGui(Instance)
     if not Instance then
         return nil
@@ -4201,6 +4194,50 @@ Connect(UserInputService.InputBegan, function(p1)
 		end
 		--if theres any other uses in the future
     end
+end)
+
+local old_print = hookfunction(print, function(...)
+    if not checkcaller() then
+        return old_print(...)
+    end
+    local args = {...}
+    local message = ""
+    for i, arg in ipairs(args) do
+        message = message .. tostring(arg) .. (i < #args and "\t" or "")
+    end
+    local Script = getcallingscript()
+    local ScriptName = Script and Script.Name or "Unknown"
+    AddToOutput("Information", string.format("[%s] %s", ScriptName, message))
+end)
+
+local old_warn = hookfunction(warn, function(...)
+    if not checkcaller() then
+        return old_warn(...)
+    end
+    local args = {...}
+    local message = ""
+    for i, arg in ipairs(args) do
+        message = message .. tostring(arg) .. (i < #args and "\t" or "")
+    end
+    local Script = getcallingscript()
+    local ScriptName = Script and Script.Name or "Unknown"
+    AddToOutput("Warning", string.format("[%s] %s", ScriptName, message))
+end)
+
+local old_error = hookfunction(error, function(message, level)
+    if not checkcaller() then
+        return old_error(message, level)
+    end
+    local Script = getcallingscript()
+    local ScriptName = Script and Script.Name or "Unknown"
+    AddToOutput("Error", string.format("[%s] %s", ScriptName, tostring(message)))
+end)
+
+local ScriptContext = game:GetService("ScriptContext")
+ScriptContext.Error:Connect(function(message, stack, Script)
+    local ScriptName = Script and Script.Name or "Unknown"
+    local full_message = string.format("[%s] %s\n%s", ScriptName, message, stack)
+    AddToOutput("Error", full_message)
 end)
 
 Connect(UserInputService.InputEnded, function(p1)
