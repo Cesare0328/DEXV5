@@ -280,6 +280,11 @@ OutputSize += (MessageLabel.TextBounds.Y + 5)
 Dex.Console.Output.CanvasSize = UDim2.new(0, 0, 0, OutputSize)
 end
 
+local function GetScriptName()
+    local success, info = pcall(debug.getinfo, 2)
+    return success and info and info.func and getfenv(info.func).script or "Unknown"
+end
+
 local function FindFirstParentAfterScreenGui(Instance)
     if not Instance then
         return nil
@@ -4206,9 +4211,7 @@ local old_print = hookfunction(print, function(...)
     for i, arg in ipairs(args) do
         message = message .. tostring(arg) .. (i < #args and "\t" or "")
     end
-    local info = debug.getinfo(2)
-    local Script = getfenv(info.func).script
-    local ScriptName = Script and Script.Name or "Unknown"
+    local ScriptName = GetScriptName()
     AddToOutput("Information", string.format("[%s] %s", ScriptName, message))
 end)
 
@@ -4221,9 +4224,7 @@ local old_warn = hookfunction(warn, function(...)
     for i, arg in ipairs(args) do
         message = message .. tostring(arg) .. (i < #args and "\t" or "")
     end
-    local info = debug.getinfo(2)
-    local Script = getfenv(info.func).script
-    local ScriptName = Script and Script.Name or "Unknown"
+    local ScriptName = GetScriptName()
     AddToOutput("Warning", string.format("[%s] %s", ScriptName, message))
 end)
 
@@ -4231,16 +4232,13 @@ local old_error = hookfunction(error, function(message, level)
     if not checkcaller() then
         return old_error(message, level)
     end
-    local info = debug.getinfo(2)
-    local Script = getfenv(info.func).script
-    local ScriptName = Script and Script.Name or "Unknown"
+    local ScriptName = GetScriptName()
     AddToOutput("Error", string.format("[%s] %s", ScriptName, tostring(message)))
 end)
 
 local ScriptContext = game:GetService("ScriptContext")
 ScriptContext.Error:Connect(function(message, stack, Script)
-    local info = debug.getinfo(2)
-    local Script = getfenv(info.func).script
+    local ScriptName = GetScriptName()
     local full_message = string.format("[%s] %s\n%s", ScriptName, message, stack)
     AddToOutput("Error", full_message)
 end)
