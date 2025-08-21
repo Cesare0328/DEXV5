@@ -4222,7 +4222,7 @@ end)
 
 Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
-	while tick() - LastConsole < 1 do task.wait() end
+	while tick() - LastConsole > 1 do task.wait() end
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
 
