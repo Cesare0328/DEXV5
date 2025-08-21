@@ -4205,6 +4205,7 @@ end)
 Connect(Dex.Console.Close.MouseButton1Up, function(p1)
 	Dex.Console.Visible = false
 end)
+
 Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 	if not Dex.Console.SearchBar.UIStroke.Enabled then
 		Dex.Console.SearchBar.UIStroke.Enabled = true
@@ -4218,6 +4219,17 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 		Dex.Console.SearchBar.TextBox:CaptureFocus()
 	end
 end)
+
+Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
+	task.wait(0.5)
+	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
+end)
+
+Dex.Console.Blinker.Visible = false
+Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
+	Dex.Console.Blinker.Position = UDim2.new(0, math.min(13 + Dex.Console.TextBox.TextBounds.X, 767), 0, 210)
+end)
+
 local old_print = hookfunction(print, function(...)
     if not checkcaller() then
         return old_print(...)
