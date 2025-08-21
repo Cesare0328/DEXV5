@@ -4223,10 +4223,8 @@ end)
 local function StartBlink()
     if BlinkerConnection then BlinkerConnection:Disconnect() end
     BlinkerConnection = GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"):Connect(function()
-        coroutine.resume(coroutine.create(function()
-            task.wait(0.5)
-            Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
-        end))
+        task.wait(0.5)
+        Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
     end)
 end
 
