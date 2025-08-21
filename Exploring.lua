@@ -264,8 +264,8 @@ end
 end
 
 local function AddToOutput(Type, Message)
-local MessageLabel = Dex.Console.TextLabel:Clone()
-local ImageType = Dex.Console.ImageLabel:Clone()
+local MessageLabel = Dex.Console.Output.TextLabel:Clone()
+local ImageType = Dex.Console.Output.ImageLabel:Clone()
 local ColorType = GuiColor[Type]
 local Color = string.format("rgb(%d,%d,%d)", math.floor(ColorType.R * 255), math.floor(ColorType.G * 255), math.floor(ColorType.B * 255))
 MessageLabel.Text = string.format('<font color="%s">' .. Message .. '</font>', Color)
@@ -274,6 +274,8 @@ ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".pn
 OutputCount += MessageLabel.TextBounds.Y
 MessageLabel.Position = UDim2_new(25, 0, 0, OutputCount)
 ImageType.Position = UDim2_new(1, 0, 0, OutputCount)
+ImageType.Parent = Dex.Console.Output
+MessageLabel.Parent = Dex.Console.Output
 end
 
 AddToOutput("Warning", "Hi this is a warn message")
