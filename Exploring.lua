@@ -4230,11 +4230,12 @@ Dex.Console.Blinker.Visible = false
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	LastConsole = tick()
 	Dex.Console.Blinker.Visible = true
-	if not Dex.Console.TextBox.TextBounds.X == 95 then
-		Dex.Console.Blinker.Position = UDim2.new(0, math.min(15 + Dex.Console.TextBox.TextBounds.X, 767), 0, 210)
-	else
-		Dex.Console.Blinker.Position = UDim2.new(0, 13, 0, 210)
-	end
+	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
+	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
+end)
+
+Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "CursorPosition"), function()
+	Dex.Console.TextBox.CursorPosition = -1
 end)
 
 local old_print = hookfunction(print, function(...)
