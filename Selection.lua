@@ -48,6 +48,7 @@ local SideMenu = WaitForChild(Gui, "SideMenu")
 local OpenToggleButton = WaitForChild(Gui, "Toggle")
 local CloseToggleButton = WaitForChild(SideMenu, "Toggle")
 local OpenScriptEditorButton = WaitForChild(SideMenu, "OpenScriptEditor")
+local ConsoleButton = WaitForChild(SideMenu, "Console")
 local ScriptEditor = WaitForChild(Gui, "ScriptEditor")
 local SlideOut = WaitForChild(SideMenu, "SlideOut")
 local SlideFrame = WaitForChild(SlideOut, "SlideFrame")
@@ -249,6 +250,10 @@ end)
 
 Connect(OpenScriptEditorButton.MouseButton1Up, function()
 	ScriptEditor.Visible = OpenScriptEditorButton.Active 
+end)
+
+Connect(Console.Button.MouseButton1Up, function()
+    Dex.Console.Visible = not Dex.Console.Visible
 end)
 
 Connect(CloseToggleButton.MouseButton1Up, function()
@@ -1124,13 +1129,15 @@ IntroFrame.Visible = false
 
 TweenPosition(SlideFrame, UDim2_new(), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 TweenPosition(OpenScriptEditorButton, UDim2_new(0,0,0,150), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-TweenPosition(CloseToggleButton, UDim2_new(0,0,0,180), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
-TweenPosition(Slant, UDim2_new(0,0,0,210), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
+TweenPosition(ConsoleButton, UDim2_new(0,0,0,180), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
+TweenPosition(CloseToggleButton, UDim2_new(0,0,0,210), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
+TweenPosition(Slant, UDim2_new(0,0,0,230), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5, true)
 
 task.wait(.5)
 
 for i = 1,0,-.1 do
 	OpenScriptEditorButton.Icon.ImageTransparency = i
+    ConsoleButton.Icon.ImageTransparency = i
 	CloseToggleButton.TextTransparency = i
 	task.wait(0)
 end
