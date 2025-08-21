@@ -276,7 +276,7 @@ ImageType.Position = UDim2_new(0, 0, 0, OutputSize)
 ImageType.ImageTransparency = 0
 ImageType.Parent = Dex.Console.Output
 MessageLabel.Parent = Dex.Console.Output
-OutputSize += MessageLabel.TextBounds.Y
+OutputSize += (MessageLabel.TextBounds.Y + 5)
 end
 
 AddToOutput("Warning", "Hi this is a warn message")
