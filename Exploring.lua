@@ -110,7 +110,6 @@ local MonthNames = {
 local GUI_SIZE = 16 -- general size of GUI objects, in pixels
 local ENTRY_PADDING, ENTRY_MARGIN = 1, 1 -- padding between items within each entry and padding between each entry
 local explorerPanel = script.Parent
-local Dex = explorerPanel.Parent
 local HoldingCtrl, HoldingShift = false, false
 -- < Custom Aliases > --
 local getinstancelist = Specials.getinstancelist
