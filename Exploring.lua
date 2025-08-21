@@ -4235,10 +4235,6 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 end)
 
-Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "CursorPosition"), function()
-	Dex.Console.TextBox.CursorPosition = -1
-end)
-
 local old_print = hookfunction(print, function(...)
     if not checkcaller() then
         return old_print(...)
