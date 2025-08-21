@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection, DebounceTask = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil, nil
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4235,7 +4235,10 @@ Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
 	local xOffset = Dex.Console.TextBox.Text == "" and 13 or 15 + Dex.Console.TextBox.TextBounds.X
 	Dex.Console.Blinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
 	Dex.Console.FakeBlinker.Position = UDim2.new(0, math.min(xOffset, 767), 0, 210)
-	task.delay(1, function()
+	if DebounceTask then
+		task.cancel(DebounceTask)
+	end
+	DebounceTask = task.delay(1, function()
 	StartBlink()
 	Dex.Console.Blinker.Visible = false
 	end)
