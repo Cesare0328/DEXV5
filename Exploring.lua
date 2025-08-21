@@ -75,7 +75,7 @@ local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local Diagnostics = settings()["Diagnostics"]
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, LastConsole = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, tick()
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -4222,12 +4222,19 @@ end)
 
 Connect(GetPropertyChangedSignal(Dex.Console.Blinker, "Visible"), function()
 	task.wait(0.5)
+	while tick() - LastConsole < 1 do task.wait() end
 	Dex.Console.Blinker.Visible = not Dex.Console.Blinker.Visible
 end)
 
 Dex.Console.Blinker.Visible = false
 Connect(GetPropertyChangedSignal(Dex.Console.TextBox, "Text"), function()
-	Dex.Console.Blinker.Position = UDim2.new(0, math.min(13 + Dex.Console.TextBox.TextBounds.X, 767), 0, 210)
+	LastConsole = tick()
+	Dex.Console.Blinker.Visible = true
+	if not Dex.Console.TextBox.TextBounds.X == 95 then
+		Dex.Console.Blinker.Position = UDim2.new(0, math.min(15 + Dex.Console.TextBox.TextBounds.X, 767), 0, 210)
+	else
+		Dex.Console.Blinker.Position = UDim2.new(0, 13, 0, 210)
+	end
 end)
 
 local old_print = hookfunction(print, function(...)
