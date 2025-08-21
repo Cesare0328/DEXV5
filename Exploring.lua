@@ -111,7 +111,7 @@ DexOutput.Name = "Output"
 DexOutputMain.Name = "Dex Output"
 DexOutputMain.Parent = DexOutput
 
-local function print(...)
+local function printz(...)
 	local A = Instance_new("Dialog")
 	for _,v in ipairs({...}) do
 		A.Name = tostring(v) .. " "
@@ -120,7 +120,7 @@ local function print(...)
 end
 
 GetPrint_Bindable.OnInvoke = function() 
-	return print 
+	return printz
 end
 
 SetSetting_Bindable.OnInvoke = function(...)
