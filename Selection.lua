@@ -668,7 +668,7 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     local response = nil
     local ATDict = {[1] = nil, [2] = nil, [3] = nil, [4] = nil}
     local ATDictScale = {[1] = 500, [2] = 500, [3] = 0.5, [4] = 500}
-    local ATDictBase = {[1] = 1000, [2] = 500, [3] = 0.5, [4] = 10000}
+    local ATDictBase = {[1] = 1000, [2] = 500, [3] = 0.5, [4] = 2500}
     if CurrentSaveInstanceWindow then
 		Destroy(CurrentSaveInstanceWindow)
 		CurrentSaveInstanceWindow = nil
