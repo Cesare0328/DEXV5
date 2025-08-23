@@ -4326,12 +4326,12 @@ local old_error = hookfunction(error, function(message, level)
     AddToOutput("Error", string.format("[%s] %s", ScriptName, tostring(message)))
 end)
 
-local ScriptContext = game:GetService("ScriptContext")
-ScriptContext.Error:Connect(function(message, stack, Script)
-    local ScriptName = GetScriptName()
-    local full_message = string.format("[%s] %s\n%s", ScriptName, message, stack)
-    AddToOutput("Error", full_message)
-end)
+--local ScriptContext = game:GetService("ScriptContext")
+--ScriptContext.Error:Connect(function(message, stack, Script)
+    --local ScriptName = GetScriptName()
+    --local full_message = string.format("[%s] %s\n%s", ScriptName, message, stack)
+    --AddToOutput("Error", full_message)
+--end)
 
 Connect(UserInputService.InputEnded, function(p1)
     local A = p1.KeyCode
