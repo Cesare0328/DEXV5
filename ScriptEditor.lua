@@ -1538,7 +1538,7 @@ local function openScript(o)
                 end
             end
             if not passed then
-                local success, sourceAssetId = tonumber(gethiddenproperty(o, "SourceAssetId"))
+                local sourceAssetId, success = tonumber(gethiddenproperty(o, "SourceAssetId"))
                 if success and sourceAssetId and sourceAssetId ~= -1 then
                     local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
                     if asset then
