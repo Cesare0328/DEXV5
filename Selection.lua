@@ -940,12 +940,12 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             local serializer = PropertySerializers[propType]
             if propName == "Source" then
                 local eS = tostring(propValue):gsub("]]>", "]]]]><![CDATA[>")
-                table.insert(output, string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', Enum.CameraType.Fixed))
+                table.insert(output, string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', eS))
             elseif propName == "ScaleFactor" then
                 table.insert(output, PropertySerializers.customfloat(propName, propValue))
             elseif serializer and propValue ~= nil then
                 if instance == workspace.CurrentCamera then
-                    table.insert(output, serializer(propName, 0))
+                    table.insert(output, serializer(propName, Enum.CameraType.Fixed))
                 else
                     table.insert(output, serializer(propName, propValue))
                 end
