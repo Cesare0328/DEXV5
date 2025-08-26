@@ -844,7 +844,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             local source = "-- Failed to get source"
             local guid = tostring(gethiddenproperty(instance, "ScriptGuid")) or "{Couldn't grab GUID}"
             local triggers = '--This script could not be decompiled due to it having no bytecode'
-            local bytecode = getscriptbytecode(instance) or ""
+            local bytecode = ""
+            if instance:IsA("LocalScript") or instance:IsA("ModuleScript") or (instance:IsA("Script") and instance.RunContext == Enum.RunContext.Client) then
+                bytecode = getscriptbytecode(instance) or ""
+            end
             if #bytecode == 0 then
                 source = "-- This script has no bytecode.\n-- It can not be decompiled."
             else
