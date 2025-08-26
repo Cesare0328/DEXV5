@@ -840,6 +840,43 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 ModelMeshCFrame = gethiddenproperty(instance, "ModelMeshCFrame"),
                 ModelMeshSize = gethiddenproperty(instance, "ModelMeshSize")
             }
+        elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
+            local source = "-- Failed to get source"
+            local guid = tostring(gethiddenproperty(instance, "ScriptGuid")) or "{Couldn't grab GUID}"
+            local triggers = '--This script could not be decompiled due to it having no bytecode'
+            local bytecode = getscriptbytecode(instance) or ""
+            if #bytecode == 0 then
+                source = "-- This script has no bytecode.\n-- It can not be decompiled."
+            else
+                local success, result = pcall(decompile, instance)
+                if success then
+                    if result:find(triggers, 1, true) then
+                        local sSuccess, sSource = pcall(function() return instance.Source end)
+                        if sSuccess and #sSource > 0 then
+                            source = sSource
+                        else
+                            source = "-- This script has no bytecode and no source.\n-- It can not be viewed."
+                        end
+                    elseif #result <= 0 then
+                        source = "-- Decompiler returned nothing."
+                    else
+                        local lines = {}
+                        for line in result:gmatch("[^\r\n]+") do
+                            table.insert(lines, line)
+                        end
+                        if #lines > 0 and lines[1]:match("^%s*%-%-") then
+                            table.remove(lines, 1)
+                        end
+                        source = table.concat(lines, "\n")
+                    end
+                else
+                    source = "-- SCRIPT GUID: " .. guid .. " \n-- Decompilation failed: " .. tostring(result)
+                end
+            end
+            properties = {
+                Source = source,
+                Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
+            }
         elseif instance:IsA("Decal") then
             properties = {
                 Texture = instance.Texture,
@@ -888,22 +925,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
         end
-        if saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
-            local source = "Decompile failed"
-            local success, result = pcall(function() return decompile(instance) end)
-            if success then
-                local lines = {}
-                for line in result:gmatch("[^\r\n]+") do
-                    table.insert(lines, line)
-                end
-                table.remove(lines, 1)
-                source = table.concat(lines, "\n")
-            end
-            properties = {
-                Source = source,
-                Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
-            }
-        end
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
             if success and val ~= nil and v ~= "Parent" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
@@ -914,18 +935,18 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         for propName, propValue in pairs(properties) do
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
-            if propName == "ScaleFactor" then
+            if propName == "Source" then
+                table.insert(output, string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', propValue))
+            elseif propName == "ScaleFactor" then
                 table.insert(output, PropertySerializers.customfloat(propName, propValue))
-            else
-                if serializer and propValue ~= nil then
-                    if instance == workspace.CurrentCamera then
-                        local old = instance.CameraType
-                        instance.CameraType = Enum.CameraType.Fixed
-                        table.insert(output, serializer(propName, propValue))
-                        instance.CameraType = old
-                    else
-                        table.insert(output, serializer(propName, propValue))
-                    end
+            elseif serializer and propValue ~= nil then
+                if instance == workspace.CurrentCamera then
+                    local old = instance.CameraType
+                    instance.CameraType = Enum.CameraType.Fixed
+                    table.insert(output, serializer(propName, propValue))
+                    instance.CameraType = old
+                else
+                    table.insert(output, serializer(propName, propValue))
                 end
             end
         end
