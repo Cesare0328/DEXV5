@@ -842,45 +842,126 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 ModelMeshSize = gethiddenproperty(instance, "ModelMeshSize")
             }
         elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
-            scriptSource = "-- Failed to get source"
             local guid = tostring(gethiddenproperty(instance, "ScriptGuid")) or "{Couldn't grab GUID}"
             local triggers = '--This script could not be decompiled due to it having no bytecode'
-            local bytecode = ""
-            if instance:IsA("LocalScript") or instance:IsA("ModuleScript") or (instance:IsA("Script") and instance.RunContext == Enum.RunContext.Client) then
-                bytecode = getscriptbytecode(instance) or ""
-            end
-            if #bytecode == 0 then
-                scriptSource = "-- This script has no bytecode.\n-- It can not be decompiled."
-            else
-                local success, result = pcall(decompile, instance)
-                if success then
-                    if result:find(triggers, 1, true) then
-                        local sSuccess, sSource = pcall(function() return instance.Source end)
-                        if sSuccess and #sSource > 0 then
-                            scriptSource = sSource
+            local path
+
+            if not instance:IsDescendantOf(game) then
+                local ancestors = {}
+                local current = instance
+                while current do
+                    table.insert(ancestors, 1, current.Name)
+                    current = current.Parent
+                end
+                if ancestors[1] == "Dex Internal Storage" then
+                    table.remove(ancestors, 1)
+                end
+                if ancestors[1] == "Nil Instances" then
+                    table.remove(ancestors, 1)
+                end
+                if #ancestors > 0 then
+                    local pathParts = {"getnilinstances()"}
+                    for i = 1, #ancestors do
+                        local name = ancestors[i]
+                        if name:match("^[%a_][%w_]*$") then
+                            table.insert(pathParts, "." .. name)
                         else
-                            scriptSource = "-- This script has no bytecode and no source.\n-- It can not be viewed."
+                            local escapedName = name:gsub('"', '\\"')
+                            table.insert(pathParts, "[\"" .. escapedName .. "\"]")
                         end
-                    elseif #result <= 0 then
-                        scriptSource = "-- Decompiler returned nothing."
+                    end
+                    path = table.concat(pathParts, "")
+                else
+                    path = "getnilinstances()"
+                end
+            else
+                local ancestors = {}
+                local current = instance
+                while current.Parent ~= game do
+                    table.insert(ancestors, 1, current.Name)
+                    current = current.Parent
+                end
+                local ServiceName = current.ClassName
+                local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+                for i = 1, #ancestors do
+                    local name = ancestors[i]
+                    if name:match("^[%a_][%w_]*$") then
+                        table.insert(pathParts, "." .. name)
                     else
-                        local lines = {}
-                        for line in result:gmatch("[^\r\n]+") do
-                            table.insert(lines, line)
-                        end
-                        if #lines > 0 and lines[1]:match("^%s*%-%-") then
-                            table.remove(lines, 1)
-                        end
-                        scriptSource = table.concat(lines, "\n")
+                        local escapedName = name:gsub('"', '\\"')
+                        table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+                    end
+                end
+                path = table.concat(pathParts, "")
+            end
+
+            scriptSource = "-- Failed to get source"
+            if instance:IsA("LocalScript") or instance:IsA("ModuleScript") then
+                local bytecode = getscriptbytecode(instance) or ""
+                if #bytecode == 0 then
+                    if instance:IsA("LocalScript") then
+                        scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
+                    else
+                        scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
                     end
                 else
-                    scriptSource = "-- SCRIPT GUID: " .. guid .. " \n-- Decompilation failed: " .. tostring(result)
+                    local success, result = pcall(decompile, instance)
+                    if success then
+                        if result:find(triggers, 1, true) then
+                            local sSuccess, sSource = pcall(function() return instance.Source end)
+                            if sSuccess and #sSource > 0 then
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, sSource)
+                            else
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                            end
+                        elseif #result <= 0 then
+                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+                        else
+                            local lines = {}
+                            for line in result:gmatch("[^\r\n]+") do
+                                table.insert(lines, line)
+                            end
+                            if #lines > 0 and lines[1]:match("^%s*%-%-") then
+                                table.remove(lines, 1)
+                            end
+                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, table.concat(lines, "\n"))
+                        end
+                    else
+                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Decompilation failed: %s", guid, path, tostring(result))
+                    end
+                end
+            elseif instance:IsA("Script") then
+                local passed = false
+                local linkedSource = instance.LinkedSource
+                if linkedSource and #linkedSource >= 1 then
+                    local result = tonumber(string.match(linkedSource, "(%d+)"))
+                    if result then
+                        result = string.format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
+                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
+                        passed = true
+                    end
+                end
+                if not passed then
+                    local sourceAssetId = tonumber(gethiddenproperty(instance, "SourceAssetId"))
+                    if sourceAssetId and sourceAssetId ~= -1 then
+                        local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
+                        if asset then
+                            local source = asset.Source
+                            if source and #source > 0 then
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
+                                passed = true
+                            end
+                        end
+                    end
+                end
+                if not passed then
+                    scriptSource = string.format("-- Script GUID: %s\n-- ServerScript", guid)
                 end
             end
-            properties = {
-                Source = scriptSource,
-                Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
-            }
+        properties = {
+            Source = scriptSource,
+            Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
+        }
         elseif instance:IsA("Decal") then
             properties = {
                 Texture = instance.Texture,
