@@ -840,21 +840,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 ModelMeshCFrame = gethiddenproperty(instance, "ModelMeshCFrame"),
                 ModelMeshSize = gethiddenproperty(instance, "ModelMeshSize")
             }
-        elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
-            local source = "Decompile failed"
-            local success, result = pcall(function() return decompile(instance) end)
-            if success then
-                local lines = {}
-                for line in result:gmatch("[^\r\n]+") do
-                    table.insert(lines, line)
-                end
-                table.remove(lines, 1)
-                source = table.concat(lines, "\n")
-            end
-            properties = {
-                Source = source,
-                Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
-            }
         elseif instance:IsA("Decal") then
             properties = {
                 Texture = instance.Texture,
@@ -901,6 +886,22 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 GrassLength = gethiddenproperty(instance, "GrassLength"),
                 Decoration = gethiddenproperty(instance, "Decoration"),
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
+            }
+        end
+        if saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
+            local source = "Decompile failed"
+            local success, result = pcall(function() return decompile(instance) end)
+            if success then
+                local lines = {}
+                for line in result:gmatch("[^\r\n]+") do
+                    table.insert(lines, line)
+                end
+                table.remove(lines, 1)
+                source = table.concat(lines, "\n")
+            end
+            properties = {
+                Source = source,
+                Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
             }
         end
         for _,v in pairs(getproperties(instance)) do
