@@ -777,6 +777,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
+    local scriptSource = nil
 
     if isLocalPlayer then
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
@@ -841,7 +842,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 ModelMeshSize = gethiddenproperty(instance, "ModelMeshSize")
             }
         elseif saveScripts and (instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")) then
-            local source = "-- Failed to get source"
+            scriptSource = "-- Failed to get source"
             local guid = tostring(gethiddenproperty(instance, "ScriptGuid")) or "{Couldn't grab GUID}"
             local triggers = '--This script could not be decompiled due to it having no bytecode'
             local bytecode = ""
@@ -849,19 +850,19 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 bytecode = getscriptbytecode(instance) or ""
             end
             if #bytecode == 0 then
-                source = "-- This script has no bytecode.\n-- It can not be decompiled."
+                scriptSource = "-- This script has no bytecode.\n-- It can not be decompiled."
             else
                 local success, result = pcall(decompile, instance)
                 if success then
                     if result:find(triggers, 1, true) then
                         local sSuccess, sSource = pcall(function() return instance.Source end)
                         if sSuccess and #sSource > 0 then
-                            source = sSource
+                            scriptSource = sSource
                         else
-                            source = "-- This script has no bytecode and no source.\n-- It can not be viewed."
+                            scriptSource = "-- This script has no bytecode and no source.\n-- It can not be viewed."
                         end
                     elseif #result <= 0 then
-                        source = "-- Decompiler returned nothing."
+                        scriptSource = "-- Decompiler returned nothing."
                     else
                         local lines = {}
                         for line in result:gmatch("[^\r\n]+") do
@@ -870,14 +871,14 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                         if #lines > 0 and lines[1]:match("^%s*%-%-") then
                             table.remove(lines, 1)
                         end
-                        source = table.concat(lines, "\n")
+                        scriptSource = table.concat(lines, "\n")
                     end
                 else
-                    source = "-- SCRIPT GUID: " .. guid .. " \n-- Decompilation failed: " .. tostring(result)
+                    scriptSource = "-- SCRIPT GUID: " .. guid .. " \n-- Decompilation failed: " .. tostring(result)
                 end
             end
             properties = {
-                Source = source,
+                Source = scriptSource,
                 Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
             }
         elseif instance:IsA("Decal") then
@@ -938,8 +939,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         for propName, propValue in pairs(properties) do
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
-            if propName == "Source" then
-                local eS = tostring(propValue):gsub("]]>", "]]]]><![CDATA[>")
+            if propName == "Source" and scriptSource then
+                local eS = tostring(scriptSource):gsub("]]>", "]]]]><![CDATA[>")
                 table.insert(output, string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', eS))
             elseif propName == "ScaleFactor" then
                 table.insert(output, PropertySerializers.customfloat(propName, propValue))
