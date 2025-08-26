@@ -944,7 +944,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             elseif propName == "ScaleFactor" then
                 table.insert(output, PropertySerializers.customfloat(propName, propValue))
             elseif serializer and propValue ~= nil then
-                if instance == workspace.CurrentCamera then
+                if instance == workspace.CurrentCamera and propName == "CameraType" then
                     table.insert(output, serializer(propName, Enum.CameraType.Fixed))
                 else
                     table.insert(output, serializer(propName, propValue))
