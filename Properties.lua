@@ -2215,6 +2215,9 @@ do
 	if not isfolder("DEXV5\\SaveInstances") then
     	makefolder("DEXV5\\SaveInstances")
 	end
+	if not isfolder("DEXV5\\Console") then
+    	makefolder("DEXV5\\Console")
+	end
 	task.spawn(function()
     	DexCacheAssets()
 	end)
