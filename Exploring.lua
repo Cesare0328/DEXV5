@@ -4262,8 +4262,7 @@ Connect(Dex.Console.Save.MouseButton1Up, function(p1)
                     local rNum, gNum, bNum = tonumber(r), tonumber(g), tonumber(b)
                     for _, mapping in pairs(ColorMap) do
                         if rNum == mapping.r and gNum == mapping.g and bNum == mapping.b then
-                            str = str .. mapping.prefix .. " --> " .. message
-                            break
+                            str = str .. mapping.prefix .. " --> " .. message .. "\n"
                         end
                     end
                 end
