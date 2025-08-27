@@ -373,12 +373,15 @@ local function CanBeSelectionBoxed(Instance)
     return true, "Instance is valid for selection-boxing"
 end
 
-local function GetFormattedDateTime()
+local function GetFormattedDateTime(savefile)
     local date = os.date("*t")
     local day = date.day
     local month = MonthNames[date.month]
     local year = date.year
     local time = os.date("%H:%M:%S")
+    if savefile then
+        time = time:gsub(":", "-")
+    end
     return string.format("%d %s, %d | %s", day, month, year, time)
 end
 
@@ -4240,6 +4243,34 @@ Connect(Dex.Console.Search.MouseButton1Up, function(p1)
 	else
 		Dex.Console.SearchBar.TextBox:CaptureFocus()
 	end
+end)
+
+Connect(Dex.Console.Save.MouseButton1Up, function(p1)
+    local str = ""
+    local ColorMap = {
+        {r = 255, g = 206, b = 11, prefix = "Warning"},
+        {r = 255, g = 116, b = 116, prefix = "Error"},
+        {r = 120, g = 169, b = 255, prefix = "Information"},
+        {r = 38, g = 255, b = 156, prefix = "Success"}
+    }
+
+    for i, v in pairs(Dex.Console.Output:GetChildren()) do
+        if v:IsA("TextLabel") and v.Transparency ~= 1 then
+            if v.Text then
+                local Colorpt = "<font color=\"rgb%((%d+), (%d+), (%d+)%)">(.-)</font>"
+                for r, g, b, message in v.Text:gmatch(Colorpt) do
+                    local rNum, gNum, bNum = tonumber(r), tonumber(g), tonumber(b)
+                    for _, mapping in pairs(ColorMap) do
+                        if rNum == mapping.r and gNum == mapping.g and bNum == mapping.b then
+                            str = str .. mapping.prefix .. " --> " .. message
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+    writefile("DEXV5\\Console\\" .. GetFormattedDateTime(true) .. ".txt", str)
 end)
 
 Connect(GetPropertyChangedSignal(Dex.Console.SearchBar.TextBox, "Text"), function()
