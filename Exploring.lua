@@ -4257,7 +4257,7 @@ Connect(Dex.Console.Save.MouseButton1Up, function(p1)
     for i, v in pairs(Dex.Console.Output:GetChildren()) do
         if v:IsA("TextLabel") and v.Transparency ~= 1 then
             if v.Text then
-                local Colorpt = "<font color=\"rgb%((%d+), (%d+), (%d+)%)">(.-)</font>"
+                local Colorpt = '<font color=\"rgb%((%d+), (%d+), (%d+)%)">(.-)</font>'
                 for r, g, b, message in v.Text:gmatch(Colorpt) do
                     local rNum, gNum, bNum = tonumber(r), tonumber(g), tonumber(b)
                     for _, mapping in pairs(ColorMap) do
