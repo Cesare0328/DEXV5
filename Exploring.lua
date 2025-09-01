@@ -1391,7 +1391,18 @@ MatchWholeWord.MouseButton1Up:Connect(function()
 	local Val = not MatchWholeWordStroke.Enabled
 	MatchWholeWordStroke.Enabled = Val
 	MatchWholeWordToggle = Val
-	rawUpdateList()
+	coroutine.wrap(function()
+		SearchLoading.Visible = true
+		while SearchLoading.Visible do
+		SearchLoading.Visible = true
+        local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
+        Tween:Play()
+        Tween.Completed:Wait()
+        SearchLoading.Rotation = 0
+		end
+    end)()
+	rawUpdateList(true)
+	SearchLoading.Visible = false
 end)
 
 MatchCase.MouseEnter:Connect(function()
@@ -1406,7 +1417,18 @@ MatchCase.MouseButton1Up:Connect(function()
 	local Val = not MatchCaseStroke.Enabled
 	MatchCaseStroke.Enabled = Val
 	MatchCaseToggle = Val
-	rawUpdateList()
+	coroutine.wrap(function()
+		SearchLoading.Visible = true
+		while SearchLoading.Visible do
+		SearchLoading.Visible = true
+        local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
+        Tween:Play()
+        Tween.Completed:Wait()
+        SearchLoading.Rotation = 0
+		end
+    end)()
+	rawUpdateList(true)
+	SearchLoading.Visible = false
 end)
 
 SearchLoading = Create('ImageButton', {
@@ -4024,23 +4046,32 @@ do
 	end
 	local function ApplyDescendants(o)
 		local s, children = pcall(GetDescendants, o)
-		if s then
-			for i = 1,#children do
-				addObject(children[i], true)
+		if not s then return end
+		local batchSize = 200
+		coroutine.wrap(function()
+			for i = 1, #children, batchSize do
+				for j = i, math.min(i + batchSize - 1, #children) do
+					addObject(children[j], true)
+				end
+				task.wait(0.00000001)
 			end
+		end)()
+	end
+
+	coroutine.wrap(function()
+		ApplyDescendants(workspace.Parent)
+		task.wait(0.00000001)
+		ApplyDescendants(DexOutput)
+		if NilStorageEnabled then
+			task.wait(0.00000001)
+			ApplyDescendants(NilStorage)
 		end
-	end
-
-	ApplyDescendants(workspace.Parent)
-	ApplyDescendants(DexOutput)
-
-	if NilStorageEnabled then
-		ApplyDescendants(NilStorage)
-	end
-
-	if RunningScriptsStorageEnabled then
-		ApplyDescendants(RunningScriptsStorage)
-	end
+		if RunningScriptsStorageEnabled then
+			task.wait(0.00000001)
+			ApplyDescendants(RunningScriptsStorage)
+    	end
+    	updateList()
+	end)()
 
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
 	updateList()
