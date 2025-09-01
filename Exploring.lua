@@ -3361,7 +3361,7 @@ do
 		local dragged = false
 		local canStartDrag = false
 
-		task.delay(0.5, function()
+		task.delay(0.25, function()
         	canStartDrag = true
     	end)
 
@@ -3399,6 +3399,7 @@ do
 		})
 		SetZIndex(parentHighlight,9)
 		conDrag = Connect(mouseDrag.MouseMoved, function(x,y)
+			if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then return end
 			local dragPos = Vector2_new(x,y)
 			if dragged then
 				local pos,size = dragPos - listFrame.AbsolutePosition,listFrame.AbsoluteSize
