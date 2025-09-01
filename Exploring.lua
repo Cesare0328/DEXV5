@@ -1890,10 +1890,6 @@ function updateActions()
 end
 
 do
-	local function pollingwait(sec)
-        local old = os.clock()
-        while os.clock() - old < sec do end
-	end
 	local function r(t)
 		for i = 1,#t do
 			coroutine.wrap(function()
@@ -1905,11 +1901,11 @@ do
 					end
 					if t[i].Expanded or filteringInstances() then
 						coroutine.wrap(function() r(t[i]) end)()
-						pollingwait(0.00000001)
+						task.wait(0.00000001)
 					end
 				end
 			end)()
-			pollingwait(0.00000001)
+			task.wait(0.00000001)
 		end
 	end
 
