@@ -1415,7 +1415,7 @@ SearchLoading = Create('ImageButton', {
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Size = UDim2_new(0, 16, 0, 16),
-    Position = UDim2_new(1, -4 - 16 - 7, 0.5, 0),
+    Position = UDim2_new(1, -4 - 16 - 7 - 16 - 4, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1,
 	Visible = false
 })
@@ -1911,10 +1911,10 @@ do
         	routine = coroutine.wrap(function()
             	task.wait()
 				SearchLoading.Visible = true
-            	local Tween = TweenService:Create(Icon, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
+            	local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
             	Tween:Play()
             	Tween.Completed:Wait()
-            	Icon.Rotation = 0
+            	SearchLoading.Rotation = 0
         	end)()
 		end
 		for i = 1,#t do
