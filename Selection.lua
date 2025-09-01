@@ -36,6 +36,7 @@ local TweenSize, TweenPosition = (function()
 end)()
 -- < Globals > --
 getgenv().AssetsCached = false
+getgenv().InitLoaded = false
 -- < Upvalues > --
 local Heartbeat = RunService.Heartbeat
 local SelectionBoxes = {}
@@ -1218,6 +1219,8 @@ switchWindows("Explorer")
 task.wait(1)
 
 SideMenu.Visible = true
+
+repeat task.wait() until getgenv().InitLoaded == true
 
 for i = 0,1,.1 do
 	IntroFrame.BackgroundTransparency = i
