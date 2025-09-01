@@ -1776,38 +1776,32 @@ function scanName(Obj)
     nameScanned = false
     local ObjName = Obj.Name
     local Filter = explorerFilter.Text
-    local LowerFilter = MatchCaseToggle and Filter or string_lower(Filter)
-    local CheckName = MatchCaseToggle and ObjName or string_lower(ObjName)
-    local IsPropSearch = string_find(Filter, "=") ~= nil
+    local LowerFilter = MatchCaseToggle and Filter or string.lower(Filter)
+    local CheckName = MatchCaseToggle and ObjName or string.lower(ObjName)
+    local IsPropSearch = string.find(Filter, "=") ~= nil
 
     if IsPropSearch then
         local Prop, Value
-        if string_find(Filter, "^%s*[Tt][Aa][Gg]=") or string_find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
-            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
+        if string.find(Filter, "^%s*[Tt][Aa][Gg]=") or string.find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
+            Prop, Value = string.match(Filter, "^%s*([^=]+)=(.+)%s*$")
         else
-            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
+            Prop, Value = string.match(Filter, "^%s*([^=]+)=(.+)%s*$")
         end
         if Prop and Value then
-            local LowerProp = string_lower(Prop)
+            local LowerProp = string.lower(Prop)
             if LowerProp == "tag" then
                 if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
+                    return true
                 end
             elseif LowerProp == "locked" then
                 local success, result = pcall(function()
-                    local ParsedValue
-                    local LowerValue = string_lower(Value)
-                    if LowerValue == "true" then
-                        ParsedValue = true
-                    elseif LowerValue == "false" then
-                        ParsedValue = false
-                    else
-                        return false
-                    end
+                    local ParsedValue = (string.lower(Value) == "true") and true or (string.lower(Value) == "false") and false or tonumber(Value) or Value
                     return checkrbxlocked(Obj) == ParsedValue
                 end)
                 if success and result then
                     nameScanned = true
+                    return true
                 end
             elseif LowerProp == "attribute" then
                 local success, result = pcall(function()
@@ -1815,83 +1809,34 @@ function scanName(Obj)
                 end)
                 if success and result then
                     nameScanned = true
+                    return true
                 end
             else
                 local success, result = pcall(function()
-                    local ParsedValue
-                    local LowerValue = string_lower(Value)
-                    if LowerValue == "true" then
-                        ParsedValue = true
-                    elseif LowerValue == "false" then
-                        ParsedValue = false
-                    elseif tonumber(Value) then
-                        ParsedValue = tonumber(Value)
-                    else
-                        ParsedValue = Value
-                    end
+                    local ParsedValue = (string.lower(Value) == "true") and true or (string.lower(Value) == "false") and false or tonumber(Value) or Value
                     return Obj[Prop] == ParsedValue
                 end)
                 if success and result then
                     nameScanned = true
+                    return true
                 end
             end
-            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
-                nameScanned = true
-            end
-            if not nameScanned then
-                for _, v in ipairs(GetChildren(Obj)) do
-                    local success, result = pcall(function()
-                        local ParsedValue
-                        local LowerValue = string_lower(Value)
-                        if LowerValue == "true" then
-                            ParsedValue = true
-                        elseif LowerValue == "false" then
-                            ParsedValue = false
-                        elseif tonumber(Value) then
-                            ParsedValue = tonumber(Value)
-                        else
-                            ParsedValue = Value
-                        end
-                        if LowerProp == "tag" then
-                            return CollectionService:HasTag(v, Value)
-                        elseif LowerProp == "locked" then
-                            return checkrbxlocked(v) == ParsedValue
-                        elseif LowerProp == "attribute" then
-                            return v:GetAttribute(Value) ~= nil
-                        else
-                            return v[Prop] == ParsedValue
-                        end
-                    end)
-                    if success and result then
-                        nameScanned = true
-                        break
-                    end
-                    local ChildCheckName = MatchCaseToggle and v.Name or string_lower(v.Name)
-                    if (MatchWholeWordToggle and ChildCheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(ChildCheckName, LowerFilter, 1, true)) then
-                        nameScanned = true
-                        break
-                    end
-                    if scanName(v) then
-                        nameScanned = true
-                        break
-                    end
-                end
-            end
-        else
-            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
-                nameScanned = true
-            else
-                lookForAName(Obj, LowerFilter, Filter)
-            end
-        end
-    else
-        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
-            nameScanned = true
-        else
-            lookForAName(Obj, LowerFilter, Filter)
         end
     end
-    return nameScanned
+
+    if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
+        nameScanned = true
+        return true
+    end
+
+    for _, v in ipairs(GetChildren(Obj)) do
+        if scanName(v) then
+            nameScanned = true
+            return true
+        end
+    end
+
+    return false
 end
 
 function updateActions()
@@ -1901,26 +1846,26 @@ function updateActions()
 end
 
 do
-	local function pollingwait(sec)
-        local old = os.clock()
-        while os.clock() - old < sec do end
-	end
 	local function r(t, isSearch)
-		for i = 1,#t do
-			coroutine.wrap(function()
-				if not filteringInstances() or scanName(t[i].Object) then
-					table_insert(TreeList, t[i])
-					local w = (t[i].Depth)*(2+ENTRY_PADDING+GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(t[i].Object.Name) + 4
-					if w > nodeWidth then
-						nodeWidth = w
-					end
-					if t[i].Expanded or filteringInstances() then
-						coroutine.wrap(function() r(t[i]) end)()
-					end
-				end
-			end)()
-			if isSearch then task.wait(0.0001) else pollingwait(0.00000001) end
-		end
+    	local function traverse(nodeList)
+        	for i = 1, #nodeList do
+            	local node = nodeList[i]
+            	if not filteringInstances() or scanName(node.Object) then
+                	table.insert(TreeList, node)
+                	local w = (node.Depth) * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(node.Object.Name) + 4
+                	if w > nodeWidth then
+                    	nodeWidth = w
+                	end
+                	if node.Expanded or filteringInstances() then
+                    	traverse(node.Children)
+                	end
+            	end
+            	if isSearch then
+                	task.wait(0.0001)
+            	end
+        	end
+    	end
+    	coroutine.wrap(traverse)(t)
 	end
 
 	function rawUpdateSize()
