@@ -24,7 +24,6 @@ local string_rep = string.rep
 local math_floor = math.floor
 local math_ceil = math.ceil
 local math_random = math.random
-local math_huge = math.huge
 -- < Services > --
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local CollectionService = cloneref(game:GetService("CollectionService"))
@@ -74,7 +73,7 @@ local checkrbxlocked = Specials.checkrbxlocked
 local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil
+local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection, SearchLoading = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil, nil
 local DebounceTask = nil
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
@@ -157,7 +156,7 @@ local FONT = 'SourceSans'
 local FONT_SIZE 
 
 do
-	local size,s,n = {8,9,10,11,12,14,18,24,36,48}, nil, math_huge
+	local size,s,n = {8,9,10,11,12,14,18,24,36,48}, nil, math.huge
 	for i = 1, #size do
 		if size[i] <= GUI_SIZE then
 			FONT_SIZE = i - 1
@@ -1410,6 +1409,18 @@ MatchCase.MouseButton1Up:Connect(function()
 	rawUpdateList()
 end)
 
+SearchLoading = Create('ImageButton', {
+    Image = "rbxassetid://89466096724094", 
+    BackgroundColor3 = Color3.new(1, 1, 1),
+    BackgroundTransparency = 1,
+    AnchorPoint = Vector2.new(1, 0.5),
+    Size = UDim2_new(0, 16, 0, 16),
+    Position = UDim2_new(1, -4 - 16 - 7, 0.5, 0),
+    ZIndex = explorerFilter.ZIndex + 1,
+	Visible = false
+})
+SearchLoading.Parent = explorerFilter
+
 explorerFilter.Parent = headerFrame
 
 SetZIndexOnChanged(explorerPanel)
@@ -1895,6 +1906,17 @@ do
         while os.clock() - old < sec do end
 	end
 	local function r(t, isSearch)
+		local routine
+		if isSearch then
+        	routine = coroutine.wrap(function()
+            	task.wait()
+				SearchLoading.Visible = true
+            	local Tween = TweenService:Create(Icon, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
+            	Tween:Play()
+            	Tween.Completed:Wait()
+            	Icon.Rotation = 0
+        	end)()
+		end
 		for i = 1,#t do
 			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
@@ -1910,6 +1932,7 @@ do
 			end)()
 			if isSearch then task.wait() else pollingwait(0.00000001) end
 		end
+		if routine then SearchLoading.Visible = false coroutine.close(routine) end
 	end
 
 	function rawUpdateSize()
