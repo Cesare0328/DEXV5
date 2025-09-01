@@ -1895,6 +1895,7 @@ do
         while os.clock() - old < sec do end
 	end
 	local function r(t)
+		warn(#t)
 		for i = 1,#t do
 			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
