@@ -4064,6 +4064,7 @@ do
 						task.wait(0.00000001)
 					end
             	end
+				rawUpdateList()
 			end)()
         end
 		task.wait(0.00000001)
