@@ -1904,10 +1904,11 @@ do
 						nodeWidth = w
 					end
 					if t[i].Expanded or filteringInstances() then
-						coroutine.wrap(function() r(t[i]) end)()
+						r(t[i])
 					end
 				end
 			end)()
+			task.wait(0.00000001)
 		end
 	end
 
