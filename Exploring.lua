@@ -1918,11 +1918,11 @@ do
 						nodeWidth = w
 					end
 					if t[i].Expanded or filteringInstances() then
-						task.defer(function() r(t[i]) end)
+						r(t[i])
 					end
 				end
 			end)()
-			if isSearch then task.wait(0.0001) else pollingwait(0.00000001) end
+			if isSearch then task.wait(0.00000001) end
 		end
 	end
 
