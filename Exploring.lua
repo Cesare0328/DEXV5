@@ -4045,28 +4045,24 @@ do
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
 	local function ApplyDescendants(o)
-		local s, children = pcall(GetDescendants, o)
-		local batchSize = 2000
-		coroutine.wrap(function()
-			for i = 1, #children, batchSize do
-				for j = i, math.min(i + batchSize - 1, #children) do
-					addObject(children[j], true)
-				end
-				task.wait(0.00000001)
-			end
-		end)()
-	end
+        local s, children = pcall(GetDescendants, o)
+        if s then
+			coroutine.wrap(function()
+            	for i = 1,#children do
+                	addObject(children[i], true)
+            	end
+			end)()
+        end
+		task.wait(0.00000001)
+    end
 
 	coroutine.wrap(function()
 		ApplyDescendants(workspace.Parent)
-		task.wait(0.00000001)
 		ApplyDescendants(DexOutput)
 		if NilStorageEnabled then
-			task.wait(0.00000001)
 			ApplyDescendants(NilStorage)
 		end
 		if RunningScriptsStorageEnabled then
-			task.wait(0.00000001)
 			ApplyDescendants(RunningScriptsStorage)
     	end
     	updateList()
