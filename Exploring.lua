@@ -4393,12 +4393,13 @@ Connect(explorerFilter.FocusLost, function()
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
 	local routine = coroutine.wrap(function()
-        task.wait()
+		while task.wait() do
 		SearchLoading.Visible = true
         local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
         Tween:Play()
         Tween.Completed:Wait()
         SearchLoading.Rotation = 0
+		end
     end)()
 	rawUpdateList(true)
 	SearchLoading.Visible = false
