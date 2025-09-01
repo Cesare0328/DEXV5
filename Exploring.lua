@@ -249,7 +249,7 @@ ScreenGui.Parent = CoreGui
 local Temp = Dex.Notification:Clone()
 Temp.Parent = ScreenGui
 Temp.ImageLabel.BackgroundTransparency = 1
-Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
+Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string_lower(Type) .. ".png")
 Temp.TextLabel.Text = Message
 Temp.UIStroke.Color = GuiColor[Type]
 
@@ -281,7 +281,7 @@ local ColorType = GuiColor[Type]
 local Color = string.format("rgb(%d,%d,%d)", math.floor(ColorType.R * 255), math.floor(ColorType.G * 255), math.floor(ColorType.B * 255))
 MessageLabel.Text = string.format('<font color="%s">' .. Message .. '</font>', Color)
 MessageLabel.TextTransparency = 0
-ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
+ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string_lower(Type) .. ".png")
 MessageLabel.Position = UDim2_new(0, 25, 0, OutputSize)
 ImageType.Position = UDim2_new(0, 0, 0, OutputSize)
 ImageType.ImageTransparency = 0
@@ -1288,7 +1288,7 @@ TitleLabel.Parent = FilterInstance
 local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material=", "meshId=", "textureId=", "tag="}
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
-        Text = string.upper(string.sub(SuggestedFilterNames[i], 1, 1)) .. string.sub(SuggestedFilterNames[i], 2),
+        Text = string.upper(string_sub(SuggestedFilterNames[i], 1, 1)) .. string_sub(SuggestedFilterNames[i], 2),
         Size = UDim2_new(0.985, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
@@ -1789,50 +1789,55 @@ function scanName(Obj)
         end
         if Prop and Value then
             local LowerProp = string_lower(Prop)
+            local LowerValue = string_lower(Value)
+            local ParsedValue
+            local CanCheckProp = true
             if LowerProp == "tag" then
-                if CollectionService:HasTag(Obj, Value) then
-                    nameScanned = true
-                end
-            elseif LowerProp == "locked" then
-                local success, result = pcall(function()
-                    local ParsedValue
-                    local LowerValue = string_lower(Value)
-                    if LowerValue == "true" then
-                        ParsedValue = true
-                    elseif LowerValue == "false" then
-                        ParsedValue = false
-                    else
-                        return false
-                    end
-                    return checkrbxlocked(Obj) == ParsedValue
-                end)
-                if success and result then
-                    nameScanned = true
-                end
+                -- No parsing needed, Value as is
             elseif LowerProp == "attribute" then
-                local success, result = pcall(function()
-                    return Obj:GetAttribute(Value) ~= nil
-                end)
-                if success and result then
-                    nameScanned = true
+                -- Same here gng
+            elseif LowerProp == "locked" then
+                if LowerValue == "true" then
+                    ParsedValue = true
+                elseif LowerValue == "false" then
+                    ParsedValue = false
+                else
+                    CanCheckProp = false
                 end
             else
-                local success, result = pcall(function()
-                    local ParsedValue
-                    local LowerValue = string_lower(Value)
-                    if LowerValue == "true" then
-                        ParsedValue = true
-                    elseif LowerValue == "false" then
-                        ParsedValue = false
-                    elseif tonumber(Value) then
-                        ParsedValue = tonumber(Value)
-                    else
-                        ParsedValue = Value
+                if LowerValue == "true" then
+                    ParsedValue = true
+                elseif LowerValue == "false" then
+                    ParsedValue = false
+                elseif tonumber(Value) then
+                    ParsedValue = tonumber(Value)
+                else
+                    ParsedValue = Value
+                end
+            end
+            if CanCheckProp then
+                if LowerProp == "tag" then
+                    if CollectionService:HasTag(Obj, Value) then
+                        nameScanned = true
                     end
-                    return Obj[Prop] == ParsedValue
-                end)
-                if success and result then
-                    nameScanned = true
+                elseif LowerProp == "locked" then
+                    local success, result = pcall(function()
+                        return checkrbxlocked(Obj) == ParsedValue
+                    end)
+                    if success and result then
+                        nameScanned = true
+                    end
+                elseif LowerProp == "attribute" then
+                    if Obj:GetAttribute(Value) ~= nil then
+                        nameScanned = true
+                    end
+                else
+                    local success, result = pcall(function()
+                        return Obj[Prop] == ParsedValue
+                    end)
+                    if success and result then
+                        nameScanned = true
+                    end
                 end
             end
             if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
@@ -1840,29 +1845,27 @@ function scanName(Obj)
             end
             if not nameScanned then
                 for _, v in ipairs(GetChildren(Obj)) do
-                    local success, result = pcall(function()
-                        local ParsedValue
-                        local LowerValue = string_lower(Value)
-                        if LowerValue == "true" then
-                            ParsedValue = true
-                        elseif LowerValue == "false" then
-                            ParsedValue = false
-                        elseif tonumber(Value) then
-                            ParsedValue = tonumber(Value)
-                        else
-                            ParsedValue = Value
+                    local propMatch = false
+                    if LowerProp == "tag" then
+                        propMatch = CollectionService:HasTag(v, Value)
+                    elseif LowerProp == "attribute" then
+                        propMatch = v:GetAttribute(Value) ~= nil
+                    else
+                        local success, result = pcall(function()
+                            if not CanCheckProp then
+                                return false
+                            end
+                            if LowerProp == "locked" then
+                                return checkrbxlocked(v) == ParsedValue
+                            else
+                                return v[Prop] == ParsedValue
+                            end
+                        end)
+                        if success then
+                            propMatch = result
                         end
-                        if LowerProp == "tag" then
-                            return CollectionService:HasTag(v, Value)
-                        elseif LowerProp == "locked" then
-                            return checkrbxlocked(v) == ParsedValue
-                        elseif LowerProp == "attribute" then
-                            return v:GetAttribute(Value) ~= nil
-                        else
-                            return v[Prop] == ParsedValue
-                        end
-                    end)
-                    if success and result then
+                    end
+                    if propMatch then
                         nameScanned = true
                         break
                     end
@@ -1901,26 +1904,26 @@ function updateActions()
 end
 
 do
+	local function pollingwait(sec)
+        local old = os.clock()
+        while os.clock() - old < sec do end
+	end
 	local function r(t, isSearch)
-    	local function traverse(nodeList)
-        	for i = 1, #nodeList do
-            	local node = nodeList[i]
-            	if not filteringInstances() or scanName(node.Object) then
-                	table.insert(TreeList, node)
-                	local w = (node.Depth) * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(node.Object.Name) + 4
-                	if w > nodeWidth then
-                    	nodeWidth = w
-                	end
-                	if node.Expanded or filteringInstances() then
-                    	traverse(node.Children)
-                	end
-            	end
-            	if isSearch then
-                	task.wait(0.0001)
-            	end
-        	end
-    	end
-    	coroutine.wrap(traverse)(t)
+		for i = 1,#t do
+			coroutine.wrap(function()
+				if not filteringInstances() or scanName(t[i].Object) then
+					table_insert(TreeList, t[i])
+					local w = (t[i].Depth)*(2+ENTRY_PADDING+GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(t[i].Object.Name) + 4
+					if w > nodeWidth then
+						nodeWidth = w
+					end
+					if t[i].Expanded or filteringInstances() then
+						task.defer(function() r(t[i]) end)
+					end
+				end
+			end)()
+			if isSearch then task.wait(0.0001) else pollingwait(0.00000001) end
+		end
 	end
 
 	function rawUpdateSize()
@@ -2783,7 +2786,7 @@ end
 local function canViewServerScript(scriptObj)
 	local linkedSource = scriptObj.LinkedSource
 	if linkedSource and #linkedSource >= 1 then
-		local result = tonumber(string.match(linkedSource, "(%d+)"))
+		local result = tonumber(string_match(linkedSource, "(%d+)"))
 		if result then
 			return true
 		end
