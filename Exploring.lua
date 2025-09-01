@@ -1896,7 +1896,6 @@ do
 	end
 	local function r(t)
 		for i = 1,#t do
-			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
 					table_insert(TreeList, t[i])
 					local w = (t[i].Depth)*(2+ENTRY_PADDING+GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(t[i].Object.Name) + 4
@@ -1907,7 +1906,6 @@ do
 						r(t[i])
 					end
 				end
-			end)()
 			task.wait(0.00000001)
 		end
 	end
