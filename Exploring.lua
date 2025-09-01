@@ -4242,8 +4242,11 @@ end
 
 Connect(UserInputService.InputBegan, function(p1)
 	local A = p1.KeyCode
-	if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
+	if A == Enum.KeyCode.LeftControl then
 		HoldingCtrl = true
+	end
+	if A == Enum.KeyCode.LeftShift then
+		HoldingShift = true
 	end
 	if p1.UserInputType == Enum.UserInputType.Keyboard and p1.KeyCode == Enum.KeyCode.Insert then
 		if not FFTextbutton.Modal then OldMouseIco = UserInputService.MouseIconEnabled end
@@ -4402,9 +4405,12 @@ end)
 
 Connect(UserInputService.InputEnded, function(p1)
     local A = p1.KeyCode
-    if A == Enum.KeyCode.LeftControl or A == Enum.KeyCode.LeftShift then
+    if A == Enum.KeyCode.LeftControl then
         HoldingCtrl = false
     end
+	if A == Enum.KeyCode.LeftShift then
+		HoldingShift = true
+	end
 end)
 
 while not RbxApi do
