@@ -4044,12 +4044,25 @@ do
 		Connect(RunningScriptsStorage.DescendantAdded,addObject)
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
+	
 	local function ApplyDescendants(o)
+		for _, child in ipairs(game:GetChildren()) do
+			if GetSetting_Bindable:Invoke("UseInstanceBlacklist") then
+				if not InstanceBlacklist[child.ClassName] then
+					addObject(child, true)
+				end
+			else
+				addObject(child, true)
+			end
+		end
         local s, children = pcall(GetDescendants, o)
         if s then
 			coroutine.wrap(function()
             	for i = 1,#children do
-                	addObject(children[i], true)
+					if children[i].Parent ~= game then
+                		addObject(children[i], true)
+						task.wait(0.00000001)
+					end
             	end
 			end)()
         end
@@ -4064,8 +4077,8 @@ do
 		end
 		if RunningScriptsStorageEnabled then
 			ApplyDescendants(RunningScriptsStorage)
-    	end
-    	updateList()
+		end
+		updateList()
 	end)()
 
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
