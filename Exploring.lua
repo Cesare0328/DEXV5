@@ -4046,8 +4046,7 @@ do
 	end
 	local function ApplyDescendants(o)
 		local s, children = pcall(GetDescendants, o)
-		if not s then return end
-		local batchSize = 200
+		local batchSize = 2000
 		coroutine.wrap(function()
 			for i = 1, #children, batchSize do
 				for j = i, math.min(i + batchSize - 1, #children) do
