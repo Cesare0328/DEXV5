@@ -1932,7 +1932,8 @@ do
 			end)()
 			if isSearch then task.wait() else pollingwait(0.00000001) end
 		end
-		if routine then SearchLoading.Visible = false coroutine.close(routine) end
+		SearchLoading.Visible = false
+		if routine then coroutine.close(routine) end
 	end
 
 	function rawUpdateSize()
