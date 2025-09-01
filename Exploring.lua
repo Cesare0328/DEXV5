@@ -1916,7 +1916,6 @@ do
 					end
 					if t[i].Expanded or filteringInstances() then
 						coroutine.wrap(function() r(t[i]) end)()
-						if isSearch then task.wait(0.0001) end
 					end
 				end
 			end)()
