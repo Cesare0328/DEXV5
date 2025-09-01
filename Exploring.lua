@@ -1906,17 +1906,6 @@ do
         while os.clock() - old < sec do end
 	end
 	local function r(t, isSearch)
-		local routine
-		if isSearch then
-        	routine = coroutine.wrap(function()
-            	task.wait()
-				SearchLoading.Visible = true
-            	local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
-            	Tween:Play()
-            	Tween.Completed:Wait()
-            	SearchLoading.Rotation = 0
-        	end)()
-		end
 		for i = 1,#t do
 			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
@@ -1932,8 +1921,6 @@ do
 			end)()
 			if isSearch then task.wait() else pollingwait(0.00000001) end
 		end
-		SearchLoading.Visible = false
-		if routine then coroutine.close(routine) end
 	end
 
 	function rawUpdateSize()
@@ -4402,7 +4389,17 @@ Connect(explorerFilter.FocusLost, function()
 	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
+	local routine = coroutine.wrap(function()
+        task.wait()
+		SearchLoading.Visible = true
+        local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
+        Tween:Play()
+        Tween.Completed:Wait()
+        SearchLoading.Rotation = 0
+    end)()
 	rawUpdateList(true)
+	SearchLoading.Visible = false
+	coroutine.close(routine)
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
         if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
 			local TargetIndex = findObjectIndex(Selection:Get()[1])
