@@ -1776,32 +1776,38 @@ function scanName(Obj)
     nameScanned = false
     local ObjName = Obj.Name
     local Filter = explorerFilter.Text
-    local LowerFilter = MatchCaseToggle and Filter or string.lower(Filter)
-    local CheckName = MatchCaseToggle and ObjName or string.lower(ObjName)
-    local IsPropSearch = string.find(Filter, "=") ~= nil
+    local LowerFilter = MatchCaseToggle and Filter or string_lower(Filter)
+    local CheckName = MatchCaseToggle and ObjName or string_lower(ObjName)
+    local IsPropSearch = string_find(Filter, "=") ~= nil
 
     if IsPropSearch then
         local Prop, Value
-        if string.find(Filter, "^%s*[Tt][Aa][Gg]=") or string.find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
-            Prop, Value = string.match(Filter, "^%s*([^=]+)=(.+)%s*$")
+        if string_find(Filter, "^%s*[Tt][Aa][Gg]=") or string_find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
+            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
         else
-            Prop, Value = string.match(Filter, "^%s*([^=]+)=(.+)%s*$")
+            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
         end
         if Prop and Value then
-            local LowerProp = string.lower(Prop)
+            local LowerProp = string_lower(Prop)
             if LowerProp == "tag" then
                 if CollectionService:HasTag(Obj, Value) then
                     nameScanned = true
-                    return true
                 end
             elseif LowerProp == "locked" then
                 local success, result = pcall(function()
-                    local ParsedValue = (string.lower(Value) == "true") and true or (string.lower(Value) == "false") and false or tonumber(Value) or Value
+                    local ParsedValue
+                    local LowerValue = string_lower(Value)
+                    if LowerValue == "true" then
+                        ParsedValue = true
+                    elseif LowerValue == "false" then
+                        ParsedValue = false
+                    else
+                        return false
+                    end
                     return checkrbxlocked(Obj) == ParsedValue
                 end)
                 if success and result then
                     nameScanned = true
-                    return true
                 end
             elseif LowerProp == "attribute" then
                 local success, result = pcall(function()
@@ -1809,34 +1815,83 @@ function scanName(Obj)
                 end)
                 if success and result then
                     nameScanned = true
-                    return true
                 end
             else
                 local success, result = pcall(function()
-                    local ParsedValue = (string.lower(Value) == "true") and true or (string.lower(Value) == "false") and false or tonumber(Value) or Value
+                    local ParsedValue
+                    local LowerValue = string_lower(Value)
+                    if LowerValue == "true" then
+                        ParsedValue = true
+                    elseif LowerValue == "false" then
+                        ParsedValue = false
+                    elseif tonumber(Value) then
+                        ParsedValue = tonumber(Value)
+                    else
+                        ParsedValue = Value
+                    end
                     return Obj[Prop] == ParsedValue
                 end)
                 if success and result then
                     nameScanned = true
-                    return true
                 end
             end
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+                nameScanned = true
+            end
+            if not nameScanned then
+                for _, v in ipairs(GetChildren(Obj)) do
+                    local success, result = pcall(function()
+                        local ParsedValue
+                        local LowerValue = string_lower(Value)
+                        if LowerValue == "true" then
+                            ParsedValue = true
+                        elseif LowerValue == "false" then
+                            ParsedValue = false
+                        elseif tonumber(Value) then
+                            ParsedValue = tonumber(Value)
+                        else
+                            ParsedValue = Value
+                        end
+                        if LowerProp == "tag" then
+                            return CollectionService:HasTag(v, Value)
+                        elseif LowerProp == "locked" then
+                            return checkrbxlocked(v) == ParsedValue
+                        elseif LowerProp == "attribute" then
+                            return v:GetAttribute(Value) ~= nil
+                        else
+                            return v[Prop] == ParsedValue
+                        end
+                    end)
+                    if success and result then
+                        nameScanned = true
+                        break
+                    end
+                    local ChildCheckName = MatchCaseToggle and v.Name or string_lower(v.Name)
+                    if (MatchWholeWordToggle and ChildCheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(ChildCheckName, LowerFilter, 1, true)) then
+                        nameScanned = true
+                        break
+                    end
+                    if scanName(v) then
+                        nameScanned = true
+                        break
+                    end
+                end
+            end
+        else
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+                nameScanned = true
+            else
+                lookForAName(Obj, LowerFilter, Filter)
+            end
         end
-    end
-
-    if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
-        nameScanned = true
-        return true
-    end
-
-    for _, v in ipairs(GetChildren(Obj)) do
-        if scanName(v) then
+    else
+        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
-            return true
+        else
+            lookForAName(Obj, LowerFilter, Filter)
         end
     end
-
-    return false
+    return nameScanned
 end
 
 function updateActions()
