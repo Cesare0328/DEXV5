@@ -4050,7 +4050,6 @@ do
 			coroutine.wrap(function()
             	for i = 1,#children do
                 	addObject(children[i], true)
-					task.wait(0.00000001)
             	end
 			end)()
         end
