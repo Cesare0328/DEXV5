@@ -3361,7 +3361,7 @@ do
 		local dragged = false
 		local canStartDrag = false
 
-		task.delay(0.25, function()
+		task.delay(0.5, function()
         	canStartDrag = true
     	end)
 
