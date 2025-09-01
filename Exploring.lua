@@ -4045,38 +4045,26 @@ do
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
 	local function ApplyDescendants(o)
-		local s, children = pcall(o.GetChildren, o)
-		if s then
+        local s, children = pcall(GetDescendants, o)
+        if s then
 			coroutine.wrap(function()
-				local function process(instance)
-					addObject(instance, true)
-					local s, childList = pcall(instance.GetChildren, instance)
-					if s then
-						for _, child in ipairs(childList) do
-							process(child)
-							task.wait(0.00001)
-						end
-					end
-				end
-				for _, child in ipairs(children) do
-					process(child)
-					task.wait(0.00001)
-				end
+            	for i = 1,#children do
+                	addObject(children[i], true)
+            	end
 			end)()
-		end
-	end
+        end
+		task.wait(0.00000001)
+    end
 
-	coroutine.wrap(function()
-		ApplyDescendants(workspace.Parent)
-		ApplyDescendants(DexOutput)
-		if NilStorageEnabled then
-			ApplyDescendants(NilStorage)
-		end
-		if RunningScriptsStorageEnabled then
-			ApplyDescendants(RunningScriptsStorage)
-    	end
-    	updateList()
-	end)()
+	ApplyDescendants(workspace.Parent)
+	ApplyDescendants(DexOutput)
+	if NilStorageEnabled then
+		ApplyDescendants(NilStorage)
+	end
+	if RunningScriptsStorageEnabled then
+		ApplyDescendants(RunningScriptsStorage)
+    end
+    updateList()
 
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
 	updateList()
