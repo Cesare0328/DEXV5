@@ -1895,7 +1895,6 @@ do
         while os.clock() - old < sec do end
 	end
 	local function r(t)
-		warn(#t)
 		for i = 1,#t do
 			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
@@ -4030,6 +4029,7 @@ do
 	end
 
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
+	warn("Search1")
 	updateList()
 end
 
@@ -4379,7 +4379,7 @@ Connect(explorerFilter.FocusLost, function()
 	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
-	rawUpdateList()
+	--rawUpdateList()
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
         if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
 			local TargetIndex = findObjectIndex(Selection:Get()[1])
