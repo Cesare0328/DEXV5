@@ -4392,8 +4392,9 @@ Connect(explorerFilter.FocusLost, function()
 	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
-	local routine = coroutine.wrap(function()
-		while task.wait() do
+	coroutine.wrap(function()
+		SearchLoading.Visible = true
+		while SearchLoading.Visible do
 		SearchLoading.Visible = true
         local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
         Tween:Play()
@@ -4403,7 +4404,6 @@ Connect(explorerFilter.FocusLost, function()
     end)()
 	rawUpdateList(true)
 	SearchLoading.Visible = false
-	coroutine.close(routine)
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
         if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
 			local TargetIndex = findObjectIndex(Selection:Get()[1])
