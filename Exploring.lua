@@ -1894,7 +1894,7 @@ do
         local old = os.clock()
         while os.clock() - old < sec do end
 	end
-	local function r(t)
+	local function r(t, isSearch)
 		for i = 1,#t do
 			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
@@ -1908,7 +1908,7 @@ do
 					end
 				end
 			end)()
-			pollingwait(0.00000001)
+			if isSearch then task.wait() else pollingwait(0.00000001) end
 		end
 	end
 
@@ -1928,16 +1928,16 @@ do
 		scrollBar:Update()
 	end
 
-	function rawUpdateList()
+	function rawUpdateList(isSearch)
 		TreeList = {}
 		nodeWidth = 0
-		r(NodeLookup[workspace.Parent])
-		r(NodeLookup[DexOutput])
+		r(NodeLookup[workspace.Parent], isSearch)
+		r(NodeLookup[DexOutput], isSearch)
 		if NilStorageEnabled then
-			r(NodeLookup[NilStorage])
+			r(NodeLookup[NilStorage], isSearch)
 		end
 		if RunningScriptsStorageEnabled then
-			r(NodeLookup[RunningScriptsStorage])
+			r(NodeLookup[RunningScriptsStorage], isSearch)
 		end
 		rawUpdateSize()
 		updateActions()
@@ -4029,7 +4029,6 @@ do
 	end
 
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
-	warn("Search1")
 	updateList()
 end
 
@@ -4379,7 +4378,7 @@ Connect(explorerFilter.FocusLost, function()
 	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
-	--rawUpdateList()
+	rawUpdateList(true)
 	if explorerFilter.Text == "" and #Selection:Get() == 1 then
         if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
 			local TargetIndex = findObjectIndex(Selection:Get()[1])
