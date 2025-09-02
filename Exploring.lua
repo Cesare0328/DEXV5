@@ -2132,6 +2132,8 @@ do
 		local found = true
 		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
 			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+			local a, b = CanBeSelectionBoxed(Obj)
+			warn(a, b)
 			if CanBeSelectionBoxed(Obj) then
 				Selection:Set({Obj})
 				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
