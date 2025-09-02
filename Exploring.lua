@@ -3642,7 +3642,8 @@ do
 							Selection:Add(node.Object)
 							Selection:ResumeUpdates()
 							lastSelectedNode = i + self.ScrollIndex
-						elseif HoldingShift and not filteringInstances() then
+						end
+						if HoldingShift and not filteringInstances() then
 							if lastSelectedNode then
 								Selection:StopUpdates()
 								if i + self.ScrollIndex - lastSelectedNode > 0 then
@@ -3662,7 +3663,8 @@ do
 								end
 								Selection:ResumeUpdates()
 							end
-						elseif HoldingCtrl then
+						end
+						if HoldingCtrl then
 							if Selection.Selected[node.Object] then
 								Selection:Remove(node.Object)
 							else
