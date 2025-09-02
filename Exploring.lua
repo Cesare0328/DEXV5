@@ -4409,7 +4409,7 @@ Connect(UserInputService.InputEnded, function(p1)
         HoldingCtrl = false
     end
 	if A == Enum.KeyCode.LeftShift then
-		HoldingShift = true
+		HoldingShift = false
 	end
 end)
 
