@@ -339,7 +339,6 @@ Connect(UserInputService.InputBegan, function(Input, GameProcessed)
     end
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.FilterDescendantsOf = {} --planned
     Params.IgnoreWater = true
             
     local Ray = camera:ScreenPointToRay(Input.Position.X, Input.Position.Y)
