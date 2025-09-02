@@ -4046,6 +4046,7 @@ do
 	end
 	local function ApplyDescendants(o)
         local s, children = pcall(GetDescendants, o)
+		task.wait(0.25)
         if s then
 			coroutine.wrap(function()
             	for i = 1,#children do
