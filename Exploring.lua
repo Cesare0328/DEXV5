@@ -2121,13 +2121,15 @@ do
 		return list
 	end
 
+	setfflag("LayerCollectorGetGuiObjectsAtPosition", "true")
+
 	SetSelection_Bindable.OnInvoke = function(...)
 		if #Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then return end
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
 		local found = true
-		local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)
-		if #Obj >= 1 then
+		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
+			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
 			if CanBeSelectionBoxed(Obj) then
 				Selection:Set({Obj})
 				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
