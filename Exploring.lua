@@ -2418,8 +2418,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 end
 function PromptPartESP(inst)
 	if CurrentPartESPWindow then
-		Destroy(CurrentPartESPWindow)
-		CurrentPartESPWindow = nil
+		repeat until not CurrentPartESPWindow
 	end
 	CurrentPartESPWindow = Clone(PartESPWindow)
 	CurrentPartESPWindow.Parent = Dex
@@ -3136,7 +3135,9 @@ function rightClickMenu(sObj)
 			if not Option.Modifiable then
 				return
 			end
-			PromptPartESP(Selection:Get()[1])
+			for _, Selected in ipairs(Selection:Get()) do
+				PromptPartESP(Selected)
+			end
 		elseif option == "Clear Search and Jump to" then
 			explorerFilter.Text = ""
             rawUpdateList()
