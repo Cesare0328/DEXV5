@@ -329,7 +329,6 @@ local function CanBeSelectionBoxed(Instance)
         return false, "Parent ScreenGui is not enabled"
     end
     local AbsolutePosition = Instance.AbsolutePosition
-	local AbsoluteSize = Instance.AbsoluteSize
     local ScreenSize = workspace.CurrentCamera.ViewportSize
     if AbsolutePosition.X + AbsoluteSize.X <= 0 or AbsolutePosition.X >= ScreenSize.X or AbsolutePosition.Y + AbsoluteSize.Y <= 0 or AbsolutePosition.Y >= ScreenSize.Y then
         return false, "Instance is fully off-screen"
