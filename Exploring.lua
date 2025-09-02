@@ -2122,8 +2122,11 @@ do
 	end
 
 	SetSelection_Bindable.OnInvoke = function(...)
-		warn(#CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y))
-		table.foreach(CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y), warn)
+		for i,v in ipairs(CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)) do
+			if v:IsDescendantOf(Dex) then
+				return
+			end
+		end
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
 		local found = true
