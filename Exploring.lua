@@ -3638,10 +3638,6 @@ do
 						end
 						if not HoldingShift then
 							lastSelectedNode = i + self.ScrollIndex
-							if not HoldingCtrl then
-								Selection:Set({})
-								Selection:Add(node.Object)
-							end
 						end
 						if HoldingShift and not filteringInstances() then
 							if lastSelectedNode then
