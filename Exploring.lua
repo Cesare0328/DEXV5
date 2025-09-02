@@ -3636,33 +3636,36 @@ do
 							SetAwaiting_Bindable:Fire(node.Object)
 							return
 						end
-						if not HoldingShift and not HoldingCtrl then
-							Selection:StopUpdates()
-							Selection:Set({})
-							Selection:Add(node.Object)
-							Selection:ResumeUpdates()
+						if not HoldingShift then
 							lastSelectedNode = i + self.ScrollIndex
+							if not HoldingCtrl then
+								Selection:Set({})
+								Selection:Add(node.Object)
+							end
 						end
 						if HoldingShift and not filteringInstances() then
 							if lastSelectedNode then
-								Selection:StopUpdates()
 								if i + self.ScrollIndex - lastSelectedNode > 0 then
+									Selection:StopUpdates()
 									for i2 = 1, i + self.ScrollIndex - lastSelectedNode do
 										local newNode = TreeList[lastSelectedNode + i2]
 										if newNode then
 											Selection:Add(newNode.Object)
 										end
 									end
+									Selection:ResumeUpdates()
 								else
+									Selection:StopUpdates()
 									for i2 = i + self.ScrollIndex - lastSelectedNode, 1 do
 										local newNode = TreeList[lastSelectedNode + i2]
 										if newNode then
 											Selection:Add(newNode.Object)
 										end
 									end
+									Selection:ResumeUpdates()
 								end
-								Selection:ResumeUpdates()
 							end
+							return
 						end
 						if HoldingCtrl then
 							if Selection.Selected[node.Object] then
@@ -3670,6 +3673,7 @@ do
 							else
 								Selection:Add(node.Object)
 							end
+							return
 						end
 						if Option.Modifiable then
 							local pos = Vector2_new(x,y)
