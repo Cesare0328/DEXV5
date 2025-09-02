@@ -2122,9 +2122,8 @@ do
 	end
 
 	SetSelection_Bindable.OnInvoke = function(...)
-		for i,v in pairs(CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y))
-			if v:IsA("GuiObject") and v.Visible then warn(v.Name) return end
-		end
+		warn(#CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y))
+		table.foreach(CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y), warn)
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
 		local found = true
