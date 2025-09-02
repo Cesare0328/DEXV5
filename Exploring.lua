@@ -2122,6 +2122,7 @@ do
 	end
 
 	SetSelection_Bindable.OnInvoke = function(...)
+		warn(#CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y))
 		if #CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then return end
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
