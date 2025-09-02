@@ -337,6 +337,19 @@ Connect(UserInputService.InputBegan, function(Input, GameProcessed)
     if Input.UserInputType == Enum.UserInputType.MouseButton1 and CurrentWindow == "Explorer" and Settings.ClickSelect then
         pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {Mouse.Target})
     end
+    local Params = RaycastParams.new()
+    Params.FilterType = Enum.RaycastFilterType.Exclude
+    Params.FilterDescendantsOf = {} --planned
+    Params.IgnoreWater = true
+            
+    local Ray = camera:ScreenPointToRay(Input.Position.X, Input.Position.Y)
+    local Result = Workspace:Raycast(Ray.Origin, Ray.Direction * 10000, Params)
+            
+    if Result then
+        pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {Result.Instance})
+    else
+        pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {})
+    end
 end)
 
 Connect(SelectionChanged_Bindable.Event, function()
