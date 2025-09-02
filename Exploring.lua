@@ -330,20 +330,20 @@ local function CanBeSelectionBoxed(Instance)
     end
     local AbsolutePosition = Instance.AbsolutePosition
     local ScreenSize = workspace.CurrentCamera.ViewportSize
-    if AbsolutePosition.X + AbsoluteSize.X <= 0 or AbsolutePosition.X >= ScreenSize.X or
-       AbsolutePosition.Y + AbsoluteSize.Y <= 0 or AbsolutePosition.Y >= ScreenSize.Y then
+    if AbsolutePosition.X + AbsoluteSize.X <= 0 or AbsolutePosition.X >= ScreenSize.X or AbsolutePosition.Y + AbsoluteSize.Y <= 0 or AbsolutePosition.Y >= ScreenSize.Y then
         return false, "Instance is fully off-screen"
     end
     local HasContent = false
     if Instance:IsA("Frame") and Instance.BackgroundTransparency < 1 then
         HasContent = true
-    elseif (Instance:IsA("ImageLabel") or Instance:IsA("ImageButton")) and
-           Instance.ImageTransparency < 1 and Instance.Image ~= "" then
+    elseif (Instance:IsA("ImageLabel") or Instance:IsA("ImageButton")) and Instance.ImageTransparency < 1 and Instance.Image ~= "" then
         HasContent = true
-    elseif (Instance:IsA("TextLabel") or Instance:IsA("TextButton")) and
-           Instance.TextTransparency < 1 and Instance.Text ~= "" then
+    elseif (Instance:IsA("TextLabel") or Instance:IsA("TextButton")) and Instance.TextTransparency < 1 and Instance.Text ~= "" then
         HasContent = true
     end
+	if Instance:IsA("GuiObject") and Instance.Visible then
+		HasContent = true
+	end
     if not HasContent then
         return false, "Instance is empty (no visible content or children)"
     end
