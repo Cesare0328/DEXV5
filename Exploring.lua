@@ -2122,11 +2122,12 @@ do
 	end
 
 	SetSelection_Bindable.OnInvoke = function(...)
+		if #CoreGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then return end
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
 		local found = true
-		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
-			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+		local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)
+		if #Obj >= 1 then
 			if CanBeSelectionBoxed(Obj) then
 				Selection:Set({Obj})
 				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
