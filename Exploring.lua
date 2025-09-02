@@ -415,7 +415,7 @@ local function SetSelectionBox2D(TargetGui)
     TargetGui:GetPropertyChangedSignal("AnchorPoint"):Connect(UpdateHighlight)
     TargetGui:GetPropertyChangedSignal("ZIndex"):Connect(UpdateHighlight)
     TargetGui.AncestryChanged:Connect(function()
-        if TargetGui.Parent:IsA("ScreenGui") then
+        if TargetGui.Parent and TargetGui.Parent:IsA("ScreenGui") then
             SelectionBox2D.IgnoreGuiInset = TargetGui.Parent.IgnoreGuiInset
         end
         UpdateHighlight()
