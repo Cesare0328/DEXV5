@@ -3638,7 +3638,7 @@ do
 						end
 						if not HoldingShift and not HoldingCtrl then
 							Selection:StopUpdates()
-							Selection:Clear()
+							Selection:Set({})
 							Selection:Add(node.Object)
 							Selection:ResumeUpdates()
 							lastSelectedNode = i + self.ScrollIndex
