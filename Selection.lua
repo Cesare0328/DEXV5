@@ -152,6 +152,7 @@ OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
     end
 return OldNameCall(self,unpack(args))
 end))
+
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
 	local A = 0
@@ -332,10 +333,10 @@ local function getSelection()
 	return (A and #A > 0) and A or {}
 end
 
-Connect(Mouse.Button1Down, function()
-	if CurrentWindow == "Explorer" and Settings.ClickSelect then
-		pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {Mouse.Target})
-	end
+Connect(UserInputService.InputBegan, function(Input, GameProcessed)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 and CurrentWindow == "Explorer" and Settings.ClickSelect then
+        pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {Mouse.Target})
+    end
 end)
 
 Connect(SelectionChanged_Bindable.Event, function()
