@@ -2124,7 +2124,14 @@ do
 	setfflag("LayerCollectorGetGuiObjectsAtPosition", "true")
 
 	SetSelection_Bindable.OnInvoke = function(...)
-		if #Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then return end
+		if #Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then
+			for i,v in ipairs(Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)) do
+				warn(v.ClassName)
+				if v:IsA("GuiObject") and v.Visible then
+					return
+				end
+			end
+		end
 		SetSelectionBox2D(nil)
 		Selection:Set(...)
 		local found = true
