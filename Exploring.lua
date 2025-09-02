@@ -395,7 +395,7 @@ local function SetSelectionBox2D(TargetGui)
         return nil
     end
     SelectionBox2D.Enabled = true
-    if TargetGui.Parent:IsA("ScreenGui") then
+    if TargetGui.Parent and TargetGui.Parent:IsA("ScreenGui") then
         SelectionBox2D.IgnoreGuiInset = TargetGui.Parent.IgnoreGuiInset
     end
     local function UpdateHighlight()
