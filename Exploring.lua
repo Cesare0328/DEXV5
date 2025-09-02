@@ -341,7 +341,7 @@ local function CanBeSelectionBoxed(Instance)
     elseif (Instance:IsA("TextLabel") or Instance:IsA("TextButton")) and Instance.TextTransparency < 1 and Instance.Text ~= "" then
         HasContent = true
     end
-	if Instance:IsA("GuiObject") and Instance.Visible then
+	if Instance:IsA("GuiObject") and Instance.Visible and #Instance:GetChildren() > 0 then
 		HasContent = true
 	end
     if not HasContent then
