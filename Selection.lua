@@ -340,9 +340,9 @@ Connect(UserInputService.InputBegan, function(Input, GameProcessed)
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude
     Params.IgnoreWater = true
-            
-    local Ray = camera:ScreenPointToRay(Input.Position.X, Input.Position.Y)
-    local Result = Workspace:Raycast(Ray.Origin, Ray.Direction * 10000, Params)
+
+    local Ray = workspace.CurrentCamera:ScreenPointToRay(Input.Position.X, Input.Position.Y)
+    local Result = workspace:Raycast(Ray.Origin, Ray.Direction * 10000, Params)
             
     if Result then
         pcall(SetSelection_Bindable.Invoke, SetSelection_Bindable, {Result.Instance})
