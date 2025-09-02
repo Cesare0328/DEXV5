@@ -329,10 +329,14 @@ local function CanBeSelectionBoxed(Instance)
         return false, "Parent ScreenGui is not enabled"
     end
     local AbsolutePosition = Instance.AbsolutePosition
+	local AbsoluteSize = Instance.AbsoluteSize
     local ScreenSize = workspace.CurrentCamera.ViewportSize
     if AbsolutePosition.X + AbsoluteSize.X <= 0 or AbsolutePosition.X >= ScreenSize.X or AbsolutePosition.Y + AbsoluteSize.Y <= 0 or AbsolutePosition.Y >= ScreenSize.Y then
         return false, "Instance is fully off-screen"
     end
+	if AbsoluteSize.X >= ScreenSize.X and AbsoluteSize.Y >= ScreenSize.Y then
+		return false, "Instance is as big or bigger than screen"
+	end
     local HasContent = false
     if Instance:IsA("Frame") and Instance.BackgroundTransparency < 1 then
         HasContent = true
@@ -2124,8 +2128,6 @@ do
 		local found = true
 		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
 			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
-			local a, b = CanBeSelectionBoxed(Obj)
-			warn(a, b)
 			if CanBeSelectionBoxed(Obj) then
 				Selection:Set({Obj})
 				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
