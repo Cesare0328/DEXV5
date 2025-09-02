@@ -335,20 +335,63 @@ local function CanBeSelectionBoxed(Instance)
         return false, "Instance is fully off-screen"
     end
     local HasContent = false
-    if Instance:IsA("Frame") and Instance.BackgroundTransparency < 1 then
-        HasContent = true
+    if Instance:IsA("Frame") or Instance:IsA("ScrollingFrame") then
+        if Instance.BackgroundTransparency < 1 or Instance.BorderSizePixel > 0 then
+            HasContent = true
+        end
     elseif (Instance:IsA("ImageLabel") or Instance:IsA("ImageButton")) and
            Instance.ImageTransparency < 1 and Instance.Image ~= "" then
         HasContent = true
-    elseif (Instance:IsA("TextLabel") or Instance:IsA("TextButton")) and
+    elseif (Instance:IsA("TextLabel") or Instance:IsA("TextButton") or Instance:IsA("TextBox")) and
            Instance.TextTransparency < 1 and Instance.Text ~= "" then
+        HasContent = true
+    else
         HasContent = true
     end
     if not HasContent then
         for _, Child in ipairs(Instance:GetChildren()) do
             if Child:IsA("GuiObject") and Child.Visible and Child.AbsoluteSize.X > 0 and Child.AbsoluteSize.Y > 0 then
-                HasContent = true
-                break
+                local childHasContent = false
+                if Child:IsA("Frame") or Child:IsA("ScrollingFrame") then
+                    if Child.BackgroundTransparency < 1 or Child.BorderSizePixel > 0 then
+                        childHasContent = true
+                    end
+                elseif (Child:IsA("ImageLabel") or Child:IsA("ImageButton")) and
+                       Child.ImageTransparency < 1 and Child.Image ~= "" then
+                    childHasContent = true
+                elseif (Child:IsA("TextLabel") or Child:IsA("TextButton") or Child:IsA("TextBox")) and
+                       Child.TextTransparency < 1 and Child.Text ~= "" then
+                    childHasContent = true
+                else
+                    childHasContent = true
+                end
+                if not childHasContent then
+                    for _, Grandchild in ipairs(Child:GetChildren()) do
+                        if Grandchild:IsA("GuiObject") and Grandchild.Visible and Grandchild.AbsoluteSize.X > 0 and Grandchild.AbsoluteSize.Y > 0 then
+                            if Grandchild:IsA("Frame") or Grandchild:IsA("ScrollingFrame") then
+                                if Grandchild.BackgroundTransparency < 1 or Grandchild.BorderSizePixel > 0 then
+                                    childHasContent = true
+                                    break
+                                end
+                            elseif (Grandchild:IsA("ImageLabel") or Grandchild:IsA("ImageButton")) and
+                                   Grandchild.ImageTransparency < 1 and Grandchild.Image ~= "" then
+                                childHasContent = true
+                                break
+                            elseif (Grandchild:IsA("TextLabel") or Grandchild:IsA("TextButton") or Grandchild:IsA("TextBox")) and
+                                   Grandchild.TextTransparency < 1 and Grandchild.Text ~= "" then
+                                childHasContent = true
+                                break
+                            else
+                                childHasContent = true
+                                break
+                            end
+                        end
+                    end
+                end
+                if childHasContent then
+                    HasContent = true
+                    break
+                end
             end
         end
     end
