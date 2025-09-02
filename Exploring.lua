@@ -2418,7 +2418,7 @@ local function StartPartESP(Target, Name, TextSize, IsDistance, IsBox)
 end
 function PromptPartESP(inst)
 	if CurrentPartESPWindow then
-		repeat until not CurrentPartESPWindow
+		repeat task.wait() until not CurrentPartESPWindow
 	end
 	CurrentPartESPWindow = Clone(PartESPWindow)
 	CurrentPartESPWindow.Parent = Dex
@@ -4047,7 +4047,7 @@ do
 	end
 	local function ApplyDescendants(o)
         local s, children = pcall(GetDescendants, o)
-		task.wait(0.25)
+		task.wait(0.00000001)
         if s then
 			coroutine.wrap(function()
             	for i = 1,#children do
