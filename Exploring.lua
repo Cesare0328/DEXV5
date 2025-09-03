@@ -22,7 +22,6 @@ local string_byte = string.byte
 local string_gsub = string.gsub
 local string_rep = string.rep
 local math_floor = math.floor
-local math_ceil = math.ceil
 local math_random = math.random
 -- < Services > --
 local UserInputService = cloneref(game:GetService("UserInputService"))
@@ -75,6 +74,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
 local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection, SearchLoading = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil, nil
 local DebounceTask = nil
+local ViewingObject = false
 local ContextMenuHovered = false
 local MatchWholeWordToggle, MatchCaseToggle = false, false
 local updateList,rawUpdateList,updateScroll,rawUpdateSize
@@ -1952,7 +1952,7 @@ do
 
 		listFrame.Size = UDim2_new(1,-GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
 
-		scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
+		scrollBar.VisibleSpace = math.ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
 		scrollBar.GUI.Size = UDim2_new(0,GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
 
 		scrollBar.TotalSpace = #TreeList+1
@@ -2844,11 +2844,17 @@ function rightClickMenu(sObj)
 		table_insert(actions, 10, "Call Remote")
 	end
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") and not sObj == workspace then
+		local b = 10
 		table_insert(actions, 8, "Teleport to")
 		table_insert(actions, 9, "Add to ESP")
 		if IsA(sObj, "Model") then
+			b = 11
 			table_insert(actions, 7, "Ungroup")
 			table_insert(actions, 10, "View Model")
+		end
+		table_insert(actions, b, "View Object")
+		if ViewingObject then
+			table_insert(actions, b + 1, "Unview Object")
 		end
 	end
     if filteringInstances() and Searched then
@@ -3094,6 +3100,20 @@ function rightClickMenu(sObj)
 			end)
 			MainWindow.Parent.Visible = true
 			MainWindow.Parent.Title.Text = "[Model Viewer] Viewing: " .. Model.Name
+		elseif option == "View Object" then
+			if not Option.Modifiable then
+				return
+			end
+			ViewingObject = true
+			workspace.CurrentCamera.CameraType = Enum.CameraType.Follow
+			workspace.CurrentCamera.CameraSubject = Selection:Get()[1]
+		elseif option == "Unview Object" then
+			if not Option.Modifiable then
+				return
+			end
+			ViewingObject = false
+			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+			workspace.CurrentCamera.CameraSubject = nil
 		elseif option == "Select Children" then
 			if not Option.Modifiable then
 				return
@@ -4072,7 +4092,7 @@ do
 		ApplyDescendants(RunningScriptsStorage)
 	end
 	updateList()
-	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
+	scrollBar.VisibleSpace = math.ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
 	updateList()
 end
 
