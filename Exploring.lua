@@ -4073,13 +4073,6 @@ do
 	updateList()
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
 	updateList()
-	task.spawn(function()
-	for i = 1, 30 do
-		warn("Waiting")
-		task.wait(1)
-	end
-	updateList()
-	end)
 end
 
 local actionButtons
@@ -4472,4 +4465,5 @@ CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, func
 	end
 	DestroyRightClick()
 end)
+updateList()
 getgenv().InitLoaded = true
