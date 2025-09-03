@@ -4049,9 +4049,9 @@ do
 		Connect(RunningScriptsStorage.DescendantAdded,addObject)
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
+	local MainHierarchyUpdated = false
 	local function ApplyDescendants(o)
 		local s, children = pcall(o.GetChildren, o)
-		task.wait(0.00000001)
 		if s then
 			coroutine.wrap(function()
 				for i = 1,#children do
@@ -4465,5 +4465,4 @@ CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, func
 	end
 	DestroyRightClick()
 end)
-updateList()
 getgenv().InitLoaded = true
