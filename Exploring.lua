@@ -4060,6 +4060,7 @@ do
 				end
 			end)()
 		end
+		updateList()
 		task.wait(0.00000001)
 	end
 	ApplyDescendants(workspace.Parent)
