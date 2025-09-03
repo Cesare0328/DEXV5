@@ -2126,7 +2126,6 @@ do
 	SetSelection_Bindable.OnInvoke = function(...)
 		if #Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then
 			for i,v in ipairs(Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)) do
-				warn(v.ClassName)
 				if v:IsA("GuiObject") and v.Visible then
 					return
 				end
@@ -4051,18 +4050,18 @@ do
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
 	local function ApplyDescendants(o)
-        local s, children = pcall(GetDescendants, o)
+		local s, children = pcall(o.GetChildren, o)
 		task.wait(0.00000001)
-        if s then
+		if s then
 			coroutine.wrap(function()
-            	for i = 1,#children do
-                	addObject(children[i], true)
-            	end
+				for i = 1,#children do
+					addObject(children[i], true)
+					ApplyDescendants(children[i])
+				end
 			end)()
-        end
+		end
 		task.wait(0.00000001)
-    end
-
+	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
 	if NilStorageEnabled then
@@ -4070,11 +4069,17 @@ do
 	end
 	if RunningScriptsStorageEnabled then
 		ApplyDescendants(RunningScriptsStorage)
-    end
-    updateList()
-
+	end
+	updateList()
 	scrollBar.VisibleSpace = math_ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
 	updateList()
+	task.spawn(function()
+	for i = 1, 30 do
+		warn("Waiting")
+		task.wait(1)
+	end
+	updateList()
+	end)
 end
 
 local actionButtons
