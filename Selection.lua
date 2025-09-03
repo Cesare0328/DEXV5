@@ -138,21 +138,6 @@ end
 BeforeLoad()
 AfterInitialization()
 
--- < General Bypasses > --
-local hook; hook = hookfunction(UserInputService.GetFocusedTextBox, function(...) local a = hook(...) if a and a:IsDescendantOf(CoreGui) then return nil end return a end)
-local OldNameCall
-OldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local args = {...}
-    local checkcaller = checkcaller()
-    local getnamecallmethod = getnamecallmethod()
-    if not checkcaller and getnamecallmethod == 'GetFocusedTextBox' and self == game.UserInputService then
-        local a = OldNameCall(self, ...)
-        if a and a:IsDescendantOf(CoreGui) then return nil end
-        return a
-    end
-return OldNameCall(self,unpack(args))
-end))
-
 local function switchWindows(p1, p2)
 	if CurrentWindow == p1 and not p2 then return end
 	local A = 0
@@ -251,7 +236,7 @@ Connect(OpenToggleButton.MouseButton1Up, function()
 end)
 
 Connect(OpenScriptEditorButton.MouseButton1Up, function()
-	ScriptEditor.Visible = OpenScriptEditorButton.Active 
+	ScriptEditor.Visible = not ScriptEditor.Visible 
 end)
 
 Connect(ConsoleButton.MouseButton1Up, function()
