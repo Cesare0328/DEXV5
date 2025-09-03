@@ -3105,15 +3105,13 @@ function rightClickMenu(sObj)
 				return
 			end
 			ViewingObject = true
-			workspace.CurrentCamera.CameraType = Enum.CameraType.Follow
 			workspace.CurrentCamera.CameraSubject = Selection:Get()[1]
 		elseif option == "Unview Object" then
 			if not Option.Modifiable then
 				return
 			end
 			ViewingObject = false
-			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
-			workspace.CurrentCamera.CameraSubject = nil
+			workspace.CurrentCamera.CameraSubject = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("Humanoid") or nil
 		elseif option == "Select Children" then
 			if not Option.Modifiable then
 				return
