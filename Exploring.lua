@@ -3111,7 +3111,7 @@ function rightClickMenu(sObj)
 				return
 			end
 			ViewingObject = false
-			workspace.CurrentCamera.CameraSubject = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("Humanoid") or nil
+			workspace.CurrentCamera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or nil
 		elseif option == "Select Children" then
 			if not Option.Modifiable then
 				return
