@@ -909,7 +909,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                             if #lines > 0 and lines[1]:match("^%s*%-%-") then
                                 table.remove(lines, 1)
                             end
-                            if not Instance:IsA("ModuleScript") then
+                            if not instance:IsA("ModuleScript") then
                                 scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, table.concat(lines, "\n"))
                             end
                         end
