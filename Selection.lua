@@ -888,8 +888,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 if #bytecode == 0 then
                     if instance:IsA("LocalScript") then
                         scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
-                    else
-                        scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
                     end
                 else
                     local success, result = pcall(decompile, instance)
@@ -911,7 +909,9 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                             if #lines > 0 and lines[1]:match("^%s*%-%-") then
                                 table.remove(lines, 1)
                             end
-                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, table.concat(lines, "\n"))
+                            if not Instance:IsA("ModuleScript") then
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, table.concat(lines, "\n"))
+                            end
                         end
                     else
                         scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Decompilation failed: %s", guid, path, tostring(result))
