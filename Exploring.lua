@@ -4070,7 +4070,7 @@ do
 	local function ApplyDescendants(o)
 		local children = GetChildren(o)
 		for i = 1, #children do
-			addObject(children[i])
+			addObject(children[i], true)
 			ApplyDescendants(children[i])
 		end
 		updateList()
