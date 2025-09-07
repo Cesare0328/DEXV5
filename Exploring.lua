@@ -4069,10 +4069,12 @@ do
 	end
 	local function ApplyDescendants(o)
 		local children = GetChildren(o)
-		for i = 1, #children do
-			addObject(children[i], true)
-			ApplyDescendants(children[i])
-		end
+		coroutine.wrap(function()
+			for i = 1, #children do
+				addObject(children[i], true)
+				ApplyDescendants(children[i])
+			end
+		end)()
 		updateList()
 		task.wait()
 	end
