@@ -4068,18 +4068,18 @@ do
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
 	local MainHierarchyUpdated = false
-	local function ApplyDescendants(o)
+	local function ApplyDescendants(o, Child)
 		local s, children = pcall(o.GetChildren, o)
 		if s then
 			coroutine.wrap(function()
 				for i = 1,#children do
 					addObject(children[i], true)
-					ApplyDescendants(children[i])
+					ApplyDescendants(children[i], true)
 				end
 			end)()
 		end
 		updateList()
-		task.wait(0.00000001)
+		if not Child then task.wait(0.00000001) end
 	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
