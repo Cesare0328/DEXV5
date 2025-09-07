@@ -4481,5 +4481,5 @@ CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, func
 	end
 	DestroyRightClick()
 end)
-task.wait(0.75)
+task.wait(1.5)
 getgenv().InitLoaded = true
