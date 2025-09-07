@@ -4083,7 +4083,7 @@ do
 			end)()
 		end
 		updateList()
-		if Child then task.wait(0.00000001) end
+		if not Child then task.wait(0.00000001) end
 	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
