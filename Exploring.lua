@@ -4067,23 +4067,14 @@ do
 		Connect(RunningScriptsStorage.DescendantAdded,addObject)
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
-	local MainHierarchyUpdated = false
-	local function ApplyDescendants(o, Child)
-		local s, children = pcall(o.GetChildren, o)
-		if s then
-			coroutine.wrap(function()
-				for i = 1,#children do
-					addObject(children[i], true)
-					if #children < 30 then
-						ApplyDescendants(children[i], true)
-					else
-						ApplyDescendants(children[i])
-					end
-				end
-			end)()
+	local function ApplyDescendants(o)
+		local children = GetChildren(o)
+		for i = 1, #children do
+			addObject(children[i])
+			ApplyDescendants(children[i])
 		end
 		updateList()
-		if not Child then task.wait(0.00000001) end
+		task.wait()
 	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
