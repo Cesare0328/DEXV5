@@ -4076,7 +4076,7 @@ do
 			end
 		end)()
 		updateList()
-		task.wait()
+		task.wait(0.000000001)
 	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
@@ -4481,5 +4481,5 @@ CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, func
 	end
 	DestroyRightClick()
 end)
-task.wait(1.5)
+task.wait(1)
 getgenv().InitLoaded = true
