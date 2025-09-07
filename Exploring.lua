@@ -4074,7 +4074,7 @@ do
 			ApplyDescendants(children[i])
 		end
 		updateList()
-		task.wait()
+		task.wait(0.00000001)
 	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
