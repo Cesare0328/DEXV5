@@ -4067,24 +4067,29 @@ do
 		Connect(RunningScriptsStorage.DescendantAdded,addObject)
 		Connect(RunningScriptsStorage.DescendantRemoving,removeObject)
 	end
-	local function ApplyDescendants(o)
-		local children = GetChildren(o)
+	local function ApplyDescendants(o, all)
+		local children
+		if all then
+			children = GetDescendants(o)
+		else
+			children = GetChildren(o)
+		end
 		coroutine.wrap(function()
 			for i = 1, #children do
 				addObject(children[i], true)
-				ApplyDescendants(children[i])
+				if not all then ApplyDescendants(children[i]) end
 			end
 		end)()
 		updateList()
 		task.wait(0.000000001)
 	end
 	ApplyDescendants(workspace.Parent)
-	ApplyDescendants(DexOutput)
+	ApplyDescendants(DexOutput, true)
 	if NilStorageEnabled then
-		ApplyDescendants(NilStorage)
+		ApplyDescendants(NilStorage, true)
 	end
 	if RunningScriptsStorageEnabled then
-		ApplyDescendants(RunningScriptsStorage)
+		ApplyDescendants(RunningScriptsStorage, true)
 	end
 	updateList()
 	scrollBar.VisibleSpace = math.ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
@@ -4481,5 +4486,5 @@ CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, func
 	end
 	DestroyRightClick()
 end)
-task.wait(1)
+task.wait(1.25)
 getgenv().InitLoaded = true
