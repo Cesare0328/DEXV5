@@ -4074,12 +4074,16 @@ do
 			coroutine.wrap(function()
 				for i = 1,#children do
 					addObject(children[i], true)
-					ApplyDescendants(children[i], true)
+					if #children < 30 then
+						ApplyDescendants(children[i], true)
+					else
+						ApplyDescendants(children[i])
+					end
 				end
 			end)()
 		end
 		updateList()
-		if not Child then task.wait(0.00000001) end
+		if Child then task.wait(0.00000001) end
 	end
 	ApplyDescendants(workspace.Parent)
 	ApplyDescendants(DexOutput)
