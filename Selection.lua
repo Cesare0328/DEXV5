@@ -1180,14 +1180,12 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
             local ReferenceString = Attributes["referent"]
             local ClassName = Attributes["class"]
             if not ReferenceString or not ClassName or ClassName == "" then
-                warn("Skipping Item tag at index " .. Index .. ": Missing or empty referent/class")
                 Index = XMLContent:find(">", Index) + 1 or #XMLContent + 1
             else
                 local ReferenceNumber = NextReferent
                 NextReferent = NextReferent + 1
                 ReferentMap[ReferenceString] = ReferenceNumber
                 local Instance = {ClassName = ClassName, Referent = ReferenceNumber, Properties = {}, ReferenceString = ReferenceString}
-                print("Created instance: " .. ClassName .. ", Referent: " .. ReferenceNumber .. ", ReferenceString: " .. ReferenceString)
                 if #CurrentPath > 0 then
                     Instance.ParentString = CurrentPath[#CurrentPath].ReferenceString
                 end
@@ -1196,38 +1194,27 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
             end
         elseif TagName == "/Item" or TagName == "/roblox" then
             if #CurrentPath > 0 then
-                print("Removing from CurrentPath, size: " .. #CurrentPath)
                 table.remove(CurrentPath)
             end
-        elseif TagName ~= "Properties" and TagName ~= "External" then
+        elseif TagName ~= "External" then -- Skip <Properties> and <External>
             local PropertyType = TagName
             local PropertyName = Attributes["name"]
             local EndTagPosition = XMLContent:find("</" .. TagName .. ">", Index)
             if not PropertyName or not EndTagPosition then
-                warn("Skipping tag '" .. TagName .. "' at index " .. Index .. ": Missing name or closing tag")
                 Index = XMLContent:find(">", Index) + 1 or #XMLContent + 1
             else
                 local ValueString = XMLContent:sub(Index, EndTagPosition - 1)
                 Index = EndTagPosition + #("</" .. TagName .. ">")
                 local Value = ParseValue(PropertyType, ValueString)
-                if PropertyType == "Ref" and Value ~= "null" and not ReferentMap[Value] then
-                    warn("Invalid Ref value '" .. Value .. "' for property '" .. PropertyName .. "' at index " .. Index .. " in instance " .. (CurrentPath[#CurrentPath] and CurrentPath[#CurrentPath].ClassName or "none"))
-                else
-                    if #CurrentPath > 0 then
-                        local CurrentInstance = CurrentPath[#CurrentPath]
-                        if not CurrentInstance.Properties then
-                            CurrentInstance.Properties = {}
-                            warn("Properties was nil for instance " .. CurrentInstance.ClassName .. " at index " .. Index)
-                        end
-                        print("Assigning property: " .. PropertyName .. ", Type: " .. PropertyType .. ", Value: " .. tostring(Value) .. ", Instance: " .. CurrentInstance.ClassName)
-                        CurrentInstance.Properties[PropertyName] = {Type = PropertyType, Value = Value}
+                if #CurrentPath > 0 then
+                    local CurrentInstance = CurrentPath[#CurrentPath]
+                    if not CurrentInstance.Properties then
+                        CurrentInstance.Properties = {}
+
                     end
+                    CurrentInstance.Properties[PropertyName] = {Type = PropertyType, Value = Value}
                 end
             end
-        end
-        print("ReferentMap after parsing:")
-        for refString, refNumber in pairs(ReferentMap) do
-            print(refString .. " -> " .. refNumber)
         end
     end
     for _, instance in ipairs(Instances) do
