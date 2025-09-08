@@ -1187,6 +1187,7 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
                 NextReferent = NextReferent + 1
                 ReferentMap[ReferenceString] = ReferenceNumber
                 local Instance = {ClassName = ClassName, Referent = ReferenceNumber, Properties = {}, ReferenceString = ReferenceString}
+                print("Created instance: " .. ClassName .. ", Referent: " .. ReferenceNumber .. ", ReferenceString: " .. ReferenceString)
                 if #CurrentPath > 0 then
                     Instance.ParentString = CurrentPath[#CurrentPath].ReferenceString
                 end
@@ -1195,9 +1196,10 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
             end
         elseif TagName == "/Item" or TagName == "/roblox" then
             if #CurrentPath > 0 then
+                print("Removing from CurrentPath, size: " .. #CurrentPath)
                 table.remove(CurrentPath)
             end
-        elseif TagName ~= "Properties" and TagName ~= "External" then -- Skip <Properties> and <External>
+        elseif TagName ~= "Properties" and TagName ~= "External" then
             local PropertyType = TagName
             local PropertyName = Attributes["name"]
             local EndTagPosition = XMLContent:find("</" .. TagName .. ">", Index)
@@ -1208,15 +1210,24 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
                 local ValueString = XMLContent:sub(Index, EndTagPosition - 1)
                 Index = EndTagPosition + #("</" .. TagName .. ">")
                 local Value = ParseValue(PropertyType, ValueString)
-                if #CurrentPath > 0 then
-                    local CurrentInstance = CurrentPath[#CurrentPath]
-                    if not CurrentInstance.Properties then
-                        CurrentInstance.Properties = {}
-                        warn("Properties was nil for instance " .. CurrentInstance.ClassName .. " at index " .. Index)
+                if PropertyType == "Ref" and Value ~= "null" and not ReferentMap[Value] then
+                    warn("Invalid Ref value '" .. Value .. "' for property '" .. PropertyName .. "' at index " .. Index .. " in instance " .. (CurrentPath[#CurrentPath] and CurrentPath[#CurrentPath].ClassName or "none"))
+                else
+                    if #CurrentPath > 0 then
+                        local CurrentInstance = CurrentPath[#CurrentPath]
+                        if not CurrentInstance.Properties then
+                            CurrentInstance.Properties = {}
+                            warn("Properties was nil for instance " .. CurrentInstance.ClassName .. " at index " .. Index)
+                        end
+                        print("Assigning property: " .. PropertyName .. ", Type: " .. PropertyType .. ", Value: " .. tostring(Value) .. ", Instance: " .. CurrentInstance.ClassName)
+                        CurrentInstance.Properties[PropertyName] = {Type = PropertyType, Value = Value}
                     end
-                    CurrentInstance.Properties[PropertyName] = {Type = PropertyType, Value = Value}
                 end
             end
+        end
+        print("ReferentMap after parsing:")
+        for refString, refNumber in pairs(ReferentMap) do
+            print(refString .. " -> " .. refNumber)
         end
     end
     for _, instance in ipairs(Instances) do
