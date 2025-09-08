@@ -1125,7 +1125,7 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
 	end
 
 	local function ParseValue(PropertyType, ValueString)
-		local CleanString = ValueString:match("^%s*(.-)%s*$")
+		local CleanString = string.match(ValueString, "^%s*(.-)%s*$")
 		if PropertyType == "string" or PropertyType == "Content" or PropertyType == "ProtectedString" or PropertyType == "BinaryString" then
 			local Cdata = CleanString:match("<!%[CDATA%[(.*)%]%]>")
 			return Cdata or CleanString
