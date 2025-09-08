@@ -1160,7 +1160,7 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
         return 0x01 -- fallback
     end
 
-    local XMLContent = readfile(InputXMLFile)
+    local XMLContent = InputXMLFile
     local Instances = {}
     local ReferentMap = {}
     local NextReferent = 0
