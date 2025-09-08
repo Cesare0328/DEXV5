@@ -1179,27 +1179,43 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
         if TagName == "Item" then
             local ReferenceString = Attributes["referent"]
             local ClassName = Attributes["class"]
-            local ReferenceNumber = NextReferent
-            NextReferent = NextReferent + 1
-            ReferentMap[ReferenceString] = ReferenceNumber
-            local Instance = {ClassName = ClassName, Referent = ReferenceNumber, Properties = {}, ReferenceString = ReferenceString}
-            if #CurrentPath > 0 then
-                Instance.ParentString = CurrentPath[#CurrentPath].ReferenceString
+            if not ReferenceString or not ClassName or ClassName == "" then
+                warn("Skipping Item tag at index " .. Index .. ": Missing or empty referent/class")
+                Index = XMLContent:find(">", Index) + 1 or #XMLContent + 1
+            else
+                local ReferenceNumber = NextReferent
+                NextReferent = NextReferent + 1
+                ReferentMap[ReferenceString] = ReferenceNumber
+                local Instance = {ClassName = ClassName, Referent = ReferenceNumber, Properties = {}, ReferenceString = ReferenceString}
+                if #CurrentPath > 0 then
+                    Instance.ParentString = CurrentPath[#CurrentPath].ReferenceString
+                end
+                table.insert(Instances, Instance)
+                table.insert(CurrentPath, Instance)
             end
-            table.insert(Instances, Instance)
-            table.insert(CurrentPath, Instance)
         elseif TagName == "/Item" or TagName == "/roblox" then
-            table.remove(CurrentPath)
-        else
+            if #CurrentPath > 0 then
+                table.remove(CurrentPath)
+            end
+        elseif TagName ~= "Properties" and TagName ~= "External" then -- Skip <Properties> and <External>
             local PropertyType = TagName
             local PropertyName = Attributes["name"]
-            local ContentStart = Index
             local EndTagPosition = XMLContent:find("</" .. TagName .. ">", Index)
-            local ValueString = XMLContent:sub(ContentStart, EndTagPosition - 1)
-            Index = EndTagPosition + #("</" .. TagName .. ">")
-            local Value = ParseValue(PropertyType, ValueString)
-            if #CurrentPath > 0 then
-                CurrentPath[#CurrentPath].Properties[PropertyName] = {Type = PropertyType, Value = Value}
+            if not PropertyName or not EndTagPosition then
+                warn("Skipping tag '" .. TagName .. "' at index " .. Index .. ": Missing name or closing tag")
+                Index = XMLContent:find(">", Index) + 1 or #XMLContent + 1
+            else
+                local ValueString = XMLContent:sub(Index, EndTagPosition - 1)
+                Index = EndTagPosition + #("</" .. TagName .. ">")
+                local Value = ParseValue(PropertyType, ValueString)
+                if #CurrentPath > 0 then
+                    local CurrentInstance = CurrentPath[#CurrentPath]
+                    if not CurrentInstance.Properties then
+                        CurrentInstance.Properties = {}
+                        warn("Properties was nil for instance " .. CurrentInstance.ClassName .. " at index " .. Index)
+                    end
+                    CurrentInstance.Properties[PropertyName] = {Type = PropertyType, Value = Value}
+                end
             end
         end
     end
