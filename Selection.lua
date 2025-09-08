@@ -1219,7 +1219,7 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
         return Items
     end
 
-    local XMLContent = readfile(InputXMLFile)
+    local XMLContent = InputXMLFile
     local XmlRoot = ParseXmlNode(XMLContent)[1]
     local ItemNodes = XmlRoot.Children
 
