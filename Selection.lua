@@ -1604,7 +1604,7 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
 		offset = offset + buffer.len(part)
 	end
 
-	writefile(OutputRBXLFile, buffer.tostring(ResultBuffer))
+	writefile(OutputRBXLFile, buffer.tostring(ResultBuffer) .. "</roblox>")
 end
 
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
