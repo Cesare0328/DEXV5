@@ -1125,6 +1125,7 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
 	end
 
 	local function ParseValue(PropertyType, ValueData)
+        if type(ValueData) == "table" then table.foreach(ValueData, print) end
         local ValueString = type(ValueData) == "table" and ValueData[1] or tostring(ValueData)
 		local CleanString = string.match(ValueString, "^%s*(.-)%s*$")
 		if PropertyType == "string" or PropertyType == "Content" or PropertyType == "ProtectedString" or PropertyType == "BinaryString" then
