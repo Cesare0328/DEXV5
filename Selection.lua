@@ -1634,6 +1634,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         if success then
             statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
         else
+            warn(errorMsg)
             statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
         end
         Started = false
@@ -1648,6 +1649,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         if success then
             statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
         else
+            warn(errorMsg)
             statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
         end
         Started = false
