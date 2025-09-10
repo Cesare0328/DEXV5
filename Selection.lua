@@ -1034,577 +1034,525 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 end
 
 local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
-	local function WriteString(Buffer, offset, String)
-		local StringBuffer = buffer.fromstring(String)
-		buffer.writeu32(Buffer, offset, #String)
-		buffer.copy(Buffer, offset + 4, StringBuffer, 0, #String)
-		return offset + 4 + #String
-	end
+    local function WriteString(Buffer, offset, String)
+        buffer.writeu32(Buffer, offset, #String)
+        buffer.copy(Buffer, offset + 4, buffer.fromstring(String), 0, #String)
+        return offset + 4 + #String
+    end
 
-	local function TransformInt32(Value)
-		if Value >= 0 then
-			return Value * 2
-		else
-			return math.abs(Value) * 2 - 1
-		end
-	end
+    local function TransformInt32(Value)
+        if Value >= 0 then
+            return Value * 2
+        else
+            return math.abs(Value) * 2 - 1
+        end
+    end
 
-	local function WriteFloat32Roblox(Buffer, offset, Value)
-		local TempBytes = buffer.create(4)
-		buffer.writef32(TempBytes, 0, Value)
-		local Byte0 = buffer.readu8(TempBytes, 0)
-		local Byte1 = buffer.readu8(TempBytes, 1)
-		local Byte2 = buffer.readu8(TempBytes, 2)
-		local Byte3 = buffer.readu8(TempBytes, 3)
-		local SignBit = bit32.rshift(Byte0, 7)
-		Byte0 = bit32.band(Byte0, 0x7F)
-		Byte3 = bit32.bor(bit32.lshift(Byte3, 1), SignBit)
-		buffer.writeu8(Buffer, offset, Byte0)
-		buffer.writeu8(Buffer, offset + 1, Byte1)
-		buffer.writeu8(Buffer, offset + 2, Byte2)
-		buffer.writeu8(Buffer, offset + 3, Byte3)
-		return offset + 4
-	end
+    local function WriteFloat32Roblox(Buffer, offset, Value)
+        local TempBytes = buffer.create(4)
+        buffer.writef32(TempBytes, 0, Value)
+        local Byte0 = buffer.readu8(TempBytes, 0)
+        local Byte1 = buffer.readu8(TempBytes, 1)
+        local Byte2 = buffer.readu8(TempBytes, 2)
+        local Byte3 = buffer.readu8(TempBytes, 3)
+        local SignBit = bit32.rshift(Byte0, 7)
+        Byte0 = bit32.band(Byte0, 0x7F)
+        Byte3 = bit32.bor(bit32.lshift(Byte3, 1), SignBit)
+        buffer.writeu8(Buffer, offset, Byte0)
+        buffer.writeu8(Buffer, offset + 1, Byte1)
+        buffer.writeu8(Buffer, offset + 2, Byte2)
+        buffer.writeu8(Buffer, offset + 3, Byte3)
+        return offset + 4
+    end
 
-	local function GetAxisIndex(Column)
-		local AxisX = math.abs(Column[1])
-		local AxisY = math.abs(Column[2])
-		local AxisZ = math.abs(Column[3])
-		if AxisX > AxisY and AxisX > AxisZ then
-			return Column[1] > 0 and 0 or 1
-		elseif AxisY > AxisX and AxisY > AxisZ then
-			return Column[2] > 0 and 2 or 3
-		else
-			return Column[3] > 0 and 4 or 5
-		end
-	end
+    local function InterleaveBytes(Arrays)
+        if #Arrays == 0 then return buffer.create(0) end
+        local BytesPerValue = buffer.len(Arrays[1])
+        local ResultBuffer = buffer.create(#Arrays * BytesPerValue)
+        local offset = 0
+        for byteIndex = 0, BytesPerValue - 1 do
+            for _, array in ipairs(Arrays) do
+                buffer.writeu8(ResultBuffer, offset, buffer.readu8(array, byteIndex))
+                offset = offset + 1
+            end
+        end
+        return ResultBuffer
+    end
 
-	local function InterleaveBytes(Arrays)
-		if #Arrays == 0 then return buffer.create(0) end
-		local BytesPerValue = buffer.len(Arrays[1])
-		local ResultBuffer = buffer.create(#Arrays * BytesPerValue)
-		local offset = 0
-		for byteIndex = 0, BytesPerValue - 1 do
-			for _, array in ipairs(Arrays) do
-				buffer.writeu8(ResultBuffer, offset, buffer.readu8(array, byteIndex))
-				offset = offset + 1
-			end
-		end
-		return ResultBuffer
-	end
+    local function GetTypeId(XmlType)
+        local TypeMap = {
+            ["string"] = 0x01, ["Content"] = 0x01, ["ProtectedString"] = 0x01,
+            ["bool"] = 0x02,
+            ["int"] = 0x03,
+            ["float"] = 0x04,
+            ["double"] = 0x05,
+            ["UDim"] = 0x06,
+            ["UDim2"] = 0x07,
+            ["Ray"] = 0x08,
+            ["Faces"] = 0x09,
+            ["Axes"] = 0x0A,
+            ["BrickColor"] = 0x0B,
+            ["Color3"] = 0x0C,
+            ["Vector2"] = 0x0D,
+            ["Vector3"] = 0x0E,
+            ["CoordinateFrame"] = 0x10, ["OptionalCoordinateFrame"] = 0x10,
+            ["token"] = 0x12, ["Enum"] = 0x12,
+            ["Ref"] = 0x13,
+            ["Vector3int16"] = 0x14,
+            ["NumberSequence"] = 0x15,
+            ["ColorSequence"] = 0x16,
+            ["NumberRange"] = 0x17,
+            ["Rect"] = 0x18,
+            ["PhysicalProperties"] = 0x19,
+            ["Color3uint8"] = 0x1A,
+            ["int64"] = 0x1B,
+            ["BinaryString"] = 0x1D,
+        }
+        return TypeMap[XmlType]
+    end
 
-	local function GetTypeId(XmlType)
-		local TypeMap = {
-			["string"] = 0x01, ["Content"] = 0x01, ["ProtectedString"] = 0x01, ["BinaryString"] = 0x1D,
-			["bool"] = 0x02,
-			["int"] = 0x03,
-			["float"] = 0x04,
-			["double"] = 0x05,
-			["UDim"] = 0x06,
-			["UDim2"] = 0x07,
-			["Ray"] = 0x08,
-			["Faces"] = 0x09,
-			["Axes"] = 0x0A,
-			["BrickColor"] = 0x0B,
-			["Color3"] = 0x0C,
-			["Vector2"] = 0x0D,
-			["Vector3"] = 0x0E,
-			["CoordinateFrame"] = 0x10, ["OptionalCoordinateFrame"] = 0x10,
-			["token"] = 0x12, ["Enum"] = 0x12,
-			["Ref"] = 0x13,
-			["Vector3int16"] = 0x14,
-			["NumberSequence"] = 0x15,
-			["ColorSequence"] = 0x16,
-			["NumberRange"] = 0x17,
-			["Rect"] = 0x18,
-			["PhysicalProperties"] = 0x19,
-			["Color3uint8"] = 0x1A,
-			["int64"] = 0x1B,
-		}
-		return TypeMap[XmlType] or 0x01
-	end
+    local function ParseValue(PropertyType, ValueNode)
+        local value = (type(ValueNode) == 'table' and #ValueNode == 1 and type(ValueNode[1]) == 'string') and ValueNode[1] or ValueNode
 
-	local function ParseValue(PropertyType, Value)
-		if type(Value) == "string" then
-			local CleanString = Value:match("^%s*(.-)%s*$")
-			if PropertyType == "string" or PropertyType == "Content" or PropertyType == "ProtectedString" or PropertyType == "BinaryString" then
-				local Cdata = CleanString:match("<!%[CDATA%[(.*)%]%]>")
-				return Cdata or CleanString
-			end
-			if PropertyType == "bool" then return CleanString == "true" end
-			if PropertyType == "int" or PropertyType == "token" or PropertyType == "BrickColor" or PropertyType == "int64" then return tonumber(CleanString) or 0 end
-			if PropertyType == "float" or PropertyType == "double" then return tonumber(CleanString) or 0.0 end
-			if PropertyType == "Ref" then return CleanString end
-			return CleanString
-		end
+        if type(value) == "string" then
+            local CleanString = value:match("^%s*(.-)%s*$")
+            if PropertyType == "string" or PropertyType == "Content" or PropertyType == "ProtectedString" or PropertyType == "BinaryString" then
+                return (CleanString:match("<!%[CDATA%[(.*)%]%]>") or CleanString)
+            end
+            if PropertyType == "bool" then return CleanString == "true" end
+            if PropertyType == "int" or PropertyType == "token" or PropertyType == "Enum" or PropertyType == "BrickColor" or PropertyType == "int64" then return tonumber(CleanString) or 0 end
+            if PropertyType == "float" or PropertyType == "double" then return tonumber(CleanString) or 0.0 end
+            if PropertyType == "Ref" then return CleanString end
+            return CleanString
+        end
 
-		if type(Value) == "table" then
-			local subValues = {}
-			for _, subNode in ipairs(Value) do
-				local subValue = ParseValue(subNode.Tag, subNode.Children or subNode.Value)
-				subValues[subNode.Tag] = subValue
-			end
+        if type(value) == "table" then
+            local subValues = {}
+            for _, subNode in ipairs(value) do
+                subValues[subNode.Tag] = ParseValue(subNode.Tag, subNode.Children)
+            end
 
-			if PropertyType == "Vector3" then
-				return {tonumber(subValues.X or 0), tonumber(subValues.Y or 0), tonumber(subValues.Z or 0)}
-			end
-			if PropertyType == "Color3" then
-				return {tonumber(subValues.R or 0), tonumber(subValues.G or 0), tonumber(subValues.B or 0)}
-			end
-			if PropertyType == "CoordinateFrame" then
-				return {tonumber(subValues.X or 0), tonumber(subValues.Y or 0), tonumber(subValues.Z or 0),
-					tonumber(subValues.R00 or 1), tonumber(subValues.R01 or 0), tonumber(subValues.R02 or 0),
-					tonumber(subValues.R10 or 0), tonumber(subValues.R11 or 1), tonumber(subValues.R12 or 0),
-					tonumber(subValues.R20 or 0), tonumber(subValues.R21 or 0), tonumber(subValues.R22 or 1)}
-			end
-			if PropertyType == "OptionalCoordinateFrame" then
-				local cframe = subValues.CFrame or {}
-				return {tonumber(cframe.X or 0), tonumber(cframe.Y or 0), tonumber(cframe.Z or 0),
-					tonumber(cframe.R00 or 1), tonumber(cframe.R01 or 0), tonumber(cframe.R02 or 0),
-					tonumber(cframe.R10 or 0), tonumber(cframe.R11 or 1), tonumber(cframe.R12 or 0),
-					tonumber(cframe.R20 or 0), tonumber(cframe.R21 or 0), tonumber(cframe.R22 or 1)}
-			end
-			if PropertyType == "PhysicalProperties" then
-				local isCustom = subValues.CustomPhysics == "true"
-				if not isCustom then return {false} end
-				return {true, tonumber(subValues.Density or 0.7), tonumber(subValues.Friction or 0.3), tonumber(subValues.Elasticity or 0.5), tonumber(subValues.FrictionWeight or 1), tonumber(subValues.ElasticityWeight or 1)}
-			end
-			if PropertyType == "Faces" then
-				return tonumber(subValues.faces or 0)
-			end
-			-- Add handlers for other structured types as needed
-		end
-		return {}
-	end
+            if PropertyType == "Vector3" then return {tonumber(subValues.X) or 0, tonumber(subValues.Y) or 0, tonumber(subValues.Z) or 0} end
+            if PropertyType == "Color3" then return {tonumber(subValues.R) or 0, tonumber(subValues.G) or 0, tonumber(subValues.B) or 0} end
+            if PropertyType == "CoordinateFrame" or PropertyType == "OptionalCoordinateFrame" then
+                local cframe = subValues.CFrame or subValues
+                return {
+                    tonumber(cframe.X) or 0, tonumber(cframe.Y) or 0, tonumber(cframe.Z) or 0,
+                    tonumber(cframe.R00) or 1, tonumber(cframe.R01) or 0, tonumber(cframe.R02) or 0,
+                    tonumber(cframe.R10) or 0, tonumber(cframe.R11) or 1, tonumber(cframe.R12) or 0,
+                    tonumber(cframe.R20) or 0, tonumber(cframe.R21) or 0, tonumber(cframe.R22) or 1
+                }
+            end
+            if PropertyType == "PhysicalProperties" then
+                if subValues.CustomPhysics ~= "true" then return {false} end
+                return {true, tonumber(subValues.Density) or 0.7, tonumber(subValues.Friction) or 0.3, tonumber(subValues.Elasticity) or 0.5, tonumber(subValues.FrictionWeight) or 1, tonumber(subValues.ElasticityWeight) or 1}
+            end
+            if PropertyType == "Faces" then return tonumber(subValues.faces) or 0 end
+        end
+        return nil
+    end
 
-	local AllInstances = {}
-	local ReferentMap = {}
-	local NextReferent = 0
-	local SharedStrings = {}
-	local SharedStringMap = {}
+    local AllInstances = {}
+    local ReferentMap = {}
+    local NextReferent = 0
+    local SharedStrings = {}
+    local SharedStringMap = {}
 
-	local function AddSharedString(String)
-		if SharedStringMap[String] == nil then
-			table.insert(SharedStrings, String)
-			SharedStringMap[String] = #SharedStrings - 1
-		end
-		return SharedStringMap[String]
-	end
+    local function AddSharedString(String)
+        if SharedStringMap[String] == nil then
+            table.insert(SharedStrings, String)
+            SharedStringMap[String] = #SharedStrings - 1
+        end
+        return SharedStringMap[String]
+    end
 
-	local function ParseXmlNode(XmlString)
-		local Items = {}
-		local cursor = 1
-		while true do
-			local startIndex, endIndex, tagName, attributesString, content = XmlString:find("<([%w:]+)%s*([^>]*)>(.-)</%1>", cursor)
-			if not startIndex then
-				startIndex, endIndex, tagName, attributesString = XmlString:find("<([%w:]+)%s*([^>]*)/>", cursor)
-				if not startIndex then break end
-				content = ""
-			end
-			cursor = endIndex + 1
+    local function ParseXmlNode(XmlString)
+        local stack = {{Children = {}}}
+        XmlString:gsub("<(%/?)([%w:]+)%s*([^>]*)>", function(slash, tagName, attrs)
+            if slash == "" then
+                local attributes = {}
+                attrs:gsub("([%w:]+)=([\"'])(.-)%2", function(key, _, value)
+                    attributes[key] = value:gsub("&amp;", "&"):gsub("&lt;", "<"):gsub("&gt;", ">"):gsub("&quot;", "\""):gsub("&apos;", "'")
+                end
+                local node = {Tag = tagName, Attributes = attributes, Children = {}}
+                table.insert(stack[#stack].Children, node)
+                if not attrs:find("/$") then
+                    table.insert(stack, node)
+                end
+            else
+                table.remove(stack)
+            end
+        end)
+        local textContent = XmlString:match(">(.-)<")
+        if textContent and #stack[#stack].Children == 0 then
+            table.insert(stack[#stack].Children, textContent:match("^%s*(.-)%s*$"))
+        end
+        return stack[1].Children
+    end
+    
+    local XmlRoot = ParseXmlNode(InputXMLFile)[1]
 
-			local Attributes = {}
-			for key, value in attributesString:gmatch('([%w:]+)="([^"]*)"') do
-				Attributes[key:gsub("&amp;", "&")] = value:gsub("&amp;", "&")
-			end
+    local function ProcessItemNode(Node, ParentReferent)
+        if Node.Tag ~= "Item" then return end
+        local ReferenceString = Node.Attributes.referent
+        local ClassName = Node.Attributes["class"]
+        if not (ReferenceString and ClassName) then return end
 
-			local Item = {
-				Tag = tagName,
-				Attributes = Attributes,
-				Children = ParseXmlNode(content),
-				Value = #content > 0 and #content == #XmlString and content or nil
-			}
-			table.insert(Items, Item)
-		end
-		if #Items == 0 and #XmlString > 0 then return XmlString end
-		return Items
-	end
+        local ReferenceNumber = NextReferent
+        NextReferent = NextReferent + 1
+        ReferentMap[ReferenceString] = ReferenceNumber
+        
+        local InstanceData = {
+            ClassName = ClassName,
+            Referent = ReferenceNumber,
+            Properties = {},
+            Parent = ParentReferent,
+            IsArchivable = true
+        }
 
-	local XMLContent = InputXMLFile
-	local XmlRoot = ParseXmlNode(XMLContent)[1]
-	local ItemNodes = XmlRoot.Children
+        local PropertiesNode = Node.Children[1]
+        if PropertiesNode and PropertiesNode.Tag == "Properties" then
+            for _, propertyNode in ipairs(PropertiesNode.Children) do
+                local propertyName = propertyNode.Attributes.name
+                if propertyName then
+                    local propertyType = propertyNode.Tag
+                    if GetTypeId(propertyType) then
+                        local value = ParseValue(propertyType, propertyNode.Children)
+                        InstanceData.Properties[propertyName] = {Type = propertyType, Value = value}
+                        if propertyName == "Archivable" and value == false then
+                           InstanceData.IsArchivable = false
+                        end
+                    end
+                end
+            end
+        end
 
-	local function ProcessItemNode(Node, ParentReferent)
-		if Node.Tag ~= "Item" then return end
-		local ReferenceString = Node.Attributes.referent
-		local ClassName = Node.Attributes["class"]
-		if not (ReferenceString and ClassName) then return end
+        if InstanceData.IsArchivable or ParentReferent == -1 then
+            table.insert(AllInstances, InstanceData)
+            for _, childNode in ipairs(Node.Children) do
+                if childNode.Tag == "Item" then
+                    ProcessItemNode(childNode, ReferenceNumber)
+                end
+            end
+        end
+    end
 
-		local IsArchivable = true
-		local ReferenceNumber = NextReferent
-		NextReferent = NextReferent + 1
-		ReferentMap[ReferenceString] = ReferenceNumber
+    for _, node in ipairs(XmlRoot.Children) do
+        ProcessItemNode(node, -1)
+    end
 
-		local InstanceData = {
-			ClassName = ClassName,
-			Referent = ReferenceNumber,
-			Properties = {},
-			Parent = ParentReferent,
-			IsArchivable = true
-		}
+    local Classes = {}
+    for _, instanceData in ipairs(AllInstances) do
+        local className = instanceData.ClassName
+        if not Classes[className] then
+            Classes[className] = {Instances = {}, Properties = {}}
+            AddSharedString(className)
+        end
+        table.insert(Classes[className].Instances, instanceData)
+        for propertyName, propertyData in pairs(instanceData.Properties) do
+            if not Classes[className].Properties[propertyName] then
+                Classes[className].Properties[propertyName] = {TypeId = GetTypeId(propertyData.Type), Values = {}}
+                AddSharedString(propertyName)
+            end
+            Classes[className].Properties[propertyName].Values[instanceData.Referent] = propertyData.Value
+        end
+    end
 
-		local PropertiesNode = Node.Children[1]
-		if PropertiesNode and PropertiesNode.Tag == "Properties" then
-			for _, propertyNode in ipairs(PropertiesNode.Children) do
-				local propertyName = propertyNode.Attributes.name
-				if propertyName then
-					local propertyType = propertyNode.Tag
-					local value = ParseValue(propertyType, propertyNode.Children)
-					InstanceData.Properties[propertyName] = {Type = propertyType, Value = value}
-					if propertyName == "Archivable" and value == false then
-						IsArchivable = false
-					end
-				end
-			end
-		end
+    local ClassList = {}
+    for className in pairs(Classes) do table.insert(ClassList, className) end
+    table.sort(ClassList)
 
-		InstanceData.IsArchivable = IsArchivable
-		if InstanceData.IsArchivable or ParentReferent == -1 then
-			table.insert(AllInstances, InstanceData)
-			for _, childNode in ipairs(Node.Children) do
-				if childNode.Tag == "Item" then
-					ProcessItemNode(childNode, ReferenceNumber)
-				end
-			end
-		end
-	end
+    local GlobalInstances = {}
+    for _, className in ipairs(ClassList) do
+        table.sort(Classes[className].Instances, function(a, b) return a.Referent < b.Referent end)
+        for _, instanceData in ipairs(Classes[className].Instances) do
+            table.insert(GlobalInstances, instanceData)
+        end
+    end
 
-	for _, node in ipairs(ItemNodes) do
-		ProcessItemNode(node, -1)
-	end
+    local function WriteFileHeader()
+        local HeaderBuffer = buffer.create(32)
+        buffer.writestring(HeaderBuffer, 0, "<roblox!\x89\xff\x0d\x0a\x1a\x0a\0\0")
+        buffer.writeu32(HeaderBuffer, 16, #ClassList)
+        buffer.writeu32(HeaderBuffer, 20, #GlobalInstances)
+        buffer.fill(HeaderBuffer, 24, 0, 8)
+        return HeaderBuffer
+    end
 
-	local Classes = {}
-	for _, instanceData in ipairs(AllInstances) do
-		local className = instanceData.ClassName
-		if not Classes[className] then
-			Classes[className] = {Instances = {}, Properties = {}}
-			AddSharedString(className)
-		end
-		table.insert(Classes[className].Instances, instanceData)
+    local function WriteChunkHeader(ChunkName, UncompressedData)
+        local CompressedData = lz4_compress(buffer.tostring(UncompressedData))
+        local CompressedBuffer = buffer.fromstring(CompressedData)
+        local HeaderBuffer = buffer.create(16)
+        buffer.writestring(HeaderBuffer, 0, ChunkName)
+        buffer.writeu32(HeaderBuffer, 4, #CompressedData)
+        buffer.writeu32(HeaderBuffer, 8, buffer.len(UncompressedData))
+        buffer.fill(HeaderBuffer, 12, 0, 4)
+        return HeaderBuffer, CompressedBuffer
+    end
 
-		for propertyName, propertyData in pairs(instanceData.Properties) do
-			if not Classes[className].Properties[propertyName] then
-				Classes[className].Properties[propertyName] = {
-					TypeId = GetTypeId(propertyData.Type),
-					Values = {}
-				}
-				AddSharedString(propertyName)
-			end
-			Classes[className].Properties[propertyName].Values[instanceData.Referent] = propertyData.Value
-		end
-	end
+    local function WriteSSTRChunk()
+        local size = 4
+        for _, s in ipairs(SharedStrings) do size = size + 4 + #s end
+        local DataBuffer = buffer.create(size)
+        local offset = 0
+        buffer.writeu32(DataBuffer, offset, #SharedStrings); offset = offset + 4
+        for _, s in ipairs(SharedStrings) do offset = WriteString(DataBuffer, offset, s) end
+        return DataBuffer
+    end
 
-	local ClassList = {}
-	for className in pairs(Classes) do table.insert(ClassList, className) end
-	table.sort(ClassList)
+    local function WriteINSTChunk(ClassName, ClassId)
+        local ClassData = Classes[ClassName]
+        local IsService = ClassName:find("Service", 1, true) and not ClassName:find("NonReplicated", 1, true)
+        local DataBuffer = buffer.create(4 + 4 + 1 + 4 + (#ClassData.Instances * (4 + (IsService and 1 or 0))))
+        local offset = 0
+        buffer.writeu32(DataBuffer, offset, ClassId); offset = offset + 4
+        buffer.writeu32(DataBuffer, offset, SharedStringMap[ClassName]); offset = offset + 4
+        buffer.writeu8(DataBuffer, offset, IsService and 1 or 0); offset = offset + 1
+        buffer.writeu32(DataBuffer, offset, #ClassData.Instances); offset = offset + 4
+        local Arrays = {}
+        local previous = 0
+        for _, instance in ipairs(ClassData.Instances) do
+            local b = buffer.create(4)
+            buffer.writeu32(b, 0, TransformInt32(instance.Referent - previous))
+            table.insert(Arrays, b)
+            previous = instance.Referent
+        end
+        local InterleavedData = InterleaveBytes(Arrays)
+        buffer.copy(DataBuffer, offset, InterleavedData, 0, buffer.len(InterleavedData))
+        offset = offset + buffer.len(InterleavedData)
+        if IsService then
+            buffer.fill(DataBuffer, offset, 1, #ClassData.Instances)
+        end
+        return DataBuffer
+    end
 
-	local GlobalInstances = {}
-	for _, className in ipairs(ClassList) do
-		table.sort(Classes[className].Instances, function(a, b) return a.Referent < b.Referent end)
-		for _, instanceData in ipairs(Classes[className].Instances) do
-			table.insert(GlobalInstances, instanceData)
-		end
-	end
+    local function WritePROPChunk(ClassName, ClassId, PropertyName, PropertyInfo)
+        local ClassData = Classes[ClassName]
+        local PropertyType = PropertyInfo.TypeId
+        local PropertyValues = {}
+        for _, instance in ipairs(ClassData.Instances) do
+            table.insert(PropertyValues, PropertyInfo.Values[instance.Referent])
+        end
 
-	local function WriteFileHeader()
-		local HeaderBuffer = buffer.create(32)
-		buffer.writestring(HeaderBuffer, 0, "<roblox!\x89\xff\x0d\x0a\x1a\x0a")
-		buffer.writeu16(HeaderBuffer, 14, 0)
-		buffer.writeu32(HeaderBuffer, 16, #ClassList)
-		buffer.writeu32(HeaderBuffer, 20, #GlobalInstances)
-		buffer.fill(HeaderBuffer, 24, 0, 8)
-		return HeaderBuffer
-	end
+        local DataParts = {}
+        if PropertyType == 0x01 then
+            local arrays = {}
+            for _, val in ipairs(PropertyValues) do
+                local b = buffer.create(4)
+                buffer.writeu32(b, 0, AddSharedString(tostring(val or "")))
+                table.insert(arrays, b)
+            end
+            table.insert(DataParts, InterleaveBytes(arrays))
+        elseif PropertyType == 0x02 then
+            local bools = buffer.create(#PropertyValues)
+            for i, val in ipairs(PropertyValues) do buffer.writeu8(bools, i - 1, val and 1 or 0) end
+            table.insert(DataParts, bools)
+        elseif PropertyType == 0x03 or PropertyType == 0x0B or PropertyType == 0x12 then
+            local arrays, prev = {}, 0
+            for _, val in ipairs(PropertyValues) do
+                local v = val or 0
+                local b = buffer.create(4)
+                buffer.writeu32(b, 0, TransformInt32(v - prev))
+                table.insert(arrays, b)
+                prev = v
+            end
+            table.insert(DataParts, InterleaveBytes(arrays))
+        elseif PropertyType == 0x04 then
+            local arrays = {}
+            for _, val in ipairs(PropertyValues) do
+                local b = buffer.create(4)
+                WriteFloat32Roblox(b, 0, val or 0)
+                table.insert(arrays, b)
+            end
+            table.insert(DataParts, InterleaveBytes(arrays))
+        elseif PropertyType == 0x0C or PropertyType == 0x0E then
+            local X, Y, Z = {}, {}, {}
+            for _, val in ipairs(PropertyValues) do
+                local v = val or {0,0,0}
+                local bx, by, bz = buffer.create(4), buffer.create(4), buffer.create(4)
+                WriteFloat32Roblox(bx, 0, v[1])
+                WriteFloat32Roblox(by, 0, v[2])
+                WriteFloat32Roblox(bz, 0, v[3])
+                table.insert(X, bx); table.insert(Y, by); table.insert(Z, bz)
+            end
+            table.insert(DataParts, InterleaveBytes(X))
+            table.insert(DataParts, InterleaveBytes(Y))
+            table.insert(DataParts, InterleaveBytes(Z))
+        elseif PropertyType == 0x10 then
+            local pos_x, pos_y, pos_z, rot_ids = {}, {}, {}, {}
+            local r00, r01, r02, r10, r11, r12, r20, r21, r22 = {}, {}, {}, {}, {}, {}, {}, {}, {}
+            
+            for _, val in ipairs(PropertyValues) do
+                local v = val or {0,0,0,1,0,0,0,1,0,0,0,1}
+                local bx, by, bz = buffer.create(4), buffer.create(4), buffer.create(4)
+                WriteFloat32Roblox(bx, 0, v[1]); table.insert(pos_x, bx)
+                WriteFloat32Roblox(by, 0, v[2]); table.insert(pos_y, by)
+                WriteFloat32Roblox(bz, 0, v[3]); table.insert(pos_z, bz)
 
-	local function WriteChunkHeader(ChunkName, UncompressedData)
-		local HeaderBuffer = buffer.create(16)
-		buffer.writestring(HeaderBuffer, 0, ChunkName)
-		buffer.writeu32(HeaderBuffer, 4, 0)  -- Compressed length = 0 (no compression)
-		buffer.writeu32(HeaderBuffer, 8, buffer.len(UncompressedData))
-		buffer.fill(HeaderBuffer, 12, 0, 4)
-		return HeaderBuffer, UncompressedData
-	end
+                local rot_id = 0 
+                if v[4] == 1 and v[8] == 1 and v[12] == 1 and v[5]==0 and v[6]==0 and v[7]==0 and v[9]==0 and v[10]==0 and v[11]==0 then
+                    rot_id = 1 
+                end
+                table.insert(rot_ids, rot_id)
+                
+                if rot_id == 0 then
+                    local br00, br01, br02 = buffer.create(4), buffer.create(4), buffer.create(4)
+                    WriteFloat32Roblox(br00, 0, v[4]); table.insert(r00, br00)
+                    WriteFloat32Roblox(br01, 0, v[5]); table.insert(r01, br01)
+                    WriteFloat32Roblox(br02, 0, v[6]); table.insert(r02, br02)
+                    local br10, br11, br12 = buffer.create(4), buffer.create(4), buffer.create(4)
+                    WriteFloat32Roblox(br10, 0, v[7]); table.insert(r10, br10)
+                    WriteFloat32Roblox(br11, 0, v[8]); table.insert(r11, br11)
+                    WriteFloat32Roblox(br12, 0, v[9]); table.insert(r12, br12)
+                    local br20, br21, br22 = buffer.create(4), buffer.create(4), buffer.create(4)
+                    WriteFloat32Roblox(br20, 0, v[10]); table.insert(r20, br20)
+                    WriteFloat32Roblox(br21, 0, v[11]); table.insert(r21, br21)
+                    WriteFloat32Roblox(br22, 0, v[12]); table.insert(r22, br22)
+                end
+            end
+            
+            local OrientationBuffer = buffer.create(#rot_ids)
+            for i,id in ipairs(rot_ids) do buffer.writeu8(OrientationBuffer, i-1, id) end
+            table.insert(DataParts, OrientationBuffer)
 
-	local function WriteSSTRChunk()
-		local TotalSize = 4
-		for _, s in ipairs(SharedStrings) do
-			TotalSize = TotalSize + 4 + #s
-		end
+            table.insert(DataParts, InterleaveBytes(pos_x)); table.insert(DataParts, InterleaveBytes(pos_y)); table.insert(DataParts, InterleaveBytes(pos_z))
+            if #r00 > 0 then
+                table.insert(DataParts, InterleaveBytes(r00)); table.insert(DataParts, InterleaveBytes(r01)); table.insert(DataParts, InterleaveBytes(r02))
+                table.insert(DataParts, InterleaveBytes(r10)); table.insert(DataParts, InterleaveBytes(r11)); table.insert(DataParts, InterleaveBytes(r12))
+                table.insert(DataParts, InterleaveBytes(r20)); table.insert(DataParts, InterleaveBytes(r21)); table.insert(DataParts, InterleaveBytes(r22))
+            end
+        elseif PropertyType == 0x13 then
+            local arrays, prev = {}, 0
+            for _, val in ipairs(PropertyValues) do
+                local ref = ReferentMap[val] or -1
+                local b = buffer.create(4)
+                buffer.writeu32(b, 0, TransformInt32(ref - prev))
+                table.insert(arrays, b)
+                prev = ref
+            end
+            table.insert(DataParts, InterleaveBytes(arrays))
+        elseif PropertyType == 0x19 then
+            local has_custom, densities, frictions, elasticities, fric_weights, elas_weights = {}, {}, {}, {}, {}, {}
+            for _, val in ipairs(PropertyValues) do
+                local v = val or {false}
+                table.insert(has_custom, v[1])
+                if v[1] then
+                    local bd,bf,be,bfw,bew = buffer.create(4),buffer.create(4),buffer.create(4),buffer.create(4),buffer.create(4)
+                    WriteFloat32Roblox(bd, 0, v[2]); table.insert(densities, bd)
+                    WriteFloat32Roblox(bf, 0, v[3]); table.insert(frictions, bf)
+                    WriteFloat32Roblox(be, 0, v[4]); table.insert(elasticities, be)
+                    WriteFloat32Roblox(bfw, 0, v[5]); table.insert(fric_weights, bfw)
+                    WriteFloat32Roblox(bew, 0, v[6]); table.insert(elas_weights, bew)
+                end
+            end
+            local has_custom_buf = buffer.create(#has_custom)
+            for i,v in ipairs(has_custom) do buffer.writeu8(has_custom_buf, i-1, v and 1 or 0) end
+            table.insert(DataParts, has_custom_buf)
+            if #densities > 0 then
+                table.insert(DataParts, InterleaveBytes(densities)); table.insert(DataParts, InterleaveBytes(frictions))
+                table.insert(DataParts, InterleaveBytes(elasticities)); table.insert(DataParts, InterleaveBytes(fric_weights))
+                table.insert(DataParts, InterleaveBytes(elas_weights))
+            end
+        elseif PropertyType == 0x1D then
+             for _, val in ipairs(PropertyValues) do
+                local s = val or ""
+                local b = buffer.create(4 + #s)
+                WriteString(b, 0, s)
+                table.insert(DataParts, b)
+            end
+        end
 
-		local DataBuffer = buffer.create(TotalSize)
-		local offset = 0
-		buffer.writeu32(DataBuffer, offset, #SharedStrings); offset = offset + 4
+        local TotalSize = 4 + 4 + 1
+        for _, part in ipairs(DataParts) do TotalSize = TotalSize + buffer.len(part) end
+        local DataBuffer = buffer.create(TotalSize)
+        local offset = 0
+        buffer.writeu32(DataBuffer, offset, ClassId); offset = offset + 4
+        buffer.writeu32(DataBuffer, offset, SharedStringMap[PropertyName]); offset = offset + 4
+        buffer.writeu8(DataBuffer, offset, PropertyType); offset = offset + 1
+        for _, part in ipairs(DataParts) do
+            buffer.copy(DataBuffer, offset, part, 0, buffer.len(part))
+            offset = offset + buffer.len(part)
+        end
+        return DataBuffer
+    end
 
-		for _, s in ipairs(SharedStrings) do
-			offset = WriteString(DataBuffer, offset, s)
-		end
-		return DataBuffer
-	end
+    local function WritePRNTChunk()
+        local DataBuffer = buffer.create(1 + 4 + (#GlobalInstances * 8))
+        local offset = 0
+        buffer.writeu8(DataBuffer, offset, 0); offset = offset + 1
+        buffer.writeu32(DataBuffer, offset, #GlobalInstances); offset = offset + 4
 
-	local function WriteINSTChunk(ClassName, ClassId)
-		local ClassData = Classes[ClassName]
-		local IsService = ClassName:match("Service$") and not ClassName:match("NonReplicated")
+        local child_arrays, child_prev = {}, 0
+        for _, inst in ipairs(GlobalInstances) do
+            local b = buffer.create(4)
+            buffer.writeu32(b, 0, TransformInt32(inst.Referent - child_prev))
+            table.insert(child_arrays, b)
+            child_prev = inst.Referent
+        end
+        local InterleavedChildren = InterleaveBytes(child_arrays)
+        buffer.copy(DataBuffer, offset, InterleavedChildren, 0, buffer.len(InterleavedChildren))
+        offset = offset + buffer.len(InterleavedChildren)
 
-		local ReferentIdSize = #ClassData.Instances * 4
-		local ServiceFlagSize = IsService and #ClassData.Instances or 0
-		local DataSize = 4 + 4 + #ClassName + 1 + 4 + ReferentIdSize + ServiceFlagSize
+        local parent_arrays, parent_prev = {}, 0
+        for _, inst in ipairs(GlobalInstances) do
+            local parent_id = inst.Parent
+            local b = buffer.create(4)
+            buffer.writeu32(b, 0, TransformInt32(parent_id - parent_prev))
+            table.insert(parent_arrays, b)
+            parent_prev = parent_id
+        end
+        local InterleavedParents = InterleaveBytes(parent_arrays)
+        buffer.copy(DataBuffer, offset, InterleavedParents, 0, buffer.len(InterleavedParents))
+        return DataBuffer
+    end
 
-		local DataBuffer = buffer.create(DataSize)
-		local offset = 0
+    local Chunks = {}
+    local MetaData = buffer.create(4); buffer.writeu32(MetaData, 0, 0)
+    local MetaHeader, CompressedMetaData = WriteChunkHeader("META", MetaData)
+    table.insert(Chunks, MetaHeader); table.insert(Chunks, CompressedMetaData)
 
-		buffer.writeu32(DataBuffer, offset, ClassId); offset = offset + 4
-		offset = WriteString(DataBuffer, offset, ClassName)
-		buffer.writeu8(DataBuffer, offset, IsService and 1 or 0); offset = offset + 1
-		buffer.writeu32(DataBuffer, offset, #ClassData.Instances); offset = offset + 4
+    local SstrData = WriteSSTRChunk()
+    local SstrHeader, CompressedSstrData = WriteChunkHeader("SSTR", SstrData)
+    table.insert(Chunks, SstrHeader); table.insert(Chunks, CompressedSstrData)
 
-		local Arrays = {}
-		local previous = 0
-		for _, instance in ipairs(ClassData.Instances) do
-			local Delta = instance.Referent - previous
-			local Transformed = TransformInt32(Delta)
-			local ReferenceBuffer = buffer.create(4)
-			buffer.writeu32(ReferenceBuffer, 0, Transformed)
-			table.insert(Arrays, ReferenceBuffer)
-			previous = instance.Referent
-		end
+    for classId, className in ipairs(ClassList) do
+        local InstData = WriteINSTChunk(className, classId - 1)
+        local InstHeader, CompressedInstData = WriteChunkHeader("INST", InstData)
+        table.insert(Chunks, InstHeader); table.insert(Chunks, CompressedInstData)
+    end
 
-		local InterleavedData = InterleaveBytes(Arrays)
-		buffer.copy(DataBuffer, offset, InterleavedData, 0, buffer.len(InterleavedData))
-		offset = offset + buffer.len(InterleavedData)
+    for classId, className in ipairs(ClassList) do
+        local SortedPropertyNames = {}
+        for propertyName in pairs(Classes[className].Properties) do table.insert(SortedPropertyNames, propertyName) end
+        table.sort(SortedPropertyNames)
+        for _, propertyName in ipairs(SortedPropertyNames) do
+            local PropData = WritePROPChunk(className, classId - 1, propertyName, Classes[className].Properties[propertyName])
+            local PropHeader, CompressedPropData = WriteChunkHeader("PROP", PropData)
+            table.insert(Chunks, PropHeader); table.insert(Chunks, CompressedPropData)
+        end
+    end
 
-		if IsService then
-			for i = 1, #ClassData.Instances do
-				buffer.writeu8(DataBuffer, offset, 1)
-				offset = offset + 1
-			end
-		end
-		return DataBuffer
-	end
+    local PrntData = WritePRNTChunk()
+    local PrntHeader, CompressedPrntData = WriteChunkHeader("PRNT", PrntData)
+    table.insert(Chunks, PrntHeader); table.insert(Chunks, CompressedPrntData)
+    
+    local EndHeader = buffer.create(16)
+    buffer.writestring(EndHeader, 0, "END\0")
+    table.insert(Chunks, EndHeader)
 
-	local function WritePROPChunk(ClassName, ClassId, PropertyName, PropertyInfo)
-		local ClassData = Classes[ClassName]
-		local PropertyType = PropertyInfo.TypeId
-		local PropertyValues = {}
-		for _, instance in ipairs(ClassData.Instances) do
-			table.insert(PropertyValues, PropertyInfo.Values[instance.Referent])
-		end
+    local FinalBufferParts = {WriteFileHeader()}
+    for _, part in ipairs(Chunks) do table.insert(FinalBufferParts, part) end
+    
+    local TotalSize = 0
+    for _, part in ipairs(FinalBufferParts) do TotalSize = TotalSize + buffer.len(part) end
+    local ResultBuffer = buffer.create(TotalSize)
+    local offset = 0
+    for _, part in ipairs(FinalBufferParts) do
+        buffer.copy(ResultBuffer, offset, part, 0, buffer.len(part))
+        offset = offset + buffer.len(part)
+    end
 
-		local DataParts = {}
-
-		if PropertyType == 0x01 then
-			local StringIndexArrays = {}
-			for _, value in ipairs(PropertyValues) do
-				local b = buffer.create(4)
-				buffer.writeu32(b, 0, AddSharedString(tostring(value or "")))
-				table.insert(StringIndexArrays, b)
-			end
-			table.insert(DataParts, InterleaveBytes(StringIndexArrays))
-		elseif PropertyType == 0x02 then
-			local BoolBuffer = buffer.create(#PropertyValues)
-			for i, value in ipairs(PropertyValues) do
-				buffer.writeu8(BoolBuffer, i - 1, value and 1 or 0)
-			end
-			table.insert(DataParts, BoolBuffer)
-		elseif PropertyType == 0x03 or PropertyType == 0x0B or PropertyType == 0x12 then
-			local Arrays, previous = {}, 0
-			for _, value in ipairs(PropertyValues) do
-				local val = value or 0
-				local b = buffer.create(4)
-				buffer.writeu32(b, 0, TransformInt32(val - previous))
-				table.insert(Arrays, b)
-				previous = val
-			end
-			table.insert(DataParts, InterleaveBytes(Arrays))
-		elseif PropertyType == 0x04 then
-			local Arrays = {}
-			for _, value in ipairs(PropertyValues) do
-				local b = buffer.create(4)
-				WriteFloat32Roblox(b, 0, value or 0)
-				table.insert(Arrays, b)
-			end
-			table.insert(DataParts, InterleaveBytes(Arrays))
-		elseif PropertyType == 0x0C or PropertyType == 0x0E then
-			local X, Y, Z = {}, {}, {}
-			for _, value in ipairs(PropertyValues) do
-				local v = value or {0,0,0}
-				local bx, by, bz = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(bx, 0, v[1])
-				WriteFloat32Roblox(by, 0, v[2])
-				WriteFloat32Roblox(bz, 0, v[3])
-				table.insert(X, bx); table.insert(Y, by); table.insert(Z, bz)
-			end
-			table.insert(DataParts, InterleaveBytes(X))
-			table.insert(DataParts, InterleaveBytes(Y))
-			table.insert(DataParts, InterleaveBytes(Z))
-		elseif PropertyType == 0x10 then
-			local pos_x, pos_y, pos_z = {}, {}, {}
-			local r00, r01, r02, r10, r11, r12, r20, r21, r22 = {}, {}, {}, {}, {}, {}, {}, {}, {}
-			for _, value in ipairs(PropertyValues) do
-				local v = value or {0,0,0,1,0,0,0,1,0,0,0,1}
-				local bx, by, bz = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(bx, 0, v[1]); table.insert(pos_x, bx)
-				WriteFloat32Roblox(by, 0, v[2]); table.insert(pos_y, by)
-				WriteFloat32Roblox(bz, 0, v[3]); table.insert(pos_z, bz)
-				local br00, br01, br02 = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(br00, 0, v[4]); table.insert(r00, br00)
-				WriteFloat32Roblox(br01, 0, v[5]); table.insert(r01, br01)
-				WriteFloat32Roblox(br02, 0, v[6]); table.insert(r02, br02)
-				local br10, br11, br12 = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(br10, 0, v[7]); table.insert(r10, br10)
-				WriteFloat32Roblox(br11, 0, v[8]); table.insert(r11, br11)
-				WriteFloat32Roblox(br12, 0, v[9]); table.insert(r12, br12)
-				local br20, br21, br22 = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(br20, 0, v[10]); table.insert(r20, br20)
-				WriteFloat32Roblox(br21, 0, v[11]); table.insert(r21, br21)
-				WriteFloat32Roblox(br22, 0, v[12]); table.insert(r22, br22)
-			end
-			local OrientationBuffer = buffer.create(#PropertyValues)
-			for i=1, #PropertyValues do buffer.writeu8(OrientationBuffer, i-1, 0) end
-			table.insert(DataParts, OrientationBuffer)
-
-			table.insert(DataParts, InterleaveBytes(pos_x)); table.insert(DataParts, InterleaveBytes(pos_y)); table.insert(DataParts, InterleaveBytes(pos_z))
-			table.insert(DataParts, InterleaveBytes(r00)); table.insert(DataParts, InterleaveBytes(r01)); table.insert(DataParts, InterleaveBytes(r02))
-			table.insert(DataParts, InterleaveBytes(r10)); table.insert(DataParts, InterleaveBytes(r11)); table.insert(DataParts, InterleaveBytes(r12))
-			table.insert(DataParts, InterleaveBytes(r20)); table.insert(DataParts, InterleaveBytes(r21)); table.insert(DataParts, InterleaveBytes(r22))
-		elseif PropertyType == 0x13 then
-			local Arrays, previous = {}, 0
-			for _, value in ipairs(PropertyValues) do
-				local ReferenceNumber = ReferentMap[value] or -1
-				local Delta = ReferenceNumber - previous
-				local b = buffer.create(4)
-				buffer.writeu32(b, 0, TransformInt32(Delta))
-				table.insert(Arrays, b)
-				previous = ReferenceNumber
-			end
-			table.insert(DataParts, InterleaveBytes(Arrays))
-		elseif PropertyType == 0x19 then
-			for _, value in ipairs(PropertyValues) do
-				local v = value or {false}
-				if not v[1] then
-					local b = buffer.create(1); buffer.writeu8(b, 0, 0)
-					table.insert(DataParts, b)
-				else
-					local b = buffer.create(1 + 5 * 4)
-					buffer.writeu8(b, 0, 1)
-					local offset = 1
-					offset = WriteFloat32Roblox(b, offset, v[2])
-					offset = WriteFloat32Roblox(b, offset, v[3])
-					offset = WriteFloat32Roblox(b, offset, v[4])
-					offset = WriteFloat32Roblox(b, offset, v[5])
-					WriteFloat32Roblox(b, offset, v[6])
-					table.insert(DataParts, b)
-				end
-			end
-		elseif PropertyType == 0x1D then
-			for _, value in ipairs(PropertyValues) do
-				local b = buffer.create(4 + #value)
-				WriteString(b, 0, value or "")
-				table.insert(DataParts, b)
-			end
-		end
-
-		local TotalSize = 4 + 4 + #PropertyName + 1
-		for _, part in ipairs(DataParts) do TotalSize = TotalSize + buffer.len(part) end
-
-		local DataBuffer = buffer.create(TotalSize)
-		local offset = 0
-		buffer.writeu32(DataBuffer, offset, ClassId); offset = offset + 4
-		offset = WriteString(DataBuffer, offset, PropertyName)
-		buffer.writeu8(DataBuffer, offset, PropertyType); offset = offset + 1
-
-		for _, part in ipairs(DataParts) do
-			buffer.copy(DataBuffer, offset, part, 0, buffer.len(part))
-			offset = offset + buffer.len(part)
-		end
-
-		return DataBuffer
-	end
-
-	local function WritePRNTChunk()
-		local DataBuffer = buffer.create(1 + 4 + (#GlobalInstances * 8))
-		local offset = 0
-		buffer.writeu8(DataBuffer, offset, 0); offset = offset + 1
-		buffer.writeu32(DataBuffer, offset, #GlobalInstances); offset = offset + 4
-
-		local ChildArrays, childPrevious = {}, 0
-		for _, instance in ipairs(GlobalInstances) do
-			local b = buffer.create(4)
-			buffer.writeu32(b, 0, TransformInt32(instance.Referent - childPrevious))
-			table.insert(ChildArrays, b)
-			childPrevious = instance.Referent
-		end
-		local InterleavedChildren = InterleaveBytes(ChildArrays)
-		buffer.copy(DataBuffer, offset, InterleavedChildren, 0, buffer.len(InterleavedChildren))
-		offset = offset + buffer.len(InterleavedChildren)
-
-		local ParentArrays, parentPrevious = {}, 0
-		for _, instance in ipairs(GlobalInstances) do
-			local ParentId = instance.Parent or -1
-			local b = buffer.create(4)
-			buffer.writeu32(b, 0, TransformInt32(ParentId - parentPrevious))
-			table.insert(ParentArrays, b)
-			parentPrevious = ParentId
-		end
-		local InterleavedParents = InterleaveBytes(ParentArrays)
-		buffer.copy(DataBuffer, offset, InterleavedParents, 0, buffer.len(InterleavedParents))
-
-		return DataBuffer
-	end
-
-	local Chunks = {}
-
-	local MetaData = buffer.create(4); buffer.writeu32(MetaData, 0, 0)
-	local MetaHeader, CompressedMetaData = WriteChunkHeader("META", MetaData)
-	table.insert(Chunks, MetaHeader); table.insert(Chunks, CompressedMetaData)
-
-	local SstrData = WriteSSTRChunk()
-	local SstrHeader, CompressedSstrData = WriteChunkHeader("SSTR", SstrData)
-	table.insert(Chunks, SstrHeader); table.insert(Chunks, CompressedSstrData)
-
-	for classId, className in ipairs(ClassList) do
-		local InstData = WriteINSTChunk(className, classId - 1)
-		local InstHeader, CompressedInstData = WriteChunkHeader("INST", InstData)
-		table.insert(Chunks, InstHeader); table.insert(Chunks, CompressedInstData)
-	end
-
-	for classId, className in ipairs(ClassList) do
-		local SortedPropertyNames = {}
-		for propertyName in pairs(Classes[className].Properties) do table.insert(SortedPropertyNames, propertyName) end
-		table.sort(SortedPropertyNames)
-
-		for _, propertyName in ipairs(SortedPropertyNames) do
-			local PropertyInfo = Classes[className].Properties[propertyName]
-			local PropData = WritePROPChunk(className, classId - 1, propertyName, PropertyInfo)
-			local PropHeader, CompressedPropData = WriteChunkHeader("PROP", PropData)
-			table.insert(Chunks, PropHeader); table.insert(Chunks, CompressedPropData)
-		end
-	end
-
-	local PrntData = WritePRNTChunk()
-	local PrntHeader, CompressedPrntData = WriteChunkHeader("PRNT", PrntData)
-	table.insert(Chunks, PrntHeader); table.insert(Chunks, CompressedPrntData)
-
-	local EndHeader, CompressedEndData = WriteChunkHeader("END\0", buffer.create(0))
-	table.insert(Chunks, EndHeader)
-	table.insert(Chunks, CompressedEndData)
-
-	local FinalBufferParts = {}
-	table.insert(FinalBufferParts, WriteFileHeader())
-	for _, part in ipairs(Chunks) do
-		table.insert(FinalBufferParts, part)
-	end
-
-	local TotalSize = 0
-	for _, part in ipairs(FinalBufferParts) do TotalSize = TotalSize + buffer.len(part) end
-
-	local ResultBuffer = buffer.create(TotalSize)
-	local offset = 0
-	for _, part in ipairs(FinalBufferParts) do
-		buffer.copy(ResultBuffer, offset, part, 0, buffer.len(part))
-		offset = offset + buffer.len(part)
-	end
-
-	writefile(OutputRBXLFile, buffer.tostring(ResultBuffer) .. "</roblox>")
+    writefile(OutputRBXLFile, buffer.tostring(ResultBuffer))
 end
 
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
