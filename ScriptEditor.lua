@@ -112,7 +112,7 @@ local function Split(str, del)
 		end
 	else
 		local i,Si,si = 0, 1, nil
-		str ..= del
+		str .. del
 		while i do
 			si, Si, i = i, find(str, del, i + 1, true)
 			if i == nil then
