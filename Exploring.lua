@@ -2810,7 +2810,10 @@ end
 
 local function canViewServerScript(scriptObj)
 	local linkedSource = scriptObj.LinkedSource
-	if linkedSource and #linkedSource >= 1 or scriptObj.RunContext == Enum.RunContext.Client then
+	if scriptObj.RunContext == Enum.RunContext.Client then
+		return true
+	end
+	if linkedSource and #linkedSource >= 1 then
 		local result = tonumber(string_match(linkedSource, "(%d+)"))
 		if result then
 			return true
