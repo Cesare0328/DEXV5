@@ -112,7 +112,7 @@ local function Split(str, del)
 		end
 	else
 		local i,Si,si = 0, 1, nil
-		str .. del
+		str = str .. del
 		while i do
 			si, Si, i = i, find(str, del, i + 1, true)
 			if i == nil then
@@ -288,11 +288,11 @@ local Lexer do
 				local Value = blank
 				while not Input.EOF() and Input.Peek(#closer) ~= closer do
 					Char, DebugInfo = Input.Next()
-					Value ..= Char
+					Value = Value .. Char
 				end
 				if Input.Peek(#closer) == closer then
 					for i = 1, #closer do
-						Value ..= Input.Next()
+						Value = Value .. Input.Next()
 					end
 					self.StringDepth = 0
 				end
@@ -305,11 +305,11 @@ local Lexer do
 				local Value = blank
 				while not Input.EOF() and Input.Peek(#closer) ~= closer do
 					Char, DebugInfo = Input.Next()
-					Value ..= Char
+					Value = Value .. Char
 				end
 				if Input.Peek(#closer) == closer then
 					for i = 1, #closer do
-						Value ..= Input.Next()
+						Value = Value .. Input.Next()
 					end
 					self.CommentDepth = 0
 				end
@@ -334,7 +334,7 @@ local Lexer do
 			elseif Check(Char, Tokens.Identifier, true) then
 				local Value = Char
 				while Check(Input.Peek(), Tokens.Identifier) and not Input.EOF() do
-					Value ..= Input.Next()
+					Value = Value .. Input.Next()
 				end
 				Result.Type = Check(Value, Tokens.Keyword) and Tokens.Keyword or Tokens.Identifier
 				Result.Value = Value
@@ -351,18 +351,18 @@ local Lexer do
 					local closer = closebrak .. rep(equal, self.CommentDepth - 1) .. closebrak
 					while not Input.EOF() and Input.Peek(#closer) ~= closer do
 						Char, DebugInfo = Input.Next()
-						Value ..= Char
+						Value = Value .. Char
 					end
 					if Input.Peek(#closer) == closer then
 						for i = 1, #closer do
-							Value ..= Input.Next()
+							Value = Value .. Input.Next()
 						end
 						self.CommentDepth = 0
 					end
 				else
 					while not Input.EOF() and not find(newline, Char, 1, true) do
 						Char, DebugInfo = Input.Next()
-						Value ..= Char
+						Value = Value .. Char
 					end
 				end
 				Result.Value = Value
@@ -370,7 +370,7 @@ local Lexer do
 			elseif Check(Char, Tokens.Number, true) or Char == dot and Check(Input.Peek(), Tokens.Number, true) then
 				local Value = Char
 				while Check(Input.Peek(), Tokens.Number) and not Input.EOF() do
-					Value ..= Input.Next()
+					Value = Value .. Input.Next()
 				end
 				Result.Value = Value
 				Result.Type = Tokens.Number
@@ -380,16 +380,16 @@ local Lexer do
 				Result.Value = quote
 				while not Input.EOF() do
 					local Char = Input.Next()
-					Result.Value ..= Char
+					Result.Value = Result.Value .. Char
 					if Escaped then
-						String ..= Char
+						String = String .. Char
 						Escaped = false
 					elseif Char == backslash then
 						Escaped = true
 					elseif Char == quote or Char == newline then
 						break
 					else
-						String ..= Char
+						String = String .. Char
 					end
 				end
 				Result.Type = Tokens.String
@@ -399,16 +399,16 @@ local Lexer do
 				Result.Value = apos
 				while not Input.EOF() do
 					local Char = Input.Next()
-					Result.Value ..= Char
+					Result.Value = Result.Value .. Char
 					if Escaped then
-						String ..= Char
+						String = String .. Char
 						Escaped = false
 					elseif Char == backslash then
 						Escaped = true
 					elseif Char == apos or Char == newline then
 						break
 					else
-						String ..= Char
+						String = String .. Char
 					end
 				end
 				Result.Type = Tokens.String
@@ -1200,12 +1200,12 @@ function EditorLib.Initialize(Frame, Options)
 				while sub(CaretLine, TabAmount + 1, TabAmount + 1) == tab do
 					TabAmount += 1
 				end
-				Data ..= rep(tab, TabAmount)
+				Data = Data .. rep(tab, TabAmount)
 				local SpTabAmount = 0
 				while sub(CaretLine, SpTabAmount + 1, SpTabAmount + 1) == " " do
 					SpTabAmount += 1
 				end
-				Data ..= gsub(rep(" ", SpTabAmount), TabText, tab)
+				Data = Data .. gsub(rep(" ", SpTabAmount), TabText, tab)
 				Write(Data, Start, End)
 				Editor.Selection.Start = Start + #Data
 				Editor.Selection.End = Editor.Selection.Start
@@ -1569,7 +1569,7 @@ Connect(SaveScript.Activated, function()
 		if fileName == "File Name" or FileName == "" then
 			fileName = "LocalScript_" .. random(1, 5000)
 		end
-		fileName ..= ".lua"
+		filename = fileName .. ".lua"
 		pathName = "DEXV5\\Scripts\\" .. fileName
 		writefile(fileName, ScriptEditor.Content)
 	end
