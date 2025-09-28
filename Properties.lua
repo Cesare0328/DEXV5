@@ -2279,7 +2279,7 @@ scrollBar:Update()
 showSelectionData(GetSelection())
 
 SelectionChanged_Bindable.Event:Connect(function() 
-	showSelectionData(GetSelection())
+	--showSelectionData(GetSelection())
 end)
 
 SetAwaiting_Bindable.Event:Connect(function(obj)
