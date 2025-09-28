@@ -2029,7 +2029,44 @@ do
 	end
 
 	function Selection:Set(objects)
-		
+		local lupdate, supdate = false, false
+		warn("1")
+		task.wait(1)
+		if #SelectionList > 0 then
+			for i = 1,#SelectionList do
+				local object = SelectionList[i]
+				local node = NodeLookup[object]
+				if node then
+					node.Selected = false
+					SelectionSet[object] = nil
+				end
+			end
+
+			SelectionList = {}
+			Selection.List = SelectionList
+			supdate = true
+		end
+		warn("2")
+		task.wait(1)
+		for i = 1,#objects do
+			local l,s = addObject(objects[i])
+			lupdate = l or lupdate
+			supdate = s or supdate
+		end
+		warn("3")
+		task.wait(1)
+		if lupdate then
+			rawUpdateList()
+			supdate = true
+		elseif supdate then
+			scrollBar:Update()
+		end
+		warn("4")
+		task.wait(1)
+		if supdate then
+			SelectionChanged_Bindable:Fire()
+			updateActions()
+		end
 	end
 
 	function Selection:Add(object)
