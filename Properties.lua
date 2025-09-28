@@ -1587,51 +1587,63 @@ local function getTableLength(t)
 end
 
 local function showSelectionData(obj)
-	ClearPropertiesList()
-	local propHolder, foundProps = {}, {}
-	local attributes, tags = {}, {}
-	numRows = 0
-	for _,nextObj in next, (obj or {}) do
-		if not foundProps[nextObj.className] then
-			foundProps[nextObj.className] = true
-			for name, value in pairs(nextObj:GetAttributes()) do
-				attributes[name] = {
-					Object = nextObj,
-					Value = value
-				}
-			end
-			for _, value in pairs(CollectionService:GetTags(nextObj)) do
-				table.insert(tags, {
-					Object = nextObj,
-					Value = value
-				})
-			end
-			for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.className, RbxApi)) do
-				if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
-					if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
-						table_insert(propHolder,{
-							propertyData = v, 
-							object = nextObj
-						})
-					end
-				end
-			end
-		end
-	end
-	sortProps(propHolder)
-	displayProperties(propHolder)
-	if getTableLength(attributes) > 0 then
-		displayTextRow("<b> ----- Attributes ----- </b>")
-		displayAttributes(attributes)
-	end
-	if getTableLength(tags) > 0 then
-		displayTextRow("<b> ----- Tags ----- </b>")
-		displayTags(tags)
-	end
-	ContentFrame.Size = UDim2_new(1, 0, 0, numRows * Row.Height)
-	scrollBar.ScrollIndex = 0
-	scrollBar.TotalSpace = numRows * Row.Height
-	scrollBar.Update()
+    ClearPropertiesList()
+    local propHolder, foundProps = {}, {}
+    local attributes, tags = {}, {}
+    numRows = 0
+    
+    for _, nextObj in next, (obj or {}) do
+        if not (nextObj and typeof(nextObj) == "Instance" and nextObj.Parent ~= nil) then
+            continue
+        end
+        
+        if not foundProps[nextObj.className] then
+            foundProps[nextObj.className] = true
+            
+            for name, value in pairs(nextObj:GetAttributes()) do
+                attributes[name] = {
+                    Object = nextObj,
+                    Value = value
+                }
+            end
+            
+            for _, value in pairs(CollectionService:GetTags(nextObj)) do
+                table.insert(tags, {
+                    Object = nextObj,
+                    Value = value
+                })
+            end
+            
+            for _, v in ipairs(RbxApi.GetProperties(nextObj, nextObj.className, RbxApi)) do
+                if nextObj:IsA(v.Class) and not checkForDupe(v,propHolder) then
+                    if string_find(string_lower(v.Name),string_lower(propertiesSearch.Text)) or not searchingProperties() then
+                        table_insert(propHolder,{
+                            propertyData = v, 
+                            object = nextObj
+                        })
+                    end
+                end
+            end
+        end
+    end
+    
+    sortProps(propHolder)
+    displayProperties(propHolder)
+    
+    if getTableLength(attributes) > 0 then
+        displayTextRow("<b> ----- Attributes ----- </b>")
+        displayAttributes(attributes)
+    end
+    
+    if getTableLength(tags) > 0 then
+        displayTextRow("<b> ----- Tags ----- </b>")
+        displayTags(tags)
+    end
+    
+    ContentFrame.Size = UDim2_new(1, 0, 0, numRows * Row.Height)
+    scrollBar.ScrollIndex = 0
+    scrollBar.TotalSpace = numRows * Row.Height
+    scrollBar.Update()
 end
 -----------------------SCROLLBAR STUFF--------------------------
 local ScrollBarWidth = 16
@@ -2279,7 +2291,7 @@ scrollBar:Update()
 showSelectionData(GetSelection())
 
 SelectionChanged_Bindable.Event:Connect(function() 
-	--showSelectionData(GetSelection())
+	showSelectionData(GetSelection())
 end)
 
 SetAwaiting_Bindable.Event:Connect(function(obj)
