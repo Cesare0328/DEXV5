@@ -3294,7 +3294,7 @@ function rightClickMenu(sObj)
 						ScriptEditor.Visible = false
 						local obj = CreateCaution("Warning", "This script is big in size, there may be lags, do you still want to continue?")
 						Connect(obj.Ok.MouseButton1Up, function()
-							CautionWindow.Visible = false
+							newCaution.Visible = false
 							OpenScript_Bindable:Fire(Selected)
 						end)
 					else
