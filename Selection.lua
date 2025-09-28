@@ -326,26 +326,7 @@ Connect(UserInputService.InputBegan, function(Input, GameProcessed)
 end)
 
 Connect(SelectionChanged_Bindable.Event, function()
-	local A = getSelection()
-	local function CleanSelectionBoxes()
-		for _, C in ipairs(SelectionBoxes) do
-			Destroy(C)
-		end
-	end
-	local function CreateSelectionBoxes()
-		for D, E in next, A do
-			if typeof(E) == "Instance" then
-				local F = Clone(SelectionBox)
-				F.Adornee = E
-				F.Parent = CoreGui
-				table_insert(SelectionBoxes, F)
-			end
-		end
-	end
-	if Settings.SelBox then
-		CleanSelectionBoxes()
-		CreateSelectionBoxes()
-	end
+	
 end)
 
 function GetSetting_Bindable.OnInvoke(p1)
