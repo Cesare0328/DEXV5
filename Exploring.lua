@@ -2030,8 +2030,7 @@ do
 
 	function Selection:Set(objects)
 		local lupdate, supdate = false, false
-		warn("1")
-		task.wait(5)
+		
 		if #SelectionList > 0 then
 			for i = 1,#SelectionList do
 				local object = SelectionList[i]
@@ -2046,23 +2045,17 @@ do
 			Selection.List = SelectionList
 			supdate = true
 		end
-		warn("2")
-		task.wait(5)
 		for i = 1,#objects do
 			local l,s = addObject(objects[i])
 			lupdate = l or lupdate
 			supdate = s or supdate
 		end
-		warn("3")
-		task.wait(5)
 		if lupdate then
 			rawUpdateList()
 			supdate = true
 		elseif supdate then
 			scrollBar:Update()
 		end
-		warn("4")
-		task.wait(5)
 		if supdate then
 			SelectionChanged_Bindable:Fire()
 			updateActions()
