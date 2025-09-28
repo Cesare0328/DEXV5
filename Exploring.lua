@@ -2029,40 +2029,7 @@ do
 	end
 
 	function Selection:Set(objects)
-		local lupdate, supdate = false, false
-
-		if #SelectionList > 0 then
-			for i = 1,#SelectionList do
-				local object = SelectionList[i]
-				local node = NodeLookup[object]
-				if node then
-					node.Selected = false
-					SelectionSet[object] = nil
-				end
-			end
-
-			SelectionList = {}
-			Selection.List = SelectionList
-			supdate = true
-		end
-
-		for i = 1,#objects do
-			local l,s = addObject(objects[i])
-			lupdate = l or lupdate
-			supdate = s or supdate
-		end
-
-		if lupdate then
-			rawUpdateList()
-			supdate = true
-		elseif supdate then
-			scrollBar:Update()
-		end
-
-		if supdate then
-			SelectionChanged_Bindable:Fire()
-			updateActions()
-		end
+		
 	end
 
 	function Selection:Add(object)
@@ -2124,9 +2091,33 @@ do
 	setfflag("LayerCollectorGetGuiObjectsAtPosition", "true")
 
 	SetSelection_Bindable.OnInvoke = function(...)
-
+		if #Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then
+			for i,v in ipairs(Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)) do
+				if v:IsA("GuiObject") and v.Visible then
+					return
+				end
+			end
+		end
+		SetSelectionBox2D(nil)
 		Selection:Set(...)
-
+		local found = true
+		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
+			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
+			if CanBeSelectionBoxed(Obj) then
+				Selection:Set({Obj})
+				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
+				local TargetIndex = findObjectIndex(Selection:Get()[1])
+        		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        		scrollBar:ScrollTo(ScrollIndex)
+			else
+				found = false
+			end
+		end
+		if Selection:Get()[1] and not found then
+			local TargetIndex = findObjectIndex(Selection:Get()[1])
+        	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+        	scrollBar:ScrollTo(ScrollIndex)
+		end
 	end
 
 	GetSelection_Bindable.OnInvoke = function()
