@@ -1626,24 +1626,7 @@ local function showSelectionData(obj)
             end
         end
     end
-    
-    sortProps(propHolder)
-    displayProperties(propHolder)
-    
-    if getTableLength(attributes) > 0 then
-        displayTextRow("<b> ----- Attributes ----- </b>")
-        displayAttributes(attributes)
-    end
-    
-    if getTableLength(tags) > 0 then
-        displayTextRow("<b> ----- Tags ----- </b>")
-        displayTags(tags)
-    end
-    
-    ContentFrame.Size = UDim2_new(1, 0, 0, numRows * Row.Height)
-    scrollBar.ScrollIndex = 0
-    scrollBar.TotalSpace = numRows * Row.Height
-    scrollBar.Update()
+
 end
 -----------------------SCROLLBAR STUFF--------------------------
 local ScrollBarWidth = 16
