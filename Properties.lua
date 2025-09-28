@@ -42,7 +42,7 @@ local GetPrint_Bindable = Bindables:WaitForChild("GetPrint", 300)
 -- < Specials > --
 local Specials = GetSpecials_Bindable:Invoke()
 local checkrbxlocked = Specials.checkrbxlocked
-local getpropertylist = getproperties --some race condition can sometimes cause this to not copy over??? 
+local getpropertylist = Specials.getpropertylist
 -- < Source > --
 local Gui = script.Parent.Parent
 local PropertiesFrame = script.Parent
