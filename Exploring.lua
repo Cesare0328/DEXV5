@@ -2124,33 +2124,9 @@ do
 	setfflag("LayerCollectorGetGuiObjectsAtPosition", "true")
 
 	SetSelection_Bindable.OnInvoke = function(...)
-		if #Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) > 0 then
-			for i,v in ipairs(Dex:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)) do
-				if v:IsA("GuiObject") and v.Visible then
-					return
-				end
-			end
-		end
-		SetSelectionBox2D(nil)
+
 		Selection:Set(...)
-		local found = true
-		if #PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y) >= 1 then
-			local Obj = PlayerGui:GetGuiObjectsAtPosition(Mouse.X, Mouse.Y)[1]
-			if CanBeSelectionBoxed(Obj) then
-				Selection:Set({Obj})
-				SetSelectionBox2D(FindFirstParentAfterScreenGui(Obj))
-				local TargetIndex = findObjectIndex(Selection:Get()[1])
-        		local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-        		scrollBar:ScrollTo(ScrollIndex)
-			else
-				found = false
-			end
-		end
-		if Selection:Get()[1] and not found then
-			local TargetIndex = findObjectIndex(Selection:Get()[1])
-        	local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-        	scrollBar:ScrollTo(ScrollIndex)
-		end
+
 	end
 
 	GetSelection_Bindable.OnInvoke = function()
@@ -3294,7 +3270,7 @@ function rightClickMenu(sObj)
 						ScriptEditor.Visible = false
 						local obj = CreateCaution("Warning", "This script is big in size, there may be lags, do you still want to continue?")
 						Connect(obj.Ok.MouseButton1Up, function()
-							newCaution.Visible = false
+							CautionWindow.Visible = false
 							OpenScript_Bindable:Fire(Selected)
 						end)
 					else
