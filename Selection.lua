@@ -584,7 +584,7 @@ repeat task.wait()
     TitleLabel.Text = string.format("Rendering [%s/%s]", tostring(base), tostring(max))
     sethiddenproperty(workspace, "StreamingMinRadius", base)
     sethiddenproperty(workspace, "StreamingTargetRadius", base + base)
-    Player:RequestStreamAroundAsync(workspace.CurrentCamera.CFrame.p)
+    pcall(function() Player:RequestStreamAroundAsync(workspace.CurrentCamera.CFrame.p) end)
     base += scale
     task.wait(interval)
 until base >= max
