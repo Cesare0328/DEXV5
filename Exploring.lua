@@ -72,7 +72,7 @@ local checkrbxlocked = Specials.checkrbxlocked
 local Stepped = RunService.Stepped
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = cloneref(WaitForChild(LocalPlayer, "PlayerGui", 300))
-local Searched, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection, SearchLoading = false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil, nil
+local Searched, SearchEnded, WhitelistedFocus, ActiveNotification, FPSDebounce, OldMouseIco, MouseLockButton, OutputSize, BlinkerConnection, SearchLoading = false, false, false, false, false, UserInputService.MouseIconEnabled, nil, 0, nil, nil
 local DebounceTask = nil
 local ViewingObject = false
 local ContextMenuHovered = false
@@ -4437,6 +4437,9 @@ Connect(UserInputService.InputEnded, function(p1)
 	if A == Enum.KeyCode.LeftShift then
 		HoldingShift = false
 	end
+	if A == Enum.KeyCode.Enter and UserInputService:GetFocusedTextBox() == explorerFilter then
+		SearchEnded = true
+	end
 end)
 
 while not RbxApi do
@@ -4447,24 +4450,30 @@ end
 Connect(explorerFilter.FocusLost, function()
 	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
-	if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
-	coroutine.wrap(function()
-		SearchLoading.Visible = true
-		while SearchLoading.Visible do
-		SearchLoading.Visible = true
-        local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
-        Tween:Play()
-        Tween.Completed:Wait()
-        SearchLoading.Rotation = 0
-		end
-    end)()
-	rawUpdateList(true)
-	SearchLoading.Visible = false
-	if explorerFilter.Text == "" and #Selection:Get() == 1 then
-        if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
-			local TargetIndex = findObjectIndex(Selection:Get()[1])
-            local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
-            scrollBar:ScrollTo(ScrollIndex)
+	repeat task.wait() until SearchEnded == true
+	SearchEnded = false
+	if string.len(explorerFilter.Text) > 0 then
+		if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
+		coroutine.wrap(function()
+			SearchLoading.Visible = true
+			while SearchLoading.Visible do
+			SearchLoading.Visible = true
+			local Tween = TweenService:Create(SearchLoading, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Rotation = 360})
+			Tween:Play()
+			Tween.Completed:Wait()
+			SearchLoading.Rotation = 0
+			end
+		end)()
+		rawUpdateList(true)
+		SearchLoading.Visible = false
+	else
+        rawUpdateList()
+		if #Selection:Get() == 1 then
+			if GetSetting_Bindable:Invoke("SkipToAfterSearch") then
+				local TargetIndex = findObjectIndex(Selection:Get()[1])
+				local ScrollIndex = math.max(1, TargetIndex - math.floor(scrollBar.VisibleSpace / 2))
+				scrollBar:ScrollTo(ScrollIndex)
+			end
 		end
 	end
 end)
