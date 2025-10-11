@@ -4445,8 +4445,8 @@ while not RbxApi do
 end
 
 Connect(explorerFilter.FocusLost, function(EnterPressed)
-	Searched = true
 	if not EnterPressed then return end
+	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if string.len(explorerFilter.Text) > 0 then
 		if FilterInstance.Visible then task.spawn(function() task.wait() FilterInstance.Visible = false end) end
