@@ -3655,6 +3655,13 @@ do
 					Connect(entry.MouseButton1Down, function(x,y)
 						local node = TreeList[i + self.ScrollIndex]
 						DestroyRightClick()
+						if GetAwaiting_Bindable:Invoke() then
+							SetAwaiting_Bindable:Fire(node.Object)
+							return
+						end
+						if not HoldingShift then
+							lastSelectedNode = i + self.ScrollIndex
+						end
 
 					end)
 					Connect(entry.MouseButton2Down, function()
