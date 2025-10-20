@@ -3662,6 +3662,17 @@ do
 						if not HoldingShift then
 							lastSelectedNode = i + self.ScrollIndex
 						end
+						if Option.Modifiable then
+							local pos = Vector2_new(x,y)
+							dragReparent(node.Object, Clone(entry), pos, entry.AbsolutePosition - pos)
+						elseif Option.Selectable then
+							if Selection.Selected[node.Object] then
+								Selection:Set({})
+							else
+								Selection:Set({node.Object})
+							end
+							dragSelect(i+self.ScrollIndex,true,'MouseButton1Up')
+						end
 
 					end)
 					Connect(entry.MouseButton2Down, function()
