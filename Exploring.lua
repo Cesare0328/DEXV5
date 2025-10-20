@@ -3655,56 +3655,7 @@ do
 					Connect(entry.MouseButton1Down, function(x,y)
 						local node = TreeList[i + self.ScrollIndex]
 						DestroyRightClick()
-						if GetAwaiting_Bindable:Invoke() then
-							SetAwaiting_Bindable:Fire(node.Object)
-							return
-						end
-						if not HoldingShift then
-							lastSelectedNode = i + self.ScrollIndex
-						end
-						if HoldingShift and not filteringInstances() then
-							if lastSelectedNode then
-								if i + self.ScrollIndex - lastSelectedNode > 0 then
-									Selection:StopUpdates()
-									for i2 = 1, i + self.ScrollIndex - lastSelectedNode do
-										local newNode = TreeList[lastSelectedNode + i2]
-										if newNode then
-											Selection:Add(newNode.Object)
-										end
-									end
-									Selection:ResumeUpdates()
-								else
-									Selection:StopUpdates()
-									for i2 = i + self.ScrollIndex - lastSelectedNode, 1 do
-										local newNode = TreeList[lastSelectedNode + i2]
-										if newNode then
-											Selection:Add(newNode.Object)
-										end
-									end
-									Selection:ResumeUpdates()
-								end
-							end
-							return
-						end
-						if HoldingCtrl then
-							if Selection.Selected[node.Object] then
-								Selection:Remove(node.Object)
-							else
-								Selection:Add(node.Object)
-							end
-							return
-						end
-						if Option.Modifiable then
-							local pos = Vector2_new(x,y)
-							dragReparent(node.Object, Clone(entry), pos, entry.AbsolutePosition - pos)
-						elseif Option.Selectable then
-							if Selection.Selected[node.Object] then
-								Selection:Set({})
-							else
-								Selection:Set({node.Object})
-							end
-							dragSelect(i+self.ScrollIndex,true,'MouseButton1Up')
-						end
+
 					end)
 					Connect(entry.MouseButton2Down, function()
 						if not Option.Selectable then return end
