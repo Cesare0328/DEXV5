@@ -1475,11 +1475,29 @@ local function DebugScriptAt(o)
             if fenv and fenv.script == o then
                 local info = debug.getinfo(obj)
                 local hash = getfunctionhash and getfunctionhash(obj) or "N/A"
+                local innerClosures = {}
+                local getprotos = getprotos or (debug and debug.getprotos)
+                if getprotos then
+                    local protos = getprotos(obj)
+                    for idx, proto in ipairs(protos) do
+                        local getproto = getproto or (debug and debug.getproto)
+                        local closures = getproto and getproto(obj, idx, true)
+                        if closures then
+                            for _, closure in ipairs(closures) do
+                                local clInfo = debug.getinfo(closure)
+                                local clName = clInfo and clInfo.name or "Anonymous Closure"
+                                local clHash = getfunctionhash and getfunctionhash(closure) or "N/A"
+                                table.insert(innerClosures, tostring(closure) .. " [" .. clName .. "] (Hash: " .. clHash .. ")")
+                            end
+                        end
+                    end
+                end
                 table.insert(gcFunctions, {
                     name = tostring(obj) .. " [" .. (info and info.name or "Anonymous Function") .. "]",
                     info = info,
                     hash = hash,
-                    source = formatSource(info and info.source)
+                    source = formatSource(info and info.source),
+                    innerClosures = innerClosures
                 })
             end
         end
@@ -1534,6 +1552,12 @@ local function DebugScriptAt(o)
             table.insert(out, string.format("GC FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
             if fn.info then
                 table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
+            end
+            if #fn.innerClosures > 0 then
+                table.insert(out, "  INNER CLOSURES:")
+                for _, cl in ipairs(fn.innerClosures) do
+                    table.insert(out, "    - " .. cl)
+                end
             end
             table.insert(out, "")
         end
