@@ -1377,17 +1377,24 @@ local function DebugScriptAt(o)
     if c ~= "LocalScript" and c ~= "Script" and c ~= "ModuleScript" then return "bad class: " .. c end
 
     if not getsenv then return "no getsenv" end
-    local env = getsenv(o)
-    if type(env) ~= "table" then
-        if c == "ModuleScript" then
-            local ok, m = pcall(require, o)
-            if not ok then return "require failed: " .. tostring(m) end
-            env = getsenv(o)
-            if type(env) ~= "table" then return "env not table after require" end
-        else
-            return "env not table"
+
+    local env
+    if c == "ModuleScript" then
+        local ok, m = pcall(require, o)
+        if not ok then return "require failed: " .. tostring(m) end
+        if type(m) == "function" then
+            env = getfenv(m)
+            if type(env) ~= "table" then env = nil end
+        elseif type(m) == "table" then
+            env = m
         end
+        if not env then
+            env = getsenv(o)
+        end
+    else
+        env = getsenv(o)
     end
+    if type(env) ~= "table" then return "env not table" end
 
     local scriptName = o.Name
     local mainFunc = getscriptfunction and getscriptfunction(o)
@@ -1403,7 +1410,7 @@ local function DebugScriptAt(o)
                 for i = 1, math.huge do
                     local name, val = debug.getupvalue(v, i)
                     if not name then break end
-                    table.insert(ups, string.format("%s=%s", name or "?", tostring(val)))
+                    table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
                 end
             end
             local cons = {}
@@ -1446,7 +1453,7 @@ local function DebugScriptAt(o)
                     for i = 1, math.huge do
                         local name, val = debug.getupvalue(v, i)
                         if not name then break end
-                        table.insert(ups, string.format("%s=%s", name or "?", tostring(val)))
+                        table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
                     end
                 end
                 local cons = {}
@@ -1472,7 +1479,7 @@ local function DebugScriptAt(o)
 
     local gcFunctions = {}
     local gc = getgc(true)
-    for _, obj in pairs(gc) do
+    for _, obj in ipairs(gc) do
         if type(obj) == "function" then
             local fenv = getfenv(obj)
             if fenv and fenv.script == o then
@@ -1482,7 +1489,7 @@ local function DebugScriptAt(o)
                     for i = 1, math.huge do
                         local name, val = debug.getupvalue(obj, i)
                         if not name then break end
-                        table.insert(ups, string.format("%s=%s", name or "?", tostring(val)))
+                        table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
                     end
                 end
                 local cons = {}
@@ -1511,7 +1518,7 @@ local function DebugScriptAt(o)
         scriptBytecode = getscriptbytecode and getscriptbytecode(o) or "N/A (use decompile for full)",
         scriptName = getscriptname and getscriptname(o) or o.Name,
         scriptThread = getscriptthread and getscriptthread(o) or "N/A",
-        scriptFunction = getscriptfunction and getscriptfunction(o) or "N/A"
+        scriptFunction = mainFunc or "N/A"
     }
 
     local out = {}
@@ -1598,7 +1605,7 @@ local function DebugScriptAt(o)
     table.insert(out, "Bytecode Hash: " .. scriptDetails.scriptHash)
     table.insert(out, "Loaded Name: " .. scriptDetails.scriptName)
     if scriptDetails.scriptThread ~= "N/A" then table.insert(out, "Main Thread: " .. tostring(scriptDetails.scriptThread)) end
-    if scriptDetails.scriptFunction ~= "N/A" then table.insert(out, "Main Function: " .. tostring(scriptDetails.scriptFunction)) end
+    table.insert(out, "Main Function: " .. tostring(scriptDetails.scriptFunction))
     if scriptDetails.scriptBytecode ~= "N/A (use decompile for full)" then
         table.insert(out, "Bytecode Snippet: " .. string.sub(scriptDetails.scriptBytecode, 1, 100) .. "...")
     end
