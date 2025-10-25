@@ -1551,7 +1551,7 @@ local function DebugScriptAt(o)
         for i, fn in ipairs(gcFunctions) do
             table.insert(out, string.format("GC FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
             if fn.info then
-                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
+                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.numparams or 0, tostring(fn.info.is_vararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
             end
             if #fn.innerClosures > 0 then
                 table.insert(out, "  INNER CLOSURES:")
