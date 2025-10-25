@@ -1396,7 +1396,60 @@ local function DebugScriptAt(o)
     local scriptName = o.Name
     local mainFunc = getscriptfunction and getscriptfunction(o)
     local scriptSource = mainFunc and pcall(function() return debug.getinfo(mainFunc).source end) and debug.getinfo(mainFunc).source or "unknown"
-    local fullPath = o:GetFullName()
+
+    local path
+    if not o:IsDescendantOf(game) then
+        local ancestors = {}
+        local current = o
+        while current do
+            table.insert(ancestors, 1, current.Name)
+            current = current.Parent
+        end
+        if ancestors[1] == "Dex Internal Storage" then
+            table.remove(ancestors, 1)
+        end
+        if ancestors[1] == "Nil Instances" then
+            table.remove(ancestors, 1)
+        end
+
+        if #ancestors > 0 then
+            local pathParts = {"getnilinstances()"}
+            for i = 1, #ancestors do
+                local name = ancestors[i]
+                if name:match("^[%a_][%w_]*$") then
+                    table.insert(pathParts, "." .. name)
+                else
+                    local escapedName = name:gsub('"', '\\"')
+                    table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+                end
+            end
+            path = table.concat(pathParts, "")
+        else
+            path = "getnilinstances()"
+        end
+    else
+        local ancestors = {}
+        local current = o
+        while current.Parent ~= game do
+            table.insert(ancestors, 1, current.Name)
+            current = current.Parent
+        end
+            
+        local ServiceName = current.ClassName
+            
+        local pathParts = {string.format("game:GetService(\"%s\")", ServiceName)}
+        for i = 1, #ancestors do
+            local name = ancestors[i]
+            if name:match("^[%a_][%w_]*$") then
+                table.insert(pathParts, "." .. name)
+            else
+                local escapedName = name:gsub('"', '\\"')
+                table.insert(pathParts, "[\"" .. escapedName .. "\"]")
+            end
+        end
+            
+        path = table.concat(pathParts, "")
+    end
 
     local function tableToString(t, depth)
         if depth > 3 then return "{...}" end
@@ -1439,6 +1492,20 @@ local function DebugScriptAt(o)
         return cons
     end
 
+    local function formatFunctionName(fn, info)
+        local funcStr = tostring(fn)
+        local name = info and info.name or ""
+        local displayName = name ~= "" and name or "Anonymous Function"
+        return funcStr .. " [" .. displayName .. "]"
+    end
+
+    local function formatSource(src)
+        if src and src:sub(1,1) == "=" then
+            return src:sub(2)
+        end
+        return src or "N/A"
+    end
+
     local envFunctions = {}
     for k, v in pairs(env) do
         if type(v) == "function" then
@@ -1447,12 +1514,12 @@ local function DebugScriptAt(o)
             local cons = getConstants(v)
             local hash = getfunctionhash and getfunctionhash(v) or "N/A"
             table.insert(envFunctions, {
-                name = tostring(k),
+                name = formatFunctionName(v, info),
                 info = info,
                 upvalues = ups,
                 constants = cons,
                 hash = hash,
-                source = info and info.source or "N/A"
+                source = formatSource(info and info.source)
             })
         end
     end
@@ -1476,12 +1543,12 @@ local function DebugScriptAt(o)
                 local cons = getConstants(v)
                 local hash = getfunctionhash and getfunctionhash(v) or "N/A"
                 table.insert(regFunctions, {
-                    name = info.name or "unnamed",
+                    name = formatFunctionName(v, info),
                     info = info,
                     upvalues = ups,
                     constants = cons,
                     hash = hash,
-                    source = info.source
+                    source = formatSource(info.source)
                 })
             end
         end
@@ -1498,12 +1565,12 @@ local function DebugScriptAt(o)
                 local cons = getConstants(obj)
                 local hash = getfunctionhash and getfunctionhash(obj) or "N/A"
                 table.insert(gcFunctions, {
-                    name = info and info.name or "anonymous",
+                    name = formatFunctionName(obj, info),
                     info = info,
                     upvalues = ups,
                     constants = cons,
                     hash = hash,
-                    source = info and info.source or "N/A"
+                    source = formatSource(info and info.source)
                 })
             end
         end
@@ -1512,7 +1579,13 @@ local function DebugScriptAt(o)
     local scriptThreads = {}
     local mainThread = getscriptthread and getscriptthread(o)
     if mainThread then
-        table.insert(scriptThreads, {name = "Main Thread", thread = mainThread, info = debug.getinfo(mainThread)})
+        local threadInfo = debug.getinfo(mainThread)
+        table.insert(scriptThreads, {
+            name = "Main Thread",
+            thread = mainThread,
+            info = threadInfo,
+            status = coroutine.status(mainThread)
+        })
     end
     for _, v in ipairs(getgc(true)) do
         if typeof(v) == "thread" and v ~= mainThread then
@@ -1530,9 +1603,9 @@ local function DebugScriptAt(o)
 
     local out = {}
     table.insert(out, "=== SCRIPT DEBUG REPORT ===")
-    table.insert(out, "SCRIPT PATH: " .. fullPath)
+    table.insert(out, "SCRIPT PATH: " .. path)
     table.insert(out, "SCRIPT CLASS: " .. c)
-    table.insert(out, "SCRIPT SOURCE: " .. scriptSource)
+    table.insert(out, "SCRIPT SOURCE: " .. formatSource(scriptSource))
     table.insert(out, "")
 
     if #envFunctions > 0 then
@@ -1611,7 +1684,7 @@ local function DebugScriptAt(o)
         for i, thr in ipairs(scriptThreads) do
             table.insert(out, string.format("THREAD #%d: %s (Status: %s)", i, thr.name, thr.status or "N/A"))
             if thr.info then
-                table.insert(out, string.format("  Source: %s, Lines: %d-%d", thr.info.source or "N/A", thr.info.linedefined or 0, thr.info.lastlinedefined or 0))
+                table.insert(out, string.format("  Source: %s, Lines: %d-%d", formatSource(thr.info.source), thr.info.linedefined or 0, thr.info.lastlinedefined or 0))
             end
             table.insert(out, "")
         end
