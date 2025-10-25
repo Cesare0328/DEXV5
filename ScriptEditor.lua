@@ -1506,6 +1506,7 @@ local function openScript(o)
 				end
     		else
         		decompiled = decompile(o)
+				decompiled = decompiled:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
         		if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
             		if #o.Source > 0 then
                 		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, o.Source)
