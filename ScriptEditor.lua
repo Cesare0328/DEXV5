@@ -1382,8 +1382,12 @@ local function DebugScriptAt(o)
     if type(env) ~= "table" then
         if c == "ModuleScript" then
             local ok, m = pcall(require, o)
-            if ok and type(m) == "table" then
-                env = getfenv(m) or m
+            if ok then
+                if type(m) == "function" then
+                    env = getfenv(m)
+                elseif type(m) == "table" then
+                    env = m
+                end
             end
         end
         if type(env) ~= "table" then return "env not table" end
@@ -1391,7 +1395,7 @@ local function DebugScriptAt(o)
 
     local scriptName = o.Name
     local mainFunc = getscriptfunction and getscriptfunction(o)
-    local scriptSource = mainFunc and pcall(debug.getinfo, mainFunc) and debug.getinfo(mainFunc).source or "unknown"
+    local scriptSource = mainFunc and pcall(function() return debug.getinfo(mainFunc).source end) and debug.getinfo(mainFunc).source or "unknown"
     local fullPath = o:GetFullName()
 
     local function getUpvalues(fn)
