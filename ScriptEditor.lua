@@ -1376,23 +1376,22 @@ local function DebugScriptAt(o)
     local c = o.ClassName
     if c ~= "LocalScript" and c ~= "Script" and c ~= "ModuleScript" then return "bad class: " .. c end
 
-    local env
-    if c == "ModuleScript" then
-        local ok, m = pcall(require, o)
-        if not ok then return "require failed: " .. tostring(m) end
-		if type(m) == "function" then
-        	env = getfenv(m) or m
-		elseif type(m) == "table" then
-			env = m
-		end
-    else
-        if not getsenv then return "no getsenv" end
-        env = getsenv(o)
+    if not getsenv then return "no getsenv" end
+    local env = getsenv(o)
+    if type(env) ~= "table" then
+        if c == "ModuleScript" then
+            local ok, m = pcall(require, o)
+            if not ok then return "require failed: " .. tostring(m) end
+            env = getsenv(o)
+            if type(env) ~= "table" then return "env not table after require" end
+        else
+            return "env not table"
+        end
     end
-    if type(env) ~= "table" then return "env not table" end
 
     local scriptName = o.Name
-    local scriptSource = debug.getinfo(o).source or "unknown"
+    local mainFunc = getscriptfunction and getscriptfunction(o)
+    local scriptSource = mainFunc and debug.getinfo(mainFunc).source or "unknown"
     local fullPath = o:GetFullName()
 
     local envFunctions = {}
@@ -1400,7 +1399,7 @@ local function DebugScriptAt(o)
         if type(v) == "function" then
             local info = debug.getinfo(v)
             local ups = {}
-            if getupvalues then
+            if debug.getupvalue then
                 for i = 1, math.huge do
                     local name, val = debug.getupvalue(v, i)
                     if not name then break end
@@ -1408,7 +1407,7 @@ local function DebugScriptAt(o)
                 end
             end
             local cons = {}
-            if debug.getconstants then
+            if debug.getconstant then
                 for i = 1, math.huge do
                     local val = debug.getconstant(v, i)
                     if val == nil then break end
@@ -1443,7 +1442,7 @@ local function DebugScriptAt(o)
             local info = debug.getinfo(v)
             if info and info.source and info.source:find(scriptName) then
                 local ups = {}
-                if getupvalues then
+                if debug.getupvalue then
                     for i = 1, math.huge do
                         local name, val = debug.getupvalue(v, i)
                         if not name then break end
@@ -1451,7 +1450,7 @@ local function DebugScriptAt(o)
                     end
                 end
                 local cons = {}
-                if debug.getconstants then
+                if debug.getconstant then
                     for i = 1, math.huge do
                         local val = debug.getconstant(v, i)
                         if val == nil then break end
@@ -1473,13 +1472,13 @@ local function DebugScriptAt(o)
 
     local gcFunctions = {}
     local gc = getgc(true)
-    for _, obj in ipairs(gc) do
+    for _, obj in pairs(gc) do
         if type(obj) == "function" then
             local fenv = getfenv(obj)
             if fenv and fenv.script == o then
                 local info = debug.getinfo(obj)
                 local ups = {}
-                if getupvalues then
+                if debug.getupvalue then
                     for i = 1, math.huge do
                         local name, val = debug.getupvalue(obj, i)
                         if not name then break end
@@ -1487,7 +1486,7 @@ local function DebugScriptAt(o)
                     end
                 end
                 local cons = {}
-                if debug.getconstants then
+                if debug.getconstant then
                     for i = 1, math.huge do
                         local val = debug.getconstant(obj, i)
                         if val == nil then break end
