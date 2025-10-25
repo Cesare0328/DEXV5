@@ -1813,7 +1813,7 @@ end)
 
 Connect(DebugScript.Activated, function()
 	if not Title.Text:find("Viewing") then return end
-	local FullLine = #string.split(Editor.Content, "\n")
+	local FullLine = #string.split(ScriptEditor.Content, "\n")
     ScriptEditor.SetContent("")
 	ScriptEditor.SetContent(DebugScriptAt(CurrentScript, FullLine))
 end)
