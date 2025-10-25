@@ -1380,7 +1380,9 @@ local function DebugScriptAt(o)
     if c == "ModuleScript" then
         local ok, m = pcall(require, o)
         if not ok then return "require failed: " .. tostring(m) end
-        env = getfenv(m) or m
+		if type(m) == "function" then
+        	env = getfenv(m) or m
+		end
     else
         if not getsenv then return "no getsenv" end
         env = getsenv(o)
