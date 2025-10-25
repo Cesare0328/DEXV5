@@ -1529,7 +1529,7 @@ local function DebugScriptAt(o, fl)
     local function printFunctionHierarchy(entry, out, indent)
         table.insert(out, indent .. entry.name .. " (Source: " .. entry.source .. ", Hash: " .. entry.hash .. ")")
         if entry.info then
-            table.insert(out, indent .. "  Params: " .. (entry.info.numparams or 0) .. ", Vararg: " .. tostring(entry.info.is_vararg) .. ", Lines: " .. (entry.info.linedefined or 0) .. "-" .. (fl or 0))
+            table.insert(out, "  Params: " .. (rootEntry.info.numparams or 0) .. ", Vararg: " .. tostring(rootEntry.info.is_vararg) .. ", Lines: " .. (rootEntry.info.linedefined or 0) .. "-" .. ((rootEntry.info.lastlinedefined ~= 0 and rootEntry.info.lastlinedefined) or fl or 0))
         end
         if #entry.upvalues > 0 then
             table.insert(out, indent .. "  UPVALUES: " .. table.concat(entry.upvalues, ", "))
