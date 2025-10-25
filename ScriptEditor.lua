@@ -1398,6 +1398,19 @@ local function DebugScriptAt(o)
     local scriptSource = mainFunc and pcall(function() return debug.getinfo(mainFunc).source end) and debug.getinfo(mainFunc).source or "unknown"
     local fullPath = o:GetFullName()
 
+    local function tableToString(t, depth)
+        if depth > 3 then return "{...}" end
+        if type(t) ~= "table" then return tostring(t) end
+        local str = "{"
+        local first = true
+        for k, v in pairs(t) do
+            if not first then str = str .. ", " end
+            str = str .. tostring(k) .. "=" .. tableToString(v, depth + 1)
+            first = false
+        end
+        return str .. "}"
+    end
+
     local function getUpvalues(fn)
         local ups = {}
         if not debug.getupvalue then return ups end
@@ -1405,7 +1418,8 @@ local function DebugScriptAt(o)
         while true do
             local success, name, val = pcall(debug.getupvalue, fn, i)
             if not success or not name then break end
-            table.insert(ups, ("%s=%s"):format(tostring(name), tostring(val)))
+            local valStr = type(val) == "table" and tableToString(val, 0) or tostring(val)
+            table.insert(ups, ("%s=%s"):format(tostring(name), valStr))
             i = i + 1
         end
         return ups
@@ -1418,7 +1432,8 @@ local function DebugScriptAt(o)
         while true do
             local success, val = pcall(debug.getconstant, fn, i)
             if not success or val == nil then break end
-            table.insert(cons, tostring(val))
+            local valStr = type(val) == "table" and tableToString(val, 0) or tostring(val)
+            table.insert(cons, valStr)
             i = i + 1
         end
         return cons
@@ -1494,21 +1509,30 @@ local function DebugScriptAt(o)
         end
     end
 
-    local scriptDetails = {
-        scriptHash = getscripthash and getscripthash(o) or "N/A",
-        scriptBytecode = getscriptbytecode and getscriptbytecode(o) or "N/A (use decompile for full)",
-        scriptName = getscriptname and getscriptname(o) or o.Name,
-        scriptThread = getscriptthread and getscriptthread(o) or "N/A",
-        scriptFunction = mainFunc or "N/A"
-    }
+    local scriptThreads = {}
+    local mainThread = getscriptthread and getscriptthread(o)
+    if mainThread then
+        table.insert(scriptThreads, {name = "Main Thread", thread = mainThread, info = debug.getinfo(mainThread)})
+    end
+    for _, v in ipairs(getgc(true)) do
+        if typeof(v) == "thread" and v ~= mainThread then
+            local threadInfo = debug.getinfo(v)
+            if threadInfo and threadInfo.source and threadInfo.source:find(scriptName) then
+                table.insert(scriptThreads, {
+                    name = threadInfo.name or "Unnamed Thread",
+                    thread = v,
+                    info = threadInfo,
+                    status = coroutine.status(v)
+                })
+            end
+        end
+    end
 
     local out = {}
     table.insert(out, "=== SCRIPT DEBUG REPORT ===")
     table.insert(out, "SCRIPT PATH: " .. fullPath)
     table.insert(out, "SCRIPT CLASS: " .. c)
     table.insert(out, "SCRIPT SOURCE: " .. scriptSource)
-    table.insert(out, "SCRIPT HASH: " .. scriptDetails.scriptHash)
-    table.insert(out, "SCRIPT NAME (loaded): " .. scriptDetails.scriptName)
     table.insert(out, "")
 
     if #envFunctions > 0 then
@@ -1582,13 +1606,17 @@ local function DebugScriptAt(o)
     end
     table.insert(out, "")
 
-    table.insert(out, "--- ADDITIONAL SCRIPT DETAILS ---")
-    table.insert(out, "Bytecode Hash: " .. scriptDetails.scriptHash)
-    table.insert(out, "Loaded Name: " .. scriptDetails.scriptName)
-    if scriptDetails.scriptThread ~= "N/A" then table.insert(out, "Main Thread: " .. tostring(scriptDetails.scriptThread)) end
-    table.insert(out, "Main Function: " .. tostring(scriptDetails.scriptFunction))
-    if scriptDetails.scriptBytecode ~= "N/A (use decompile for full)" then
-        table.insert(out, "Bytecode Snippet: " .. string.sub(scriptDetails.scriptBytecode, 1, 100) .. "...")
+    if #scriptThreads > 0 then
+        table.insert(out, "--- SCRIPT THREADS (" .. #scriptThreads .. ") ---")
+        for i, thr in ipairs(scriptThreads) do
+            table.insert(out, string.format("THREAD #%d: %s (Status: %s)", i, thr.name, thr.status or "N/A"))
+            if thr.info then
+                table.insert(out, string.format("  Source: %s, Lines: %d-%d", thr.info.source or "N/A", thr.info.linedefined or 0, thr.info.lastlinedefined or 0))
+            end
+            table.insert(out, "")
+        end
+    else
+        table.insert(out, "No threads associated with script.")
     end
 
     return table.concat(out, "\n")
