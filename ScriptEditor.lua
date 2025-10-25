@@ -1451,11 +1451,98 @@ local function DebugScriptAt(o)
         path = table.concat(pathParts, "")
     end
 
+    local function tableToString(t, depth)
+        if depth > 3 then return "{...}" end
+        if type(t) ~= "table" then return tostring(t) end
+        local str = "{"
+        local first = true
+        for k, v in pairs(t) do
+            if not first then str = str .. ", " end
+            str = str .. tostring(k) .. "=" .. tableToString(v, depth + 1)
+            first = false
+        end
+        return str .. "}"
+    end
+
+    local function getUpvalues(fn)
+        local ups = {}
+        if not debug.getupvalue then return ups end
+        local i = 1
+        while true do
+            local success, name, val = pcall(debug.getupvalue, fn, i)
+            if not success or not name then break end
+            local valStr = type(val) == "table" and tableToString(val, 0) or tostring(val)
+            table.insert(ups, ("%s=%s"):format(tostring(name), valStr))
+            i = i + 1
+        end
+        return ups
+    end
+
+    local function getConstants(fn)
+        local cons = {}
+        if not debug.getconstant then return cons end
+        local i = 1
+        while true do
+            local success, val = pcall(debug.getconstant, fn, i)
+            if not success or val == nil then break end
+            local valStr = type(val) == "table" and tableToString(val, 0) or tostring(val)
+            table.insert(cons, valStr)
+            i = i + 1
+        end
+        return cons
+    end
+
     local function formatSource(src)
         if src and src:sub(1,1) == "=" then
             return src:sub(2)
         end
         return src or "N/A"
+    end
+
+    local function collectNestedFunctions(fn)
+        local info = debug.getinfo(fn)
+        local hash = getfunctionhash and getfunctionhash(fn) or "N/A"
+        local entry = {
+            name = tostring(fn) .. " [" .. (info and info.name or "Anonymous Function") .. "]",
+            info = info,
+            hash = hash,
+            source = formatSource(info and info.source),
+            upvalues = getUpvalues(fn),
+            constants = getConstants(fn),
+            children = {}
+        }
+        local protos = getprotos and getprotos(fn)
+        if protos then
+            for idx = 1, #protos do
+                local closures = getproto and getproto(fn, idx, true)
+                if closures then
+                    for _, closure in ipairs(closures) do
+                        local childEntry = collectNestedFunctions(closure)
+                        table.insert(entry.children, childEntry)
+                    end
+                end
+            end
+        end
+        return entry
+    end
+
+    local function printFunctionHierarchy(entry, out, indent)
+        table.insert(out, indent .. entry.name .. " (Source: " .. entry.source .. ", Hash: " .. entry.hash .. ")")
+        if entry.info then
+            table.insert(out, indent .. "  Params: " .. (entry.info.nparams or 0) .. ", Vararg: " .. tostring(entry.info.isvararg) .. ", Lines: " .. (entry.info.linedefined or 0) .. "-" .. (entry.info.lastlinedefined or 0))
+        end
+        if #entry.upvalues > 0 then
+            table.insert(out, indent .. "  UPVALUES: " .. table.concat(entry.upvalues, ", "))
+        end
+        if #entry.constants > 0 then
+            table.insert(out, indent .. "  CONSTANTS: " .. table.concat(entry.constants, ", "))
+        end
+        if #entry.children > 0 then
+            table.insert(out, indent .. "  INNER CLOSURES:")
+            for _, child in ipairs(entry.children) do
+                printFunctionHierarchy(child, out, indent .. "    ")
+            end
+        end
     end
 
     local envTables = {}
@@ -1473,32 +1560,8 @@ local function DebugScriptAt(o)
         if type(obj) == "function" then
             local fenv = getfenv(obj)
             if fenv and fenv.script == o then
-                local info = debug.getinfo(obj)
-                local hash = getfunctionhash and getfunctionhash(obj) or "N/A"
-                local innerClosures = {}
-                local getprotos = getprotos or (debug and debug.getprotos)
-                if getprotos then
-                    local protos = getprotos(obj)
-                    for idx, proto in ipairs(protos) do
-                        local getproto = getproto or (debug and debug.getproto)
-                        local closures = getproto and getproto(obj, idx, true)
-                        if closures then
-                            for _, closure in ipairs(closures) do
-                                local clInfo = debug.getinfo(closure)
-                                local clName = clInfo and clInfo.name or "Anonymous Closure"
-                                local clHash = getfunctionhash and getfunctionhash(closure) or "N/A"
-                                table.insert(innerClosures, tostring(closure) .. " [" .. clName .. "] (Hash: " .. clHash .. ")")
-                            end
-                        end
-                    end
-                end
-                table.insert(gcFunctions, {
-                    name = tostring(obj) .. " [" .. (info and info.name or "Anonymous Function") .. "]",
-                    info = info,
-                    hash = hash,
-                    source = formatSource(info and info.source),
-                    innerClosures = innerClosures
-                })
+                local rootEntry = collectNestedFunctions(obj)
+                table.insert(gcFunctions, rootEntry)
             end
         end
     end
@@ -1548,17 +1611,8 @@ local function DebugScriptAt(o)
 
     if #gcFunctions > 0 then
         table.insert(out, "--- GC FUNCTIONS (" .. #gcFunctions .. ") ---")
-        for i, fn in ipairs(gcFunctions) do
-            table.insert(out, string.format("GC FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
-            if fn.info then
-                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.numparams or 0, tostring(fn.info.is_vararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
-            end
-            if #fn.innerClosures > 0 then
-                table.insert(out, "  INNER CLOSURES:")
-                for _, cl in ipairs(fn.innerClosures) do
-                    table.insert(out, "    - " .. cl)
-                end
-            end
+        for i, rootEntry in ipairs(gcFunctions) do
+            printFunctionHierarchy(rootEntry, out, "GC FUNC #" .. i .. ": ")
             table.insert(out, "")
         end
     else
