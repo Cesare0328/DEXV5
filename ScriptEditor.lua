@@ -1614,7 +1614,7 @@ local function DebugScriptAt(o, fl)
         for i, rootEntry in ipairs(gcFunctions) do
             table.insert(out, "GC FUNC #" .. i .. ": " .. rootEntry.name .. " (Source: " .. rootEntry.source .. ", Hash: " .. rootEntry.hash .. ")")
             if rootEntry.info then
-                table.insert(out, "  Params: " .. (rootEntry.info.nparams or 0) .. ", Vararg: " .. tostring(rootEntry.info.isvararg) .. ", Lines: " .. (rootEntry.info.linedefined or 0) .. "-" .. (rootEntry.info.lastlinedefined or 0))
+                table.insert(out, "  Params: " .. (rootEntry.info.numparams or 0) .. ", Vararg: " .. tostring(rootEntry.info.is_vararg) .. ", Lines: " .. (rootEntry.info.linedefined or 0) .. "-" .. (fl or 0))
             end
             if #rootEntry.upvalues > 0 then
                 table.insert(out, "  UPVALUES: " .. table.concat(rootEntry.upvalues, ", "))
@@ -1623,7 +1623,7 @@ local function DebugScriptAt(o, fl)
                 table.insert(out, "  CONSTANTS: " .. table.concat(rootEntry.constants, ", "))
             end
             if #rootEntry.children > 0 then
-                table.insert(out, "  CHILDREN:")
+                table.insert(out, "  INLINE CLOSURE:")
                 for _, child in ipairs(rootEntry.children) do
                     printFunctionHierarchy(child, out, "    ")
                 end
