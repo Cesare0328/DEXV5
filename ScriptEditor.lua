@@ -1382,18 +1382,8 @@ local function DebugScriptAt(o)
     if c == "ModuleScript" then
         local ok, m = pcall(require, o)
         if not ok then return "require failed: " .. tostring(m) end
-        if type(m) == "function" then
-            env = getfenv(m)
-            if type(env) ~= "table" then env = nil end
-        elseif type(m) == "table" then
-            env = m
-        end
-        if not env then
-            env = getsenv(o)
-        end
-    else
-        env = getsenv(o)
     end
+    env = getsenv(o)
     if type(env) ~= "table" then return "env not table" end
 
     local scriptName = o.Name
@@ -1406,20 +1396,15 @@ local function DebugScriptAt(o)
         if type(v) == "function" then
             local info = debug.getinfo(v)
             local ups = {}
-            if debug.getupvalue then
-                for i = 1, math.huge do
-                    local name, val = debug.getupvalue(v, i)
-                    if not name then break end
-                    table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
-                end
+            local ups_table = debug.getupvalues and debug.getupvalues(v) or {}
+            for _, pair in ipairs(ups_table) do
+                local name, val = pair[1], pair[2]
+                table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
             end
             local cons = {}
-            if debug.getconstant then
-                for i = 1, math.huge do
-                    local val = debug.getconstant(v, i)
-                    if val == nil then break end
-                    table.insert(cons, tostring(val))
-                end
+            local cons_table = debug.getconstants and debug.getconstants(v) or {}
+            for _, val in ipairs(cons_table) do
+                table.insert(cons, tostring(val))
             end
             local hash = getfunctionhash and getfunctionhash(v) or "N/A"
             table.insert(envFunctions, {
@@ -1449,20 +1434,15 @@ local function DebugScriptAt(o)
             local info = debug.getinfo(v)
             if info and info.source and info.source:find(scriptName) then
                 local ups = {}
-                if debug.getupvalue then
-                    for i = 1, math.huge do
-                        local name, val = debug.getupvalue(v, i)
-                        if not name then break end
-                        table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
-                    end
+                local ups_table = debug.getupvalues and debug.getupvalues(v) or {}
+                for _, pair in ipairs(ups_table) do
+                    local name, val = pair[1], pair[2]
+                    table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
                 end
                 local cons = {}
-                if debug.getconstant then
-                    for i = 1, math.huge do
-                        local val = debug.getconstant(v, i)
-                        if val == nil then break end
-                        table.insert(cons, tostring(val))
-                    end
+                local cons_table = debug.getconstants and debug.getconstants(v) or {}
+                for _, val in ipairs(cons_table) do
+                    table.insert(cons, tostring(val))
                 end
                 local hash = getfunctionhash and getfunctionhash(v) or "N/A"
                 table.insert(regFunctions, {
@@ -1485,20 +1465,15 @@ local function DebugScriptAt(o)
             if fenv and fenv.script == o then
                 local info = debug.getinfo(obj)
                 local ups = {}
-                if debug.getupvalue then
-                    for i = 1, math.huge do
-                        local name, val = debug.getupvalue(obj, i)
-                        if not name then break end
-                        table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
-                    end
+                local ups_table = debug.getupvalues and debug.getupvalues(obj) or {}
+                for _, pair in ipairs(ups_table) do
+                    local name, val = pair[1], pair[2]
+                    table.insert(ups, ("%s=%s"):format(tostring(name or "?"), tostring(val)))
                 end
                 local cons = {}
-                if debug.getconstant then
-                    for i = 1, math.huge do
-                        local val = debug.getconstant(obj, i)
-                        if val == nil then break end
-                        table.insert(cons, tostring(val))
-                    end
+                local cons_table = debug.getconstants and debug.getconstants(obj) or {}
+                for _, val in ipairs(cons_table) do
+                    table.insert(cons, tostring(val))
                 end
                 local hash = getfunctionhash and getfunctionhash(obj) or "N/A"
                 table.insert(gcFunctions, {
