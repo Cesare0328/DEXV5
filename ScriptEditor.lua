@@ -1373,65 +1373,235 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 
 local function DebugScriptAt(o)
     if typeof(o) ~= "Instance" then return "Need Instance" end
-    local env
     local c = o.ClassName
-    if c == "LocalScript" or c == "Script" then
-        if not getsenv then return "no getsenv" end
-        env = getsenv(o)
-    elseif c == "ModuleScript" then
+    if c ~= "LocalScript" and c ~= "Script" and c ~= "ModuleScript" then return "bad class: " .. c end
+
+    local env
+    if c == "ModuleScript" then
         local ok, m = pcall(require, o)
         if not ok then return "require failed: " .. tostring(m) end
-        env = m
-    else return "bad class: " .. c end
+        env = getfenv(m) or m
+    else
+        if not getsenv then return "no getsenv" end
+        env = getsenv(o)
+    end
     if type(env) ~= "table" then return "env not table" end
 
-    local f, t = {}, {}
+    local scriptName = o.Name
+    local scriptSource = debug.getinfo(o).source or "unknown"
+    local fullPath = o:GetFullName()
+
+    local envFunctions = {}
     for k, v in pairs(env) do
-        local n = tostring(k)
-        if type(v) == "function" then f[n] = v
-        elseif type(v) == "table" then
-            local c = 0
-            for _ in pairs(v) do c = c + 1 end
-            t[n] = c
-        end
-    end
-
-    local out = { "SCRIPT PATH : " .. o:GetFullName() }
-    local tmp = {}
-    for n in pairs(f) do tmp[#tmp + 1] = n end
-    out[#out + 1] = "FUNCTIONS : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
-
-    for n, c in pairs(t) do tmp[#tmp + 1] = n .. "[" .. c .. "]" end
-    out[#out + 1] = "TABLES : " .. (#tmp > 0 and table.concat(tmp, ", ") or "")
-
-    if next(f) then
-        out[#out + 1] = "\n--FUNCTIONS--"
-        for n, fn in pairs(f) do
-            out[#out + 1] = "\nFUNCTION " .. n .. " :"
+        if type(v) == "function" then
+            local info = debug.getinfo(v)
+            local ups = {}
             if getupvalues then
-                local ups = {}
-                for i, _ in pairs(getupvalues(fn) or {}) do
-                    local _, v = pcall(getupvalue, fn, i)
-                    if v ~= nil then ups[#ups + 1] = tostring(v) end
+                for i = 1, math.huge do
+                    local name, val = debug.getupvalue(v, i)
+                    if not name then break end
+                    table.insert(ups, string.format("%s=%s", name or "?", tostring(val)))
                 end
-                if #ups > 0 then out[#out + 1] = "UPVALUES :\n" .. table.concat(ups, ", ") end
             end
-            if getconstants then
+            local cons = {}
+            if debug.getconstants then
+                for i = 1, math.huge do
+                    local val = debug.getconstant(v, i)
+                    if val == nil then break end
+                    table.insert(cons, tostring(val))
+                end
+            end
+            local hash = getfunctionhash and getfunctionhash(v) or "N/A"
+            table.insert(envFunctions, {
+                name = tostring(k),
+                info = info,
+                upvalues = ups,
+                constants = cons,
+                hash = hash,
+                source = info and info.source or "N/A"
+            })
+        end
+    end
+
+    local envTables = {}
+    for k, v in pairs(env) do
+        if type(v) == "table" then
+            local size = 0
+            for _ in pairs(v) do size = size + 1 end
+            envTables[tostring(k)] = size
+        end
+    end
+
+    local regFunctions = {}
+    local reg = getreg()
+    for k, v in pairs(reg) do
+        if type(v) == "function" then
+            local info = debug.getinfo(v)
+            if info and info.source and info.source:find(scriptName) then
+                local ups = {}
+                if getupvalues then
+                    for i = 1, math.huge do
+                        local name, val = debug.getupvalue(v, i)
+                        if not name then break end
+                        table.insert(ups, string.format("%s=%s", name or "?", tostring(val)))
+                    end
+                end
                 local cons = {}
-                for _, v in pairs(getconstants(fn) or {}) do cons[#cons + 1] = tostring(v) end
-                if #cons > 0 then out[#out + 1] = "CONSTANTS :\n" .. table.concat(cons, ", ") end
+                if debug.getconstants then
+                    for i = 1, math.huge do
+                        local val = debug.getconstant(v, i)
+                        if val == nil then break end
+                        table.insert(cons, tostring(val))
+                    end
+                end
+                local hash = getfunctionhash and getfunctionhash(v) or "N/A"
+                table.insert(regFunctions, {
+                    name = info.name or "unnamed",
+                    info = info,
+                    upvalues = ups,
+                    constants = cons,
+                    hash = hash,
+                    source = info.source
+                })
             end
         end
     end
 
-    if next(t) then
-        out[#out + 1] = "\n--TABLES--"
-        for n, c in pairs(t) do out[#out + 1] = "TABLE " .. n .. " : " .. c .. " entries" end
+    local gcFunctions = {}
+    local gc = getgc(true)
+    for _, obj in ipairs(gc) do
+        if type(obj) == "function" then
+            local fenv = getfenv(obj)
+            if fenv and fenv.script == o then
+                local info = debug.getinfo(obj)
+                local ups = {}
+                if getupvalues then
+                    for i = 1, math.huge do
+                        local name, val = debug.getupvalue(obj, i)
+                        if not name then break end
+                        table.insert(ups, string.format("%s=%s", name or "?", tostring(val)))
+                    end
+                end
+                local cons = {}
+                if debug.getconstants then
+                    for i = 1, math.huge do
+                        local val = debug.getconstant(obj, i)
+                        if val == nil then break end
+                        table.insert(cons, tostring(val))
+                    end
+                end
+                local hash = getfunctionhash and getfunctionhash(obj) or "N/A"
+                table.insert(gcFunctions, {
+                    name = info and info.name or "anonymous",
+                    info = info,
+                    upvalues = ups,
+                    constants = cons,
+                    hash = hash,
+                    source = info and info.source or "N/A"
+                })
+            end
+        end
+    end
+
+    local scriptDetails = {
+        scriptHash = getscripthash and getscripthash(o) or "N/A",
+        scriptBytecode = getscriptbytecode and getscriptbytecode(o) or "N/A (use decompile for full)",
+        scriptName = getscriptname and getscriptname(o) or o.Name,
+        scriptThread = getscriptthread and getscriptthread(o) or "N/A",
+        scriptFunction = getscriptfunction and getscriptfunction(o) or "N/A"
+    }
+
+    local out = {}
+    table.insert(out, "=== SCRIPT DEBUG REPORT ===")
+    table.insert(out, "SCRIPT PATH: " .. fullPath)
+    table.insert(out, "SCRIPT CLASS: " .. c)
+    table.insert(out, "SCRIPT SOURCE: " .. scriptSource)
+    table.insert(out, "SCRIPT HASH: " .. scriptDetails.scriptHash)
+    table.insert(out, "SCRIPT NAME (loaded): " .. scriptDetails.scriptName)
+    table.insert(out, "")
+
+    if #envFunctions > 0 then
+        table.insert(out, "--- ENVIRONMENT FUNCTIONS (" .. #envFunctions .. ") ---")
+        for i, fn in ipairs(envFunctions) do
+            table.insert(out, string.format("ENV FUNC #%d: %s (Hash: %s, Source: %s)", i, fn.name, fn.hash, fn.source))
+            if fn.info then
+                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
+            end
+            if #fn.upvalues > 0 then
+                table.insert(out, "  UPVALUES: " .. table.concat(fn.upvalues, ", "))
+            end
+            if #fn.constants > 0 then
+                table.insert(out, "  CONSTANTS: " .. table.concat(fn.constants, ", "))
+            end
+            table.insert(out, "")
+        end
+    else
+        table.insert(out, "No functions in environment.")
+    end
+    table.insert(out, "")
+
+    local envTableList = {}
+    for n, size in pairs(envTables) do
+        table.insert(envTableList, n .. "[" .. size .. "]")
+    end
+    if #envTableList > 0 then
+        table.insert(out, "ENVIRONMENT TABLES: " .. table.concat(envTableList, ", "))
+    else
+        table.insert(out, "No tables in environment.")
+    end
+    table.insert(out, "")
+
+    if #regFunctions > 0 then
+        table.insert(out, "--- REGISTRY FUNCTIONS (" .. #regFunctions .. ") ---")
+        for i, fn in ipairs(regFunctions) do
+            table.insert(out, string.format("REG FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
+            if fn.info then
+                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
+            end
+            if #fn.upvalues > 0 then
+                table.insert(out, "  UPVALUES: " .. table.concat(fn.upvalues, ", "))
+            end
+            if #fn.constants > 0 then
+                table.insert(out, "  CONSTANTS: " .. table.concat(fn.constants, ", "))
+            end
+            table.insert(out, "")
+        end
+    else
+        table.insert(out, "No functions in registry matching script.")
+    end
+    table.insert(out, "")
+
+    if #gcFunctions > 0 then
+        table.insert(out, "--- GC FUNCTIONS (" .. #gcFunctions .. ") ---")
+        for i, fn in ipairs(gcFunctions) do
+            table.insert(out, string.format("GC FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
+            if fn.info then
+                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
+            end
+            if #fn.upvalues > 0 then
+                table.insert(out, "  UPVALUES: " .. table.concat(fn.upvalues, ", "))
+            end
+            if #fn.constants > 0 then
+                table.insert(out, "  CONSTANTS: " .. table.concat(fn.constants, ", "))
+            end
+            table.insert(out, "")
+        end
+    else
+        table.insert(out, "No functions in GC associated with script.")
+    end
+    table.insert(out, "")
+
+    table.insert(out, "--- ADDITIONAL SCRIPT DETAILS ---")
+    table.insert(out, "Bytecode Hash: " .. scriptDetails.scriptHash)
+    table.insert(out, "Loaded Name: " .. scriptDetails.scriptName)
+    if scriptDetails.scriptThread ~= "N/A" then table.insert(out, "Main Thread: " .. tostring(scriptDetails.scriptThread)) end
+    if scriptDetails.scriptFunction ~= "N/A" then table.insert(out, "Main Function: " .. tostring(scriptDetails.scriptFunction)) end
+    if scriptDetails.scriptBytecode ~= "N/A (use decompile for full)" then
+        table.insert(out, "Bytecode Snippet: " .. string.sub(scriptDetails.scriptBytecode, 1, 100) .. "...")
     end
 
     return table.concat(out, "\n")
 end
-
 
 local function openScript(o)
 	CurrentScript = o
