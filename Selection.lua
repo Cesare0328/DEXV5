@@ -893,6 +893,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 else
                     local success, result = pcall(decompile, instance)
                     if success then
+						result = result:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
                         if result:find(triggers, 1, true) then
                             local sSuccess, sSource = pcall(function() return instance.Source end)
                             if sSuccess and #sSource > 0 then
@@ -918,34 +919,36 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                         scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Decompilation failed: %s", guid, path, tostring(result))
                     end
                 end
-            elseif instance:IsA("Script") then
-                local passed = false
-                local linkedSource = instance.LinkedSource
-                if linkedSource and #linkedSource >= 1 then
-                    local result = tonumber(string.match(linkedSource, "(%d+)"))
-                    if result then
-                        result = string.format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
-                        passed = true
-                    end
-                end
-                if not passed then
-                    local sourceAssetId, success = gethiddenproperty(instance, "SourceAssetId")
-                    if success and sourceAssetId and sourceAssetId ~= -1 then
-                        local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
-                        if asset then
-                            local source = asset.Source
-                            if source and #source > 0 then
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
-                                passed = true
-                            end
-                        end
-                    end
-                end
-                if not passed then
-                    scriptSource = string.format("-- Script GUID: %s\n-- ServerScript", guid)
-                end
-            end
+			elseif IsA(o, "Script") then
+				local passed = false
+				local linkedSource = o.LinkedSource
+				if o.RunContext == Enum.RunContext.Client then
+					decompiled = decompile(o)
+					decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+					passed = true
+				end
+				if linkedSource and #linkedSource >= 1 and not passed then
+					local result = tonumber(string.match(linkedSource, "(%d+)"))
+					if result then
+						result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
+						decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
+						passed = true
+					end
+				end
+				if not passed then
+					local sourceAssetId, success = gethiddenproperty(o, "SourceAssetId")
+					if success and sourceAssetId and sourceAssetId ~= -1 then
+						local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
+						if asset then
+							local source = asset.Source
+							if source and #source > 0 then
+								decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
+								passed = true
+							end
+						end
+					end
+				end
+			end
         properties = {
             Source = scriptSource,
             Enabled = instance:IsA("Script") or instance:IsA("LocalScript") and instance.Enabled or false
