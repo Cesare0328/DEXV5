@@ -1533,27 +1533,6 @@ local function DebugScriptAt(o)
         end
     end
 
-    local regFunctions = {}
-    local reg = getreg()
-    for k, v in pairs(reg) do
-        if type(v) == "function" then
-            local info = debug.getinfo(v)
-            if info and info.source and info.source:find(scriptName) then
-                local ups = getUpvalues(v)
-                local cons = getConstants(v)
-                local hash = getfunctionhash and getfunctionhash(v) or "N/A"
-                table.insert(regFunctions, {
-                    name = formatFunctionName(v, info),
-                    info = info,
-                    upvalues = ups,
-                    constants = cons,
-                    hash = hash,
-                    source = formatSource(info.source)
-                })
-            end
-        end
-    end
-
     local gcFunctions = {}
     local gc = getgc(true)
     for _, obj in ipairs(gc) do
@@ -1636,26 +1615,6 @@ local function DebugScriptAt(o)
         table.insert(out, "ENVIRONMENT TABLES: " .. table.concat(envTableList, ", "))
     else
         table.insert(out, "No tables in environment.")
-    end
-    table.insert(out, "")
-
-    if #regFunctions > 0 then
-        table.insert(out, "--- REGISTRY FUNCTIONS (" .. #regFunctions .. ") ---")
-        for i, fn in ipairs(regFunctions) do
-            table.insert(out, string.format("REG FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
-            if fn.info then
-                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
-            end
-            if #fn.upvalues > 0 then
-                table.insert(out, "  UPVALUES: " .. table.concat(fn.upvalues, ", "))
-            end
-            if #fn.constants > 0 then
-                table.insert(out, "  CONSTANTS: " .. table.concat(fn.constants, ", "))
-            end
-            table.insert(out, "")
-        end
-    else
-        table.insert(out, "No functions in registry matching script.")
     end
     table.insert(out, "")
 
