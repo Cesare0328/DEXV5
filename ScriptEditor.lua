@@ -1395,7 +1395,6 @@ local function DebugScriptAt(o, fl)
 
     local scriptName = o.Name
     local mainFunc = getscriptfunction and getscriptfunction(o)
-    local scriptSource = mainFunc and pcall(function() return debug.getinfo(mainFunc).source end) and debug.getinfo(mainFunc).source or "unknown"
 
     local path
     if not o:IsDescendantOf(game) then
@@ -1595,7 +1594,6 @@ local function DebugScriptAt(o, fl)
     table.insert(out, "=== SCRIPT DEBUG REPORT ===")
     table.insert(out, "SCRIPT PATH: " .. path)
     table.insert(out, "SCRIPT CLASS: " .. c)
-    table.insert(out, "SCRIPT SOURCE: " .. formatSource(scriptSource))
     table.insert(out, "")
 
     local envTableList = {}
