@@ -1371,7 +1371,7 @@ local ScriptEditor, EditorGrid, Clear, TxtArea = EditorLib.Initialize(FindFirstC
 	CaretBlinkingRate = .5
 })
 
-local function DebugScriptAt(o)
+local function DebugScriptAt(o, fl)
     if typeof(o) ~= "Instance" then return "Need Instance" end
     local c = o.ClassName
     if c ~= "LocalScript" and c ~= "Script" and c ~= "ModuleScript" then return "bad class: " .. c end
@@ -1529,7 +1529,7 @@ local function DebugScriptAt(o)
     local function printFunctionHierarchy(entry, out, indent)
         table.insert(out, indent .. entry.name .. " (Source: " .. entry.source .. ", Hash: " .. entry.hash .. ")")
         if entry.info then
-            table.insert(out, indent .. "  Params: " .. (entry.info.nparams or 0) .. ", Vararg: " .. tostring(entry.info.isvararg) .. ", Lines: " .. (entry.info.linedefined or 0) .. "-" .. (entry.info.lastlinedefined or 0))
+            table.insert(out, indent .. "  Params: " .. (entry.info.numparams or 0) .. ", Vararg: " .. tostring(entry.info.is_vararg) .. ", Lines: " .. (entry.info.linedefined or 0) .. "-" .. (fl or 0))
         end
         if #entry.upvalues > 0 then
             table.insert(out, indent .. "  UPVALUES: " .. table.concat(entry.upvalues, ", "))
@@ -1538,7 +1538,7 @@ local function DebugScriptAt(o)
             table.insert(out, indent .. "  CONSTANTS: " .. table.concat(entry.constants, ", "))
         end
         if #entry.children > 0 then
-            table.insert(out, indent .. "  CHILDREN:")
+            table.insert(out, indent .. "  INLINE CLOSURE:")
             for _, child in ipairs(entry.children) do
                 printFunctionHierarchy(child, out, indent .. "    ")
             end
@@ -1813,8 +1813,9 @@ end)
 
 Connect(DebugScript.Activated, function()
 	if not Title.Text:find("Viewing") then return end
+	local FullLine = #string.split(Editor.Content, "\n")
     ScriptEditor.SetContent("")
-	ScriptEditor.SetContent(DebugScriptAt(CurrentScript))
+	ScriptEditor.SetContent(DebugScriptAt(CurrentScript, FullLine))
 end)
 
 Connect(CloseEditor.Activated, function()
