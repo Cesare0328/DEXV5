@@ -1382,6 +1382,8 @@ local function DebugScriptAt(o)
         if not ok then return "require failed: " .. tostring(m) end
 		if type(m) == "function" then
         	env = getfenv(m) or m
+		elseif type(m) == "table" then
+			env = m
 		end
     else
         if not getsenv then return "no getsenv" end
