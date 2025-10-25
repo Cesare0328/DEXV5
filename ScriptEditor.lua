@@ -1451,77 +1451,11 @@ local function DebugScriptAt(o)
         path = table.concat(pathParts, "")
     end
 
-    local function tableToString(t, depth)
-        if depth > 3 then return "{...}" end
-        if type(t) ~= "table" then return tostring(t) end
-        local str = "{"
-        local first = true
-        for k, v in pairs(t) do
-            if not first then str = str .. ", " end
-            str = str .. tostring(k) .. "=" .. tableToString(v, depth + 1)
-            first = false
-        end
-        return str .. "}"
-    end
-
-    local function getUpvalues(fn)
-        local ups = {}
-        if not debug.getupvalue then return ups end
-        local i = 1
-        while true do
-            local success, name, val = pcall(debug.getupvalue, fn, i)
-            if not success or not name then break end
-            local valStr = type(val) == "table" and tableToString(val, 0) or tostring(val)
-            table.insert(ups, ("%s=%s"):format(tostring(name), valStr))
-            i = i + 1
-        end
-        return ups
-    end
-
-    local function getConstants(fn)
-        local cons = {}
-        if not debug.getconstant then return cons end
-        local i = 1
-        while true do
-            local success, val = pcall(debug.getconstant, fn, i)
-            if not success or val == nil then break end
-            local valStr = type(val) == "table" and tableToString(val, 0) or tostring(val)
-            table.insert(cons, valStr)
-            i = i + 1
-        end
-        return cons
-    end
-
-    local function formatFunctionName(fn, info)
-        local funcStr = tostring(fn)
-        local name = info and info.name or ""
-        local displayName = name ~= "" and name or "Anonymous Function"
-        return funcStr .. " [" .. displayName .. "]"
-    end
-
     local function formatSource(src)
         if src and src:sub(1,1) == "=" then
             return src:sub(2)
         end
         return src or "N/A"
-    end
-
-    local envFunctions = {}
-    for k, v in pairs(env) do
-        if type(v) == "function" then
-            local info = debug.getinfo(v)
-            local ups = getUpvalues(v)
-            local cons = getConstants(v)
-            local hash = getfunctionhash and getfunctionhash(v) or "N/A"
-            table.insert(envFunctions, {
-                name = formatFunctionName(v, info),
-                info = info,
-                upvalues = ups,
-                constants = cons,
-                hash = hash,
-                source = formatSource(info and info.source)
-            })
-        end
     end
 
     local envTables = {}
@@ -1540,14 +1474,10 @@ local function DebugScriptAt(o)
             local fenv = getfenv(obj)
             if fenv and fenv.script == o then
                 local info = debug.getinfo(obj)
-                local ups = getUpvalues(obj)
-                local cons = getConstants(obj)
                 local hash = getfunctionhash and getfunctionhash(obj) or "N/A"
                 table.insert(gcFunctions, {
-                    name = formatFunctionName(obj, info),
+                    name = tostring(obj) .. " [" .. (info and info.name or "Anonymous Function") .. "]",
                     info = info,
-                    upvalues = ups,
-                    constants = cons,
                     hash = hash,
                     source = formatSource(info and info.source)
                 })
@@ -1587,26 +1517,6 @@ local function DebugScriptAt(o)
     table.insert(out, "SCRIPT SOURCE: " .. formatSource(scriptSource))
     table.insert(out, "")
 
-    if #envFunctions > 0 then
-        table.insert(out, "--- ENVIRONMENT FUNCTIONS (" .. #envFunctions .. ") ---")
-        for i, fn in ipairs(envFunctions) do
-            table.insert(out, string.format("ENV FUNC #%d: %s (Hash: %s, Source: %s)", i, fn.name, fn.hash, fn.source))
-            if fn.info then
-                table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
-            end
-            if #fn.upvalues > 0 then
-                table.insert(out, "  UPVALUES: " .. table.concat(fn.upvalues, ", "))
-            end
-            if #fn.constants > 0 then
-                table.insert(out, "  CONSTANTS: " .. table.concat(fn.constants, ", "))
-            end
-            table.insert(out, "")
-        end
-    else
-        table.insert(out, "No functions in environment.")
-    end
-    table.insert(out, "")
-
     local envTableList = {}
     for n, size in pairs(envTables) do
         table.insert(envTableList, n .. "[" .. size .. "]")
@@ -1624,12 +1534,6 @@ local function DebugScriptAt(o)
             table.insert(out, string.format("GC FUNC #%d: %s (Source: %s, Hash: %s)", i, fn.name, fn.source, fn.hash))
             if fn.info then
                 table.insert(out, string.format("  Params: %d, Vararg: %s, Lines: %d-%d", fn.info.nparams or 0, tostring(fn.info.isvararg), fn.info.linedefined or 0, fn.info.lastlinedefined or 0))
-            end
-            if #fn.upvalues > 0 then
-                table.insert(out, "  UPVALUES: " .. table.concat(fn.upvalues, ", "))
-            end
-            if #fn.constants > 0 then
-                table.insert(out, "  CONSTANTS: " .. table.concat(fn.constants, ", "))
             end
             table.insert(out, "")
         end
