@@ -1593,7 +1593,7 @@ local function DebugScriptAt(o, fl)
     local out = {}
     table.insert(out, "=== SCRIPT DEBUG REPORT ===")
     table.insert(out, "SCRIPT PATH: " .. path)
-    table.insert(out, "SCRIPT CLASS: " .. c)
+    table.insert(out, "SCRIPT TYPE/CLASS: " .. c)
     table.insert(out, "")
 
     local envTableList = {}
@@ -1657,7 +1657,7 @@ local function openScript(o)
     if cache[id] then
         ScriptEditor.SetContent(cache[id])
     else
-        local guid = tostring(gethiddenproperty(o,"ScriptGuid")) or "{Couldn't grab GUID}"
+        local guid = tostring(gethiddenproperty(o, "ScriptGuid") or "") == "" and "{Couldn't grab SGUID}" or "{Couldn't grab SGUID}"
     	local path
     	if not o:IsDescendantOf(game) then
         	local ancestors = {}
@@ -1714,23 +1714,24 @@ local function openScript(o)
 		
 		local decompiled
 		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
-    		if string.len(getscriptbytecode(o)) == 0 then
+			local bytecode = getscriptbytecode(o)
+    		if not bytecode or bytecode and string.len(bytecode) == 0 then
 				if IsA(0, "LocalScript") then
-        			decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
+        			decompiled = format("-- Script GUID: NULL\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
 				else
-					decompiled = format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
+					decompiled = format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
 				end
     		else
         		decompiled = decompile(o)
 				decompiled = decompiled:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
         		if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
             		if #o.Source > 0 then
-                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, o.Source)
+                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript) [Clean Source]\n\n%s\n", guid, path, o.Source)
             		elseif #o.Source <= 0 then
-                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
             		end
         		elseif #decompiled <= 0 then
-            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
         		else
             		local lines = {}
             		for line in decompiled:gmatch("[^\r\n]+") do
@@ -1740,7 +1741,7 @@ local function openScript(o)
                 		table.remove(lines, 1)
                 		decompiled = table.concat(lines, "\n")
             		end
-            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n%s", guid, path, decompiled)
         		end
     		end
         elseif IsA(o, "Script") then
@@ -1748,14 +1749,14 @@ local function openScript(o)
             local linkedSource = o.LinkedSource
 			if o.RunContext == Enum.RunContext.Client then
 				decompiled = decompile(o)
-				decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+				decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
 				passed = true
 			end
             if linkedSource and #linkedSource >= 1 and not passed then
                 local result = tonumber(string.match(linkedSource, "(%d+)"))
                 if result then
                     result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
+                    decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s (ServerScript) [Linked Source]", guid, path, result)
                     passed = true
                 end
             end
@@ -1766,7 +1767,7 @@ local function openScript(o)
                     if asset then
                         local source = asset.Source
                         if source and #source > 0 then
-                            decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
+                            decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Legacy RunContext]\n%s", guid, path, source)
                             passed = true
                         end
                     end
