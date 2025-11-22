@@ -3956,7 +3956,7 @@ end
 local function addObject(object,noupdate)
 	if string.len(explorerFilter.Text) > 0 then
 		if scanName(object) then
-			local parent = newObj.Parent
+			local parent = object.Parent
 			local parentIndex = parent and findObjectIndex(parent)
 			if not parentIndex then
 				rawUpdateList(true)
@@ -3967,7 +3967,7 @@ local function addObject(object,noupdate)
 			coroutine.wrap(function()
 				local tempList = {}
 				local tempLookup = {}
-				tempLookup[newObj] = {Object = newObj, Depth = parentNode.Depth + 1, Expanded = false}
+				tempLookup[object] = {Object = object, Depth = parentNode.Depth + 1, Expanded = false}
 				r(tempLookup, true)
 				for _, node in ipairs(tempList) do
 					table.insert(TreeList, parentIndex + 1, node)
