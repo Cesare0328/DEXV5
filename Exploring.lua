@@ -3954,6 +3954,11 @@ local function check(object)
 end
 
 local function addObject(object,noupdate)
+	if string.len(explorerFilter.Text) > 0 then
+		if scanName(object) then
+			rawUpdateList(true)
+		end
+	end
 	if object.Parent == game and InstanceBlacklist[object.ClassName] or object.ClassName == '' then
 		return
 	end
@@ -4445,7 +4450,7 @@ while not RbxApi do
 end
 
 Connect(explorerFilter.FocusLost, function(EnterPressed)
-	if not EnterPressed then return end
+	if not EnterPressed then SearchLoading.Visible = false FilterInstance.Visible = false return end
 	Searched = true
 	if not explorerFilter.Text == "" then explorerFilter.ClearTextOnFocus = true end
 	if string.len(explorerFilter.Text) > 0 then
