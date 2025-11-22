@@ -1920,93 +1920,6 @@ function updateActions()
     end
 end
 
-function addDescendant(newObj)
-    if filteringInstances() and not scanName(newObj) then return end
-    
-    local function ensurePath(obj, depth)
-        depth = depth or 0
-        if depth > 20 then return false end
-        local parent = obj.Parent
-        if not parent or parent == game then
-            local node = NodeLookup[obj]
-            if not node then
-                node = {Object = obj, Depth = depth, Expanded = filteringInstances()}
-                NodeLookup[obj] = node
-                if not filteringInstances() or scanName(obj) then
-                    table.insert(TreeList, #TreeList + 1, node)
-                    local w = node.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(obj.Name) + 4
-                    if w > nodeWidth then nodeWidth = w end
-                end
-            end
-            return true
-        end
-        if not ensurePath(parent, depth + 1) then return false end
-        local parentNode = NodeLookup[parent]
-        local parentIndex = findObjectIndex(parent)
-        if not parentNode.Expanded and filteringInstances() then
-            parentNode.Expanded = true
-            local children = GetChildren(parent)
-            local inserted = false
-            for i, childObj in ipairs(children) do
-                if not NodeLookup[childObj] then
-                    NodeLookup[childObj] = {Object = childObj, Depth = parentNode.Depth + 1, Expanded = filteringInstances()}
-                end
-                local childNode = NodeLookup[childObj]
-                if not filteringInstances() or scanName(childObj) then
-                    table.insert(TreeList, parentIndex + i, childNode)
-                    local w = childNode.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(childObj.Name) + 4
-                    if w > nodeWidth then nodeWidth = w end
-                    inserted = true
-                    if childNode.Expanded or filteringInstances() then
-                        ensurePath(childObj, depth + 2)
-                    end
-                end
-            end
-            if inserted then
-                rawUpdateSize()
-                updateScroll()
-            end
-        end
-        return true
-    end
-    
-    if not ensurePath(newObj) then
-        rawUpdateList(true)
-        return
-    end
-    local parent = newObj.Parent
-    if parent and NodeLookup[parent] then
-        local parentIndex = findObjectIndex(parent)
-        local parentNode = NodeLookup[parent]
-        if parentNode.Expanded or filteringInstances() then
-            local children = GetChildren(parent)
-            local inserted = false
-            for i, childObj in ipairs(children) do
-                if childObj == newObj then
-                    if not NodeLookup[newObj] then
-                        NodeLookup[newObj] = {Object = newObj, Depth = parentNode.Depth + 1, Expanded = filteringInstances()}
-                    end
-                    local newNode = NodeLookup[newObj]
-                    if not filteringInstances() or scanName(newObj) then
-                        table.insert(TreeList, parentIndex + i, newNode)
-                        local w = newNode.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(newObj.Name) + 4
-                        if w > nodeWidth then nodeWidth = w end
-                        inserted = true
-                        if newNode.Expanded or filteringInstances() then
-                            ensurePath(newObj, 1)
-                        end
-                    end
-                    break
-                end
-            end
-            if inserted then
-                rawUpdateSize()
-                updateScroll()
-            end
-        end
-    end
-end
-
 do
 	local function pollingwait(sec)
         local old = os.clock()
@@ -4042,7 +3955,29 @@ end
 
 local function addObject(object,noupdate)
 	if string.len(explorerFilter.Text) > 0 then
-		addDescendant(object)
+		if scanName(object) then
+			local parent = newObj.Parent
+			local parentIndex = parent and findObjectIndex(parent)
+			if not parentIndex then
+				rawUpdateList(true)
+				return
+			end
+			local parentNode = TreeList[parentIndex]
+			if not parentNode.Expanded then return end
+			coroutine.wrap(function()
+				local tempList = {}
+				local tempLookup = {}
+				tempLookup[newObj] = {Object = newObj, Depth = parentNode.Depth + 1, Expanded = false}
+				r(tempLookup, true)
+				for _, node in ipairs(tempList) do
+					table.insert(TreeList, parentIndex + 1, node)
+					local w = node.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(node.Object.Name) + 4
+					if w > nodeWidth then nodeWidth = w end
+				end
+				rawUpdateSize()
+				updateScroll()
+			end)()
+		end
 	end
 	if object.Parent == game and InstanceBlacklist[object.ClassName] or object.ClassName == '' then
 		return
