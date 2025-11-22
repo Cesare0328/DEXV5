@@ -3955,7 +3955,7 @@ end
 
 local function addObject(object,noupdate)
 local addQueue, debounceTimer = {}, nil
-local DEBOUNCE_TIME = 0.5
+local DEBOUNCE_TIME = 0.05
 
 	if string.len(explorerFilter.Text) > 0 then
 		table.insert(addQueue, object)
@@ -3963,17 +3963,21 @@ local DEBOUNCE_TIME = 0.5
 			debounceTimer:Disconnect()
 		end
 		debounceTimer = task.delay(DEBOUNCE_TIME, function()
-			for _, obj in ipairs(addQueue) do
-				if scanName(obj) then
-					local parent = obj.Parent
-					local parentIndex = parent and findObjectIndex(parent)
-					if not parentIndex then
+			task.spawn(function()
+				for _, obj in ipairs(addQueue) do
+					if #addQueue > 5 then
 						rawUpdateList(true)
-						return
+						break
 					end
-					local parentNode = TreeList[parentIndex]
-					if not parentNode.Expanded then return end
-					coroutine.wrap(function()
+					if scanName(obj) then
+						local parent = obj.Parent
+						local parentIndex = parent and findObjectIndex(parent)
+						if not parentIndex then
+							rawUpdateList(true)
+							return
+						end
+						local parentNode = TreeList[parentIndex]
+						if not parentNode.Expanded then return end
 						local tempList = {}
 						local tempLookup = {}
 						tempLookup[obj] = {Object = obj, Depth = parentNode.Depth + 1, Expanded = false}
@@ -3983,11 +3987,11 @@ local DEBOUNCE_TIME = 0.5
 							local w = node.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(node.Object.Name) + 4
 							if w > nodeWidth then nodeWidth = w end
 						end
-						rawUpdateSize()
-						updateScroll()
-					end)()
+					end
 				end
-			end
+				rawUpdateSize()
+				updateScroll()
+			end)
 			addQueue = {}
 		end)
 	end
