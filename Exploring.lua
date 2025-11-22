@@ -3955,7 +3955,7 @@ end
 
 local function addObject(object,noupdate)
 local addQueue, debounceTimer = {}, nil
-local DEBOUNCE_TIME = 0.1
+local DEBOUNCE_TIME = 0.5
 
 	if string.len(explorerFilter.Text) > 0 then
 		table.insert(addQueue, object)
@@ -3991,7 +3991,7 @@ local DEBOUNCE_TIME = 0.1
 			addQueue = {}
 		end)
 	end
-	
+
 	if object.Parent == game and InstanceBlacklist[object.ClassName] or object.ClassName == '' then
 		return
 	end
