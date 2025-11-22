@@ -897,12 +897,12 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                         if result:find(triggers, 1, true) then
                             local sSuccess, sSource = pcall(function() return instance.Source end)
                             if sSuccess and #sSource > 0 then
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n\n%s\n", guid, path, sSource)
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript) [Clean Source]\n\n%s\n", guid, path, sSource)
                             else
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
                             end
                         elseif #result <= 0 then
-                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
                         else
                             local lines = {}
                             for line in result:gmatch("[^\r\n]+") do
@@ -912,7 +912,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                                 table.remove(lines, 1)
                             end
                             if not instance:IsA("ModuleScript") then
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, table.concat(lines, "\n"))
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n%s", guid, path, table.concat(lines, "\n"))
                             end
                         end
                     else
@@ -924,7 +924,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 				local linkedSource = o.LinkedSource
 				if o.RunContext == Enum.RunContext.Client then
 					decompiled = decompile(o)
-					decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, decompiled)
+					decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
 					passed = true
 				end
 				if linkedSource and #linkedSource >= 1 and not passed then
@@ -942,7 +942,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 						if asset then
 							local source = asset.Source
 							if source and #source > 0 then
-								decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n%s", guid, path, source)
+								decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Legacy RunContext]\n%s", guid, path, source)
 								passed = true
 							end
 						end
