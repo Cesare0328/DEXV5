@@ -4,6 +4,7 @@ local script = getgenv().Dex:WaitForChild("Specials")
 do local o=getgenv().getnilinstances;getgenv().getnilinstances=function()return setmetatable(o(),{__index=function(t,k)for _,v in pairs(t)do if v and v.Name==k then return v end end end})end end
 -- < Services > --
 local HttpService = cloneref(game:GetService("HttpService"))
+local ReflectionService = cloneref(game:GetService("ReflectionService"))
 -- < Aliases > --
 local bit32_band = bit32.band
 local bit32_rshift = bit32.rshift
@@ -456,7 +457,14 @@ local Specials = {
 	fireclickdetector = fireclickdetector,
 	firetouchinterest = firetouchinterest,
 	fireproximityprompt = fireproximityprompt,
-	getpropertylist = getproperties,
+	getpropertylist = function(p1)
+		local props = ReflectionService:GetPropertiesOfClass(p1.className)
+		local names = {}
+		for _, prop in ipairs(props) do
+			table.insert(names, prop.Name)
+		end
+    return names
+	end,
 	getinstancelist = getinstances or getinstancelist,
 	writeinstance = function(p1, p2)
 		local A, B = Class:new(p1.ClassName)
