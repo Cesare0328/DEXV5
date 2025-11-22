@@ -888,8 +888,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 local bytecode = getscriptbytecode(instance) or ""
                 if #bytecode == 0 then
                     if instance:IsA("LocalScript") then
-                        scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
-                    end
+                        scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
+                    else
+						scriptSource = format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
+					end
                 else
                     local success, result = pcall(decompile, instance)
                     if success then
@@ -899,10 +901,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                             if sSuccess and #sSource > 0 then
                                 scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript) [Clean Source]\n\n%s\n", guid, path, sSource)
                             else
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
                             end
                         elseif #result <= 0 then
-                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
                         else
                             local lines = {}
                             for line in result:gmatch("[^\r\n]+") do
@@ -916,7 +918,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                             end
                         end
                     else
-                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Decompilation failed: %s", guid, path, tostring(result))
+                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Decompilation failed: %s", guid, path, tostring(result))
                     end
                 end
 			elseif IsA(o, "Script") then
@@ -931,7 +933,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 					local result = tonumber(string.match(linkedSource, "(%d+)"))
 					if result then
 						result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-						decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s", guid, path, result)
+						decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s (ServerScript) [Linked Source]", guid, path, result)
 						passed = true
 					end
 				end
