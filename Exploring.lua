@@ -3954,31 +3954,44 @@ local function check(object)
 end
 
 local function addObject(object,noupdate)
+local addQueue, debounceTimer = {}, nil
+local DEBOUNCE_TIME = 0.1
+
 	if string.len(explorerFilter.Text) > 0 then
-		if scanName(object) then
-			local parent = object.Parent
-			local parentIndex = parent and findObjectIndex(parent)
-			if not parentIndex then
-				rawUpdateList(true)
-				return
-			end
-			local parentNode = TreeList[parentIndex]
-			if not parentNode.Expanded then return end
-			coroutine.wrap(function()
-				local tempList = {}
-				local tempLookup = {}
-				tempLookup[object] = {Object = object, Depth = parentNode.Depth + 1, Expanded = false}
-				r(tempLookup, true)
-				for _, node in ipairs(tempList) do
-					table.insert(TreeList, parentIndex + 1, node)
-					local w = node.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(node.Object.Name) + 4
-					if w > nodeWidth then nodeWidth = w end
-				end
-				rawUpdateSize()
-				updateScroll()
-			end)()
+		table.insert(addQueue, object)
+		if debounceTimer then
+			debounceTimer:Disconnect()
 		end
+		debounceTimer = task.delay(DEBOUNCE_TIME, function()
+			for _, obj in ipairs(addQueue) do
+				if scanName(obj) then
+					local parent = obj.Parent
+					local parentIndex = parent and findObjectIndex(parent)
+					if not parentIndex then
+						rawUpdateList(true)
+						return
+					end
+					local parentNode = TreeList[parentIndex]
+					if not parentNode.Expanded then return end
+					coroutine.wrap(function()
+						local tempList = {}
+						local tempLookup = {}
+						tempLookup[obj] = {Object = obj, Depth = parentNode.Depth + 1, Expanded = false}
+						r(tempLookup, true)
+						for _, node in ipairs(tempList) do
+							table.insert(TreeList, parentIndex + 1, node)
+							local w = node.Depth * (2 + ENTRY_PADDING + GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(node.Object.Name) + 4
+							if w > nodeWidth then nodeWidth = w end
+						end
+						rawUpdateSize()
+						updateScroll()
+					end)()
+				end
+			end
+			addQueue = {}
+		end)
 	end
+	
 	if object.Parent == game and InstanceBlacklist[object.ClassName] or object.ClassName == '' then
 		return
 	end
