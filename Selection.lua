@@ -76,7 +76,6 @@ local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Player = Players.LocalPlayer
 local Mouse = cloneref(Player:GetMouse())
 local CurrentWindow = "Nothing c:"
-local Visited = setmetatable({}, {__mode = "k"}) 
 local Windows = {
 	Explorer = {
 		ExplorerPanel,
@@ -565,21 +564,17 @@ local PropertySerializers = {
         end
     end
 }
-local function CountInstances(avoidPlayerCharacters)
-    local count = 0
-
-    for _, inst in ipairs(game:GetDescendants()) do
-        if Blacklist[inst.ClassName] or Blacklist[inst.Name] then
-            continue
-        end
-        
-        if avoidPlayerCharacters and inst:IsA("Model") and Players:GetPlayerFromCharacter(inst) ~= nil then
-            continue
-        end
-        
-        count += 1
+local function CountInstances(instance, avoidPlayerCharacters)
+    local count = 1
+    if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
+        return 0
     end
-    
+    if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
+        return 0
+    end
+    for _, child in ipairs(instance:GetChildren()) do
+        count = count + CountInstances(child, avoidPlayerCharacters)
+    end
     return count
 end
 
@@ -745,35 +740,33 @@ end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
     if SaveMapSettings.ProgressiveSave and not instance == workspace.CurrentCamera then task.wait(0.05) end
-	if Visited[instance] then
-        statusCallback(processed, total, "Cycle detected, skipping re-visit: " .. (instance:GetFullName() or "Unnamed"))
-        return processed
-    end
-    Visited[instance] = true
     if instance.ClassName:find("Wrap") then return processed end
     if instance:IsA("Bone") and (not instance.Parent or not instance.Parent:IsA("BasePart") or instance.Parent:IsA("Bone")) then return processed end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
         statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
+
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
         table.insert(BlacklistModels, instance)
         statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
+    
     for _,v in pairs(BlacklistModels) do
     if instance:IsDescendantOf(v) then
         statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
     end
+    
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
+
     local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
     local scriptSource = nil
-	warn("G")
-	task.wait(2)
+
     if isLocalPlayer then
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
         table.insert(output, string.format('<string name="Name">%s</string>', EscapeXml(instance.Name .. "[LocalPlayer]")))
@@ -781,8 +774,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         table.insert(output, string.format('<Item class="%s" referent="%s">', instance.ClassName or "Unknown", ref))
         table.insert(output, "<Properties>")
         table.insert(output, PropertySerializers.string("Name", instance.Name or "Unnamed"))
-		warn("Gx2")
-		task.wait(2)
+
         local properties = {}
         if instance:IsA("BasePart") then
             properties = {
@@ -1011,16 +1003,13 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
         end
-		warn("Gx3")
-		task.wait(2)
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
             if success and val ~= nil and v ~= "Parent" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
-		warn("Gx4")
-		task.wait(2)
+
         for propName, propValue in pairs(properties) do
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
@@ -1040,11 +1029,9 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
         table.insert(output, "</Properties>")
     end
-	task.wait(5)
-	warn("M")
+
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-		task.wait(0.05)
     end
 
     table.insert(output, "</Item>")
@@ -1682,7 +1669,10 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     local output = {XmlHeader}
-    local totalInstances = CountInstances(avoidPlayerCharacters)
+    local totalInstances = 0
+    for _, instance in ipairs(game:GetChildren()) do
+        totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
+    end
     if saveNilInstances then
         local Nil = getnilinstances() or {}
         totalInstances = totalInstances + #Nil
@@ -1697,7 +1687,9 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
             TitleLabel.Text = string.format("[N/A] %s", message)
         end
     end
+
     statusCallback(0, totalInstances, "Starting serialization...")
+
     for _, instance in ipairs(game:GetChildren()) do
         if instance == Players then
             local ref = GetRef(instance)
@@ -1714,6 +1706,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
     end
+
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
         local ref = GetRef(Workspace)
@@ -1744,7 +1737,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
                 table.insert(output, "</Item>")
             end
-			task.wait()
         end
         table.insert(output, "</Item>")
         table.insert(output, "</Item>")
