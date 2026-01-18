@@ -756,27 +756,31 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
-
+	task.wait(2)
+	warn("Y")
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
         table.insert(BlacklistModels, instance)
         statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
-    
+    task.wait(2)
+	warn("X")
     for _,v in pairs(BlacklistModels) do
     if instance:IsDescendantOf(v) then
         statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
         return processed
     end
     end
-
+	task.wait(2)
+	warn("Z")
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
 
     local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
     local scriptSource = nil
-
+	task.wait(3)
+	warn("G")
     if isLocalPlayer then
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
         table.insert(output, string.format('<string name="Name">%s</string>', EscapeXml(instance.Name .. "[LocalPlayer]")))
@@ -1039,7 +1043,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
         table.insert(output, "</Properties>")
     end
-
+	task.wait(5)
+	warn("M")
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
 		task.wait(0.05)
