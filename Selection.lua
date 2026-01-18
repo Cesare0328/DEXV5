@@ -1706,6 +1706,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
+		task.wait(0)
     end
 
     if saveNilInstances then
@@ -1738,6 +1739,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
                 table.insert(output, "</Item>")
             end
+			task.wait(0)
         end
         table.insert(output, "</Item>")
         table.insert(output, "</Item>")
