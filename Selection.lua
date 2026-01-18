@@ -1036,6 +1036,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     end
 
     table.insert(output, "</Item>")
+	warn("Ran")
     return processed
 end
 
@@ -1702,11 +1703,13 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
             table.insert(output, "</Properties>")
             if Player then
                 processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
-            end
+				task.wait()
+			end
             table.insert(output, "</Item>")
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
-        end
+			task.wait()
+		end
 		task.wait()
     end
 
