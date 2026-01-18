@@ -458,12 +458,13 @@ local Specials = {
 	firetouchinterest = firetouchinterest,
 	fireproximityprompt = fireproximityprompt,
 	getpropertylist = function(p1)
-		local props = ReflectionService:GetPropertiesOfClass(p1.className)
-		local names = {}
-		for _, prop in ipairs(props) do
-			table.insert(names, prop.Name)
+		local props = ReflectionService:GetPropertiesOfClass(Instance.className) -- HAS to be className and NOT ClassName
+		if not props then return {} end
+		local names = table.create(#props)
+		for i, p in props do
+			names[i] = p.Name
 		end
-    return names
+	return names
 	end,
 	getinstancelist = getinstances or getinstancelist,
 	writeinstance = function(p1, p2)
