@@ -938,7 +938,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 					end
 				end
 				if not passed then
-					local sourceAssetId, success = gethiddenproperty(o, "SourceAssetId")
+					local sourceAssetId, success = gethiddenproperty(instance, "SourceAssetId")
 					if success and sourceAssetId and sourceAssetId ~= -1 then
 						local asset = LoadLocalAsset(InsertService, "rbxassetid://" .. sourceAssetId)
 						if asset then
