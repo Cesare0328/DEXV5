@@ -76,6 +76,7 @@ local SetSelection_Bindable = WaitForChild(Bindables, "SetSelection", 300)
 local Player = Players.LocalPlayer
 local Mouse = cloneref(Player:GetMouse())
 local CurrentWindow = "Nothing c:"
+local Visited = setmetatable({}, {__mode = "k"}) 
 local Windows = {
 	Explorer = {
 		ExplorerPanel,
@@ -744,6 +745,11 @@ end
 
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
     if SaveMapSettings.ProgressiveSave and not instance == workspace.CurrentCamera then task.wait(0.05) end
+	if Visited[instance] then
+        statusCallback(processed, total, "Cycle detected, skipping re-visit: " .. (instance:GetFullName() or "Unnamed"))
+        return processed
+    end
+    Visited[instance] = true
     if instance.ClassName:find("Wrap") then return processed end
     if instance:IsA("Bone") and (not instance.Parent or not instance.Parent:IsA("BasePart") or instance.Parent:IsA("Bone")) then return processed end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
@@ -763,7 +769,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         return processed
     end
     end
-    
+
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
 
@@ -1690,7 +1696,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     statusCallback(0, totalInstances, "Starting serialization...")
-	task.wait(2)
     for _, instance in ipairs(game:GetChildren()) do
         if instance == Players then
             local ref = GetRef(instance)
@@ -1706,9 +1711,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
-		task.wait()
     end
-	task.wait(5)
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
         local ref = GetRef(Workspace)
