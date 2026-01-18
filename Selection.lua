@@ -574,6 +574,7 @@ local function CountInstances(instance, avoidPlayerCharacters)
     end
     for _, child in ipairs(instance:GetChildren()) do
         count = count + CountInstances(child, avoidPlayerCharacters)
+		task.wait()
     end
     return count
 end
@@ -1032,7 +1033,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-		task.wait()
     end
 
     table.insert(output, "</Item>")
@@ -1673,7 +1673,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
         totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
-		task.wait(0.15)
+		task.wait()
     end
 	warn("FIN")
     if saveNilInstances then
@@ -1703,16 +1703,14 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
             table.insert(output, "</Properties>")
             if Player then
                 processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
-				task.wait()
-			end
+            end
             table.insert(output, "</Item>")
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
-			task.wait()
-		end
+        end
 		task.wait()
     end
-	warn("FIN2")
+
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
         local ref = GetRef(Workspace)
@@ -1743,7 +1741,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
                 table.insert(output, "</Item>")
             end
-			task.wait()
         end
         table.insert(output, "</Item>")
         table.insert(output, "</Item>")
