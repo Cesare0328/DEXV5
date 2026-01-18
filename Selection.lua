@@ -921,11 +921,11 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                         scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Decompilation failed: %s", guid, path, tostring(result))
                     end
                 end
-			elseif IsA(o, "Script") then
+			elseif IsA(instance, "Script") then
 				local passed = false
-				local linkedSource = o.LinkedSource
-				if o.RunContext == Enum.RunContext.Client then
-					decompiled = decompile(o)
+				local linkedSource = instance.LinkedSource
+				if instance.RunContext == Enum.RunContext.Client then
+					decompiled = decompile(instance)
 					decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
 					passed = true
 				end
