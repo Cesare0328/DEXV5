@@ -1790,6 +1790,7 @@ createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacte
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
 
 Connect(SaveMapButton.Activated, function()
+	warn("RAN")
 	saveinstance(SaveMapSettings.SaveScripts, SaveMapSettings.AvoidPlayerCharacters, SaveMapSettings.SaveNilInstances)
 end)
 
