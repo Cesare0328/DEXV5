@@ -775,10 +775,17 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 	warn("Z")
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
-
+	task.wait(2)
+	warn("Zx2")
     local isLocalPlayer = instance == Player
+	task.wait(2)
+	warn("Zx3")
     local ref = GetRef(instance)
+	task.wait(2)
+	warn("Zx4")
     local scriptSource = nil
+	task.wait(2)
+	warn("Zx5")
 	task.wait(3)
 	warn("G")
     if isLocalPlayer then
