@@ -1042,6 +1042,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+		task.wait(0)
     end
 
     table.insert(output, "</Item>")
@@ -1694,7 +1695,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
             TitleLabel.Text = string.format("[N/A] %s", message)
         end
     end
-	task.wait(2)
     statusCallback(0, totalInstances, "Starting serialization...")
     for _, instance in ipairs(game:GetChildren()) do
         if instance == Players then
@@ -1711,8 +1711,8 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
+		task.wait()
     end
-	task.wait(10)
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
         local ref = GetRef(Workspace)
