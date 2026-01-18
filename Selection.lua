@@ -928,14 +928,14 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 				local linkedSource = instance.LinkedSource
 				if instance.RunContext == Enum.RunContext.Client then
 					decompiled = decompile(instance)
-					decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
+					decompiled = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
 					passed = true
 				end
 				if linkedSource and #linkedSource >= 1 and not passed then
 					local result = tonumber(string.match(linkedSource, "(%d+)"))
 					if result then
-						result = format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-						decompiled = format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s (ServerScript) [Linked Source]", guid, path, result)
+						result = string.format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
+						decompiled = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s (ServerScript) [Linked Source]", guid, path, result)
 						passed = true
 					end
 				end
