@@ -768,13 +768,12 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     end
     end
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
-	task.wait(2)
     processed = processed + 1
     local isLocalPlayer = instance == Player
     local ref = GetRef(instance)
     local scriptSource = nil
-	task.wait(3)
 	warn("G")
+	task.wait(2)
     if isLocalPlayer then
         table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
         table.insert(output, string.format('<string name="Name">%s</string>', EscapeXml(instance.Name .. "[LocalPlayer]")))
@@ -782,7 +781,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
         table.insert(output, string.format('<Item class="%s" referent="%s">', instance.ClassName or "Unknown", ref))
         table.insert(output, "<Properties>")
         table.insert(output, PropertySerializers.string("Name", instance.Name or "Unnamed"))
-
+		warn("Gx2")
+		task.wait(2)
         local properties = {}
         if instance:IsA("BasePart") then
             properties = {
@@ -1011,13 +1011,16 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
         end
+		warn("Gx3")
+		task.wait(2)
         for _,v in pairs(getproperties(instance)) do
             local success, val = pcall(function() return instance[v] end)
             if success and val ~= nil and v ~= "Parent" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
                 properties[v] = instance[v]
             end
         end
-
+		warn("Gx4")
+		task.wait(2)
         for propName, propValue in pairs(properties) do
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
