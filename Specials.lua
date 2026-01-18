@@ -482,7 +482,7 @@ local Specials = {
 		return C
 	end
 }
-
+getgenv().getproperties = getpropertylist
 function GetSpecials_Bindable.OnInvoke()
 	return Specials
 end
