@@ -1042,7 +1042,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-		task.wait(0)
+		task.wait(0.05)
     end
 
     table.insert(output, "</Item>")
@@ -1708,10 +1708,9 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
                 processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
             end
             table.insert(output, "</Item>")
-        --else
-            --processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+        else
+            processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
-		task.wait()
     end
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
