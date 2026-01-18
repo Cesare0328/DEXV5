@@ -1672,6 +1672,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
         totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
+		task.wait(0)
     end
     if saveNilInstances then
         local Nil = getnilinstances() or {}
@@ -1790,8 +1791,7 @@ createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacte
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
 
 Connect(SaveMapButton.Activated, function()
-	warn("RAN")
-	--saveinstance(SaveMapSettings.SaveScripts, SaveMapSettings.AvoidPlayerCharacters, SaveMapSettings.SaveNilInstances)
+	saveinstance(SaveMapSettings.SaveScripts, SaveMapSettings.AvoidPlayerCharacters, SaveMapSettings.SaveNilInstances)
 end)
 
 task.wait(0)
