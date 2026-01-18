@@ -1674,7 +1674,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
     local output = {XmlHeader}
     local totalInstances = CountInstances(avoidPlayerCharacters)
-	task.wait(5)
     if saveNilInstances then
         local Nil = getnilinstances() or {}
         totalInstances = totalInstances + #Nil
@@ -1707,6 +1706,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
+		task.wait()
     end
 
     if saveNilInstances then
@@ -1739,6 +1739,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
                 table.insert(output, "</Item>")
             end
+			task.wait()
         end
         table.insert(output, "</Item>")
         table.insert(output, "</Item>")
