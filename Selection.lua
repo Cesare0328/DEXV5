@@ -1036,7 +1036,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     end
 
     table.insert(output, "</Item>")
-	warn("Ran")
     return processed
 end
 
@@ -1674,8 +1673,9 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
         totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
-		task.wait()
+		task.wait(0.15)
     end
+	warn("FIN")
     if saveNilInstances then
         local Nil = getnilinstances() or {}
         totalInstances = totalInstances + #Nil
@@ -1712,7 +1712,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 		end
 		task.wait()
     end
-
+	warn("FIN2")
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
         local ref = GetRef(Workspace)
