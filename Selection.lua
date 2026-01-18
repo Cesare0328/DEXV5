@@ -1690,7 +1690,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     statusCallback(0, totalInstances, "Starting serialization...")
-
+	task.wait(2)
     for _, instance in ipairs(game:GetChildren()) do
         if instance == Players then
             local ref = GetRef(instance)
@@ -1708,7 +1708,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         end
 		task.wait()
     end
-
+	task.wait(5)
     if saveNilInstances then
         statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
         local ref = GetRef(Workspace)
