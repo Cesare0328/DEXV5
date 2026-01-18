@@ -1708,8 +1708,8 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
                 processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
             end
             table.insert(output, "</Item>")
-        else
-            processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+        --else
+            --processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
 		task.wait()
     end
