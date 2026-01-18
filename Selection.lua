@@ -946,7 +946,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 						if asset then
 							local source = asset.Source
 							if source and #source > 0 then
-								decompiled = format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Legacy RunContext]\n%s", guid, path, source)
+								decompiled = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Legacy RunContext]\n%s", guid, path, source)
 								passed = true
 							end
 						end
