@@ -458,7 +458,7 @@ local Specials = {
 	firetouchinterest = firetouchinterest,
 	fireproximityprompt = fireproximityprompt,
 	getpropertylist = function(p1)
-		local props = ReflectionService:GetPropertiesOfClass(Instance.className) -- HAS to be className and NOT ClassName
+		local props = ReflectionService:GetPropertiesOfClass(p1.className) -- HAS to be className and NOT ClassName
 		if not props then return {} end
 		local names = table.create(#props)
 		for i, p in props do
