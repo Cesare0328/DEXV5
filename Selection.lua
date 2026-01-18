@@ -14,6 +14,7 @@ local HttpService = cloneref(game:GetService("HttpService"))
 local RunService = cloneref(game:GetService("RunService"))
 local CoreGui = cloneref( game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
+local InsertService = cloneref(game:GetService("InsertService"))
 local TweenService = cloneref(game:GetService("TweenService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local ContentProvider = cloneref(game:GetService("ContentProvider"))
@@ -26,6 +27,7 @@ local Clone = RunService.Clone
 local Destroy = RunService.Destroy
 local JSONDecode = HttpService.JSONDecode
 local JSONEncode = HttpService.JSONEncode
+local LoadLocalAsset = InsertService.LoadLocalAsset
 local Wait, Connect = (function()
 	local A = RunService.Changed
 	return A.Wait, A.Connect
