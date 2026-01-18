@@ -921,7 +921,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                         scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Decompilation failed: %s", guid, path, tostring(result))
                     end
                 end
-			elseif IsA(instance, "Script") then
+			elseif instance:IsA("Script") then
 				local passed = false
 				local linkedSource = instance.LinkedSource
 				if instance.RunContext == Enum.RunContext.Client then
