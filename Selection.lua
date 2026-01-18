@@ -1032,6 +1032,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     for _, child in ipairs(instance:GetChildren()) do
         processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+		task.wait()
     end
 
     table.insert(output, "</Item>")
@@ -1672,7 +1673,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
         totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
-		task.wait(0)
+		task.wait()
     end
     if saveNilInstances then
         local Nil = getnilinstances() or {}
@@ -1706,7 +1707,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
-		task.wait(0)
+		task.wait()
     end
 
     if saveNilInstances then
@@ -1739,7 +1740,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
                 table.insert(output, "</Item>")
             end
-			task.wait(0)
+			task.wait()
         end
         table.insert(output, "</Item>")
         table.insert(output, "</Item>")
