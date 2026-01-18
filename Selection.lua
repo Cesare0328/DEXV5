@@ -565,17 +565,14 @@ local PropertySerializers = {
     end
 }
 local function CountInstances(avoidPlayerCharacters)
-    local Blacklist = Blacklist or {}
     local count = 0
-    
+
     for _, inst in ipairs(game:GetDescendants()) do
         if Blacklist[inst.ClassName] or Blacklist[inst.Name] then
             continue
         end
         
-        if avoidPlayerCharacters 
-            and inst:IsA("Model") 
-            and game.Players:GetPlayerFromCharacter(inst) ~= nil then
+        if avoidPlayerCharacters and inst:IsA("Model") and Players:GetPlayerFromCharacter(inst) ~= nil then
             continue
         end
         
@@ -1677,6 +1674,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
 
     local output = {XmlHeader}
     local totalInstances = CountInstances(avoidPlayerCharacters)
+	task.wait(5)
     if saveNilInstances then
         local Nil = getnilinstances() or {}
         totalInstances = totalInstances + #Nil
