@@ -564,18 +564,24 @@ local PropertySerializers = {
         end
     end
 }
-local function CountInstances(instance, avoidPlayerCharacters)
-    local count = 1
-    if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
-        return 0
+local function CountInstances(avoidPlayerCharacters)
+    local Blacklist = Blacklist or {}
+    local count = 0
+    
+    for _, inst in ipairs(game:GetDescendants()) do
+        if Blacklist[inst.ClassName] or Blacklist[inst.Name] then
+            continue
+        end
+        
+        if avoidPlayerCharacters 
+            and inst:IsA("Model") 
+            and game.Players:GetPlayerFromCharacter(inst) ~= nil then
+            continue
+        end
+        
+        count += 1
     end
-    if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
-        return 0
-    end
-    for _, child in ipairs(instance:GetChildren()) do
-        count = count + CountInstances(child, avoidPlayerCharacters)
-		task.wait()
-    end
+    
     return count
 end
 
@@ -1670,12 +1676,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     local output = {XmlHeader}
-    local totalInstances = 0
-    for _, instance in ipairs(game:GetChildren()) do
-        totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
-		task.wait()
-    end
-	warn("FIN")
+    local totalInstances = CountInstances(avoidPlayerCharacters)
     if saveNilInstances then
         local Nil = getnilinstances() or {}
         totalInstances = totalInstances + #Nil
@@ -1708,7 +1709,6 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         else
             processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
         end
-		task.wait()
     end
 
     if saveNilInstances then
