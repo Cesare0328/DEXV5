@@ -1716,7 +1716,7 @@ local function openScript(o)
 		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
 			local bytecode = getscriptbytecode(o)
     		if not bytecode or bytecode and string.len(bytecode) == 0 then
-				if IsA(0, "LocalScript") then
+				if IsA(o, "LocalScript") then
         			decompiled = format("-- Script GUID: NULL\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
 				else
 					decompiled = format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
