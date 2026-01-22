@@ -100,7 +100,8 @@ local XmlFooter = "</roblox>"
 local Blacklist = {
     CoreGui = true,
     Chat = true,
-    CorePackages = true
+    CorePackages = true,
+	PackageLink = true
 }
 local BlacklistModels = {}
 local RefCounter = 0
