@@ -1715,6 +1715,7 @@ local function openScript(o)
 		local decompiled
 		if IsA(o, "LocalScript") or IsA(o, "ModuleScript") then
 			local bytecode = getscriptbytecode(o)
+			local Class = o.ClassName
     		if not bytecode or bytecode and string.len(bytecode) == 0 then
 				if IsA(o, "LocalScript") then
         			decompiled = format("-- Script GUID: NULL\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
@@ -1726,12 +1727,12 @@ local function openScript(o)
 				decompiled = decompiled:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
         		if find(decompiled, Triggers[1]) and not find(decompiled, Triggers[2]) then
             		if #o.Source > 0 then
-                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript) [Clean Source]\n\n%s\n", guid, path, o.Source)
+                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (%s) [Clean Source]\n\n%s\n", guid, path, Class, o.Source)
             		elseif #o.Source <= 0 then
-                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (%s)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path, Class)
             		end
         		elseif #decompiled <= 0 then
-            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (%s)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path, Class)
         		else
             		local lines = {}
             		for line in decompiled:gmatch("[^\r\n]+") do
@@ -1741,7 +1742,7 @@ local function openScript(o)
                 		table.remove(lines, 1)
                 		decompiled = table.concat(lines, "\n")
             		end
-            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n%s", guid, path, decompiled)
+            		decompiled = format("-- Script GUID: %s\n-- Script Path: %s (%s)\n%s", guid, path, Class, decompiled)
         		end
     		end
         elseif IsA(o, "Script") then
