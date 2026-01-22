@@ -101,7 +101,9 @@ local Blacklist = {
     CoreGui = true,
     Chat = true,
     CorePackages = true,
-	PackageLink = true
+	PackageLink = true,
+	AudioDeviceInput = true,
+	AnimationRig = true
 }
 local BlacklistModels = {}
 local RefCounter = 0
