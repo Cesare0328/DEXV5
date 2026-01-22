@@ -897,17 +897,18 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 					end
                 else
                     local success, result = pcall(decompile, instance)
+					local Class = instance.ClassName
                     if success then
 						result = result:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
                         if result:find(triggers, 1, true) then
                             local sSuccess, sSource = pcall(function() return instance.Source end)
                             if sSuccess and #sSource > 0 then
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript) [Clean Source]\n\n%s\n", guid, path, sSource)
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (%s) [Clean Source]\n\n%s\n", guid, path, Class, sSource)
                             else
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path)
+                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (%s)\n-- Electron V3 Decompiler\n-- This script has no bytecode and no source.\n-- It can not be viewed.", guid, path, Class)
                             end
                         elseif #result <= 0 then
-                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path)
+                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (%s)\n-- Electron V3 Decompiler\n-- Decompiler returned nothing, script has no bytecode or has anti-decompiler implemented.", guid, path, Class)
                         else
                             local lines = {}
                             for line in result:gmatch("[^\r\n]+") do
@@ -916,12 +917,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                             if #lines > 0 and lines[1]:match("^%s*%-%-") then
                                 table.remove(lines, 1)
                             end
-                            if not instance:IsA("ModuleScript") then
-                                scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n%s", guid, path, table.concat(lines, "\n"))
-                            end
+                            scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (%s)\n%s", guid, path, Class, table.concat(lines, "\n"))
                         end
                     else
-                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (LocalScript)\n-- Decompilation failed: %s", guid, path, tostring(result))
+                        scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (%s)\n-- Decompilation failed: %s", guid, path, Class, tostring(result))
                     end
                 end
 			elseif instance:IsA("Script") then
@@ -929,14 +928,14 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 				local linkedSource = instance.LinkedSource
 				if instance.RunContext == Enum.RunContext.Client then
 					decompiled = decompile(instance)
-					decompiled = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
+					scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
 					passed = true
 				end
 				if linkedSource and #linkedSource >= 1 and not passed then
 					local result = tonumber(string.match(linkedSource, "(%d+)"))
 					if result then
 						result = string.format("https://assetdelivery.roblox.com/v1/asset?id=%s", result)
-						decompiled = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s (ServerScript) [Linked Source]", guid, path, result)
+						scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s\n-- Open this link in your browser and it will automatically download the source: \n-- %s (ServerScript) [Linked Source]", guid, path, result)
 						passed = true
 					end
 				end
@@ -947,7 +946,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 						if asset then
 							local source = asset.Source
 							if source and #source > 0 then
-								decompiled = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Legacy RunContext]\n%s", guid, path, source)
+								scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Legacy RunContext]\n%s", guid, path, source)
 								passed = true
 							end
 						end
