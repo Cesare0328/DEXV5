@@ -103,7 +103,8 @@ local Blacklist = {
     CorePackages = true,
 	PackageLink = true,
 	AudioDeviceInput = true,
-	AnimationRig = true
+	AnimationRig = true,
+	AnimationRigData = true
 }
 local BlacklistModels = {}
 local RefCounter = 0
