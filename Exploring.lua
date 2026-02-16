@@ -1,28 +1,5 @@
 -- < Fix for module threads not being supported since synapse x > --
 local script = getgenv().Dex:WaitForChild("ExplorerPanel"):WaitForChild("Exploring")
--- < Aliases > --
-local Instance_new = Instance.new
-local UDim2_new = UDim2.new
-local Vector2_new = Vector2.new
-local Vector3_new = Vector3.new
-local NumberRange_new = NumberRange.new
-local Color3_new = Color3.new
-local Color3_fromRGB = Color3.fromRGB
-local table_insert = table.insert
-local table_remove = table.remove
-local table_sort = table.sort
-local table_concat = table.concat
-local table_clear = table.clear
-local string_split = string.split
-local string_find = string.find
-local string_match = string.match
-local string_lower = string.lower
-local string_sub = string.sub
-local string_byte = string.byte
-local string_gsub = string.gsub
-local string_rep = string.rep
-local math_floor = math.floor
-local math_random = math.random
 -- < Services > --
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local CollectionService = cloneref(game:GetService("CollectionService"))
@@ -117,13 +94,13 @@ local fireclickdetector = Specials.fireclickdetector
 local firetouchinterest = Specials.firetouchinterest
 local fireproximityprompt = Specials.fireproximityprompt
 -- < Source > --
-local DexOutput, DexOutputMain = Instance_new("Folder"), Instance_new("ScreenGui")
+local DexOutput, DexOutputMain = Instance.new("Folder"), Instance.new("ScreenGui")
 DexOutput.Name = "Output"
 DexOutputMain.Name = "Dex Output"
 DexOutputMain.Parent = DexOutput
 
 local function printz(...)
-	local A = Instance_new("Dialog")
+	local A = Instance.new("Dialog")
 	for _,v in ipairs({...}) do
 		A.Name = tostring(v) .. " "
 	end
@@ -165,27 +142,27 @@ do
 end
 
 local GuiColor = {
-	Background = Color3_fromRGB(37, 37, 42),
-	Console = Color3_fromRGB(11,13,13),
-	ConsoleBorder = Color3_fromRGB(26,30,31),
-	Border = Color3_fromRGB(20, 20, 25),
-	Warning = Color3_fromRGB(255, 206, 11),
-	Information = Color3_fromRGB(120, 169, 255),
-	Error = Color3_fromRGB(255, 116, 116),
-	Success = Color3_fromRGB(38, 255, 156),
-	Question = Color3_fromRGB(120, 169, 255),
-	Selected = Color3_fromRGB(5, 100, 145),
-	BorderSelected = Color3_fromRGB(2, 125, 145),
-	Text = Color3_fromRGB(245, 245, 250),
-	FrameBorder = Color3_fromRGB(49, 49, 53),
-	TextDisabled = Color3_fromRGB(190, 190, 195),
-	TextSelected = Color3_fromRGB(255, 255, 255),
-	Button = Color3_fromRGB(31, 31, 35),
-	ButtonBorder = Color3_fromRGB(135, 135, 140),
-	ButtonSelected = Color3_fromRGB(0, 170, 155),
-	Field = Color3_fromRGB(37, 37, 42),
-	FieldBorder = Color3_fromRGB(50, 50, 55),
-	TitleBackground = Color3_fromRGB(10, 10, 15)
+	Background = Color3.fromRGB(37, 37, 42),
+	Console = Color3.fromRGB(11,13,13),
+	ConsoleBorder = Color3.fromRGB(26,30,31),
+	Border = Color3.fromRGB(20, 20, 25),
+	Warning = Color3.fromRGB(255, 206, 11),
+	Information = Color3.fromRGB(120, 169, 255),
+	Error = Color3.fromRGB(255, 116, 116),
+	Success = Color3.fromRGB(38, 255, 156),
+	Question = Color3.fromRGB(120, 169, 255),
+	Selected = Color3.fromRGB(5, 100, 145),
+	BorderSelected = Color3.fromRGB(2, 125, 145),
+	Text = Color3.fromRGB(245, 245, 250),
+	FrameBorder = Color3.fromRGB(49, 49, 53),
+	TextDisabled = Color3.fromRGB(190, 190, 195),
+	TextSelected = Color3.fromRGB(255, 255, 255),
+	Button = Color3.fromRGB(31, 31, 35),
+	ButtonBorder = Color3.fromRGB(135, 135, 140),
+	ButtonSelected = Color3.fromRGB(0, 170, 155),
+	Field = Color3.fromRGB(37, 37, 42),
+	FieldBorder = Color3.fromRGB(50, 50, 55),
+	TitleBackground = Color3.fromRGB(10, 10, 15)
 }
 -- Icon map constants
 while not getgenv().AssetsCached == true do task.wait() end
@@ -219,7 +196,7 @@ for _, Metadata in ipairs(HttpService:JSONDecode(game:HttpGet(ReflectionMetadata
 end
 
 local function Create(p1, p2)
-	local A = typeof(p1) == 'string' and Instance_new(p1) or p1
+	local A = typeof(p1) == 'string' and Instance.new(p1) or p1
 	for B, C in next, p2 do
 		if typeof(B) == 'number' then
 			C.Parent = A
@@ -249,14 +226,14 @@ ScreenGui.Parent = CoreGui
 local Temp = Dex.Notification:Clone()
 Temp.Parent = ScreenGui
 Temp.ImageLabel.BackgroundTransparency = 1
-Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string_lower(Type) .. ".png")
+Temp.ImageLabel.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
 Temp.TextLabel.Text = Message
 Temp.UIStroke.Color = GuiColor[Type]
 
-Temp.Position = UDim2_new(1, 0, 0, -45)
+Temp.Position = UDim2.new(1, 0, 0, -45)
 Temp.Visible = true
 
-local pos = UDim2_new(1, -327.5, 0, -45)
+local pos = UDim2.new(1, -327.5, 0, -45)
 local Info = TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 local Tween = TweenService:Create(Temp, Info, {Position = pos})
 local Info2 = TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
@@ -281,9 +258,9 @@ local ColorType = GuiColor[Type]
 local Color = string.format("rgb(%d,%d,%d)", math.floor(ColorType.R * 255), math.floor(ColorType.G * 255), math.floor(ColorType.B * 255))
 MessageLabel.Text = string.format('<font color="%s">' .. Message .. '</font>', Color)
 MessageLabel.TextTransparency = 0
-ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string_lower(Type) .. ".png")
-MessageLabel.Position = UDim2_new(0, 25, 0, OutputSize)
-ImageType.Position = UDim2_new(0, 0, 0, OutputSize)
+ImageType.Image = getcustomasset("DEXV5\\Assets\\" .. string.lower(Type) .. ".png")
+MessageLabel.Position = UDim2.new(0, 25, 0, OutputSize)
+ImageType.Position = UDim2.new(0, 0, 0, OutputSize)
 ImageType.ImageTransparency = 0
 ImageType.Parent = Dex.Console.Output
 MessageLabel.Parent = Dex.Console.Output
@@ -406,7 +383,7 @@ local function SetSelectionBox2D(TargetGui)
             return
         end
         local AbsoluteSize = TargetGui.AbsoluteSize
-        HighlightFrame.Size = UDim2_new(0, AbsoluteSize.X, TargetGui.Size.Y.Scale, TargetGui.Size.Y.Offset)
+        HighlightFrame.Size = UDim2.new(0, AbsoluteSize.X, TargetGui.Size.Y.Scale, TargetGui.Size.Y.Offset)
         HighlightFrame.Position = TargetGui.Position
         HighlightFrame.AnchorPoint = TargetGui.AnchorPoint
         HighlightFrame.ZIndex = TargetGui.ZIndex + 10
@@ -433,7 +410,7 @@ getgenv().createDDown = function(dBut, callback, ...)
         for _, v in ipairs(activeOptions) do
             Destroy(v)
         end
-        table_clear(activeOptions)
+        table.clear(activeOptions)
         barActive = false
         return
     else
@@ -454,8 +431,8 @@ getgenv().createDDown = function(dBut, callback, ...)
         newOption.ZIndex = 2
         newOption.Name = "Option " .. tostring(i)
         newOption.BackgroundTransparency = 0
-        table_insert(activeOptions, newOption)
-        newOption.Position = UDim2_new(-.4, dBut.Position.X.Offset, dBut.Position.Y.Scale, dBut.Position.Y.Offset + (#activeOptions * dBut.Size.Y.Offset))
+        table.insert(activeOptions, newOption)
+        newOption.Position = UDim2.new(-.4, dBut.Position.X.Offset, dBut.Position.Y.Scale, dBut.Position.Y.Offset + (#activeOptions * dBut.Size.Y.Offset))
         newOption.Text = slots[i]
         newOption.Parent = base.Parent.Parent.Parent
         Connect(newOption.MouseButton1Down, function()
@@ -464,7 +441,7 @@ getgenv().createDDown = function(dBut, callback, ...)
             for _, v in ipairs(activeOptions) do
                 Destroy(v)
             end
-            table_clear(activeOptions)
+            table.clear(activeOptions)
             barActive = false
         end)
     end
@@ -512,7 +489,7 @@ do
 	local iconMap = 'rbxasset://textures/ClassImages.png'
 
 	function Icon(IconFrame,index)
-		local mapSize = Vector2_new(2352,16)
+		local mapSize = Vector2.new(2352,16)
 		local iconSize = 16
 		local class = 'Frame'
 		if typeof(IconFrame) == 'string' then
@@ -529,13 +506,13 @@ do
 					Active = false,
 					BackgroundTransparency = 1,
 					Image = iconMap,
-					Size = UDim2_new(0,iconSize,0,mapSize.Y)
+					Size = UDim2.new(0,iconSize,0,mapSize.Y)
 				})
 			})
 		end
 		local IconMap = WaitForChild(IconFrame, "IconMap", 300)
-		IconMap.ImageRectOffset = Vector2_new(iconSize * index, 0)
-		IconMap.ImageRectSize = Vector2_new(iconSize, iconSize)
+		IconMap.ImageRectOffset = Vector2.new(iconSize * index, 0)
+		IconMap.ImageRectSize = Vector2.new(iconSize, iconSize)
 		return IconFrame
 	end
 end
@@ -556,7 +533,7 @@ function SpecialIcon(IconFrame,texture,iconSize)
 				Active = true,
 				BackgroundTransparency = 1,
 				Image = texture,
-				Size = iconSize or UDim2_new(0,16,0,16)
+				Size = iconSize or UDim2.new(0,16,0,16)
 			})
 		})
 	end
@@ -574,7 +551,7 @@ do
 		local Frame = Create('Frame',{
 			Name = "Arrow Graphic",
 			BorderSizePixel = 0,
-			Size = UDim2_new(0,size,0,size),
+			Size = UDim2.new(0,size,0,size),
 			Transparency = 1
 		})
 
@@ -584,34 +561,34 @@ do
 			})
 		end
 
-		template.BackgroundColor3 = Color3_new(1, 1, 1)
+		template.BackgroundColor3 = Color3.new(1, 1, 1)
 
 		local transform
 		if dir == nil or dir == 'Up' then
 			function transform(p,s) return p,s end
 		elseif dir == 'Down' then
-			function transform(p,s) return UDim2_new(0,p.X.Offset,0,size-p.Y.Offset-1),s end
+			function transform(p,s) return UDim2.new(0,p.X.Offset,0,size-p.Y.Offset-1),s end
 		elseif dir == 'Left' then
-			function transform(p,s) return UDim2_new(0,p.Y.Offset,0,p.X.Offset),UDim2_new(0,s.Y.Offset,0,s.X.Offset) end
+			function transform(p,s) return UDim2.new(0,p.Y.Offset,0,p.X.Offset),UDim2.new(0,s.Y.Offset,0,s.X.Offset) end
 		elseif dir == 'Right' then
-			function transform(p,s) return UDim2_new(0,size-p.Y.Offset-1,0,p.X.Offset),UDim2_new(0,s.Y.Offset,0,s.X.Offset) end
+			function transform(p,s) return UDim2.new(0,size-p.Y.Offset-1,0,p.X.Offset),UDim2.new(0,s.Y.Offset,0,s.X.Offset) end
 		end
 
 		local scale
 		if scaled then
-			function scale(p,s) return UDim2_new(p.X.Offset/size,0,p.Y.Offset/size,0),UDim2_new(s.X.Offset/size,0,s.Y.Offset/size,0) end
+			function scale(p,s) return UDim2.new(p.X.Offset/size,0,p.Y.Offset/size,0),UDim2.new(s.X.Offset/size,0,s.Y.Offset/size,0) end
 		else
 			function scale(p,s) return p,s end
 		end
 
-		local o = math_floor(size/4)
+		local o = math.floor(size/4)
 		if size%2 == 0 then
 			local n = size/2-1
 			for i = 0,n do
 				local t = Clone(template)
 				local p,s = scale(transform(
-					UDim2_new(0,n-i,0,o+i),
-					UDim2_new(0,(i+1)*2,0,1)
+					UDim2.new(0,n-i,0,o+i),
+					UDim2.new(0,(i+1)*2,0,1)
 					))
 				t.Position = p
 				t.Size = s
@@ -622,8 +599,8 @@ do
 			for i = 0,n do
 				local t = Clone(template)
 				local p,s = scale(transform(
-					UDim2_new(0,n-i,0,o+i),
-					UDim2_new(0,i*2+1,0,1)
+					UDim2.new(0,n-i,0,o+i),
+					UDim2.new(0,i*2+1,0,1)
 					))
 				t.Position = p
 				t.Size = s
@@ -633,8 +610,8 @@ do
 		if size%4 > 1 then
 			local t = Clone(template)
 			local p,s = scale(transform(
-				UDim2_new(0,0,0,size-o-1),
-				UDim2_new(0,size,0,1)
+				UDim2.new(0,0,0,size-o-1),
+				UDim2.new(0,size,0,1)
 				))
 			t.Position = p
 			t.Size = s
@@ -642,7 +619,7 @@ do
 		end
 
 		for _, v in ipairs(GetChildren(Frame)) do
-			v.BackgroundColor3 = Color3_new(1, 1, 1)
+			v.BackgroundColor3 = Color3.new(1, 1, 1)
 		end
 
 		return Frame
@@ -652,7 +629,7 @@ do
 		local Frame = Create('Frame',{
 			Name = "Grip Graphic",
 			BorderSizePixel = 0,
-			Size = UDim2_new(0,size.X,0,size.Y),
+			Size = UDim2.new(0,size.X,0,size.Y),
 			Transparency = 1
 		})
 
@@ -665,21 +642,21 @@ do
 		spacing = spacing or 2
 
 		local scale = function(p)
-			return scaled and UDim2_new(p.X.Offset / size.X, 0, p.Y.Offset / size.Y, 0) or p
+			return scaled and UDim2.new(p.X.Offset / size.X, 0, p.Y.Offset / size.Y, 0) or p
 		end
 
 		if dir == 'Vertical' then
 			for i=0,size.X-1,spacing do
 				local t = Clone(template)
-				t.Size = scale(UDim2_new(0,1,0, size.Y))
-				t.Position = scale(UDim2_new(0,i,0,0))
+				t.Size = scale(UDim2.new(0,1,0, size.Y))
+				t.Position = scale(UDim2.new(0,i,0,0))
 				t.Parent = Frame
 			end
 		elseif dir == nil or dir == 'Horizontal' then
 			for i=0,size.Y-1,spacing do
 				local t = Clone(template)
-				t.Size = scale(UDim2_new(0,size.X,0,1))
-				t.Position = scale(UDim2_new(0,0,0,i))
+				t.Size = scale(UDim2.new(0,size.X,0,1))
+				t.Position = scale(UDim2.new(0,0,0,i))
 				t.Parent = Frame
 			end
 		end
@@ -693,33 +670,33 @@ do
 		local ScrollFrame = Create('Frame',{
 			Name = "ScrollFrame",
 			BorderSizePixel = 0,
-			Position = horizontal and UDim2_new(0,0,1,-GUI_SIZE) or UDim2_new(1,-GUI_SIZE,0,0),
-			Size = horizontal and UDim2_new(1,0,0,GUI_SIZE) or UDim2_new(0,GUI_SIZE,1,0),
+			Position = horizontal and UDim2.new(0,0,1,-GUI_SIZE) or UDim2.new(1,-GUI_SIZE,0,0),
+			Size = horizontal and UDim2.new(1,0,0,GUI_SIZE) or UDim2.new(0,GUI_SIZE,1,0),
 			BackgroundTransparency = 1,
 			Create('ImageButton',{
 				Name = "ScrollDown",
-				Position = horizontal and UDim2_new(1,-GUI_SIZE,0,0) or UDim2_new(0,0,1,-GUI_SIZE),
-				Size = UDim2_new(0, GUI_SIZE, 0, GUI_SIZE),
+				Position = horizontal and UDim2.new(1,-GUI_SIZE,0,0) or UDim2.new(0,0,1,-GUI_SIZE),
+				Size = UDim2.new(0, GUI_SIZE, 0, GUI_SIZE),
 				BackgroundColor3 = GuiColor.Button,
 				BorderColor3 = GuiColor.Border
 			}),
 			Create('ImageButton',{
 				Name = "ScrollUp",
-				Size = UDim2_new(0, GUI_SIZE, 0, GUI_SIZE),
+				Size = UDim2.new(0, GUI_SIZE, 0, GUI_SIZE),
 				BackgroundColor3 = GuiColor.Button,
 				BorderColor3 = GuiColor.Border
 			}),
 			Create('ImageButton',{
 				Name = "ScrollBar",
-				Size = horizontal and UDim2_new(1,-GUI_SIZE*2,1,0) or UDim2_new(1,0,1,-GUI_SIZE*2),
-				Position = horizontal and UDim2_new(0,GUI_SIZE,0,0) or UDim2_new(0,0,0,GUI_SIZE),
+				Size = horizontal and UDim2.new(1,-GUI_SIZE*2,1,0) or UDim2.new(1,0,1,-GUI_SIZE*2),
+				Position = horizontal and UDim2.new(0,GUI_SIZE,0,0) or UDim2.new(0,0,0,GUI_SIZE),
 				AutoButtonColor = false,
-				BackgroundColor3 = Color3_new(1/4, 1/4, 1/4),
+				BackgroundColor3 = Color3.new(1/4, 1/4, 1/4),
 				BorderColor3 = GuiColor.Border,
 				Create('ImageButton',{
 					Name = "ScrollThumb",
 					AutoButtonColor = false,
-					Size = UDim2_new(0, GUI_SIZE, 0, GUI_SIZE),
+					Size = UDim2.new(0, GUI_SIZE, 0, GUI_SIZE),
 					BackgroundColor3 = GuiColor.Button,
 					BorderColor3 = GuiColor.Border
 				})
@@ -735,18 +712,18 @@ do
 
 		local ScrollDownFrame = ScrollFrame.ScrollDown
 		local ScrollDownGraphic = ArrowGraphic(graphicSize,horizontal and 'Right' or 'Down',true,graphicTemplate)
-		ScrollDownGraphic.Position = UDim2_new(.5,-graphicSize/2,.5,-graphicSize/2)
+		ScrollDownGraphic.Position = UDim2.new(.5,-graphicSize/2,.5,-graphicSize/2)
 		ScrollDownGraphic.Parent = ScrollDownFrame
 		local ScrollUpFrame = ScrollFrame.ScrollUp
 		local ScrollUpGraphic = ArrowGraphic(graphicSize,horizontal and 'Left' or 'Up',true,graphicTemplate)
-		ScrollUpGraphic.Position = UDim2_new(.5,-graphicSize/2,.5,-graphicSize/2)
+		ScrollUpGraphic.Position = UDim2.new(.5,-graphicSize/2,.5,-graphicSize/2)
 		ScrollUpGraphic.Parent = ScrollUpFrame
 		local ScrollBarFrame = ScrollFrame.ScrollBar
 		local ScrollThumbFrame = ScrollBarFrame.ScrollThumb
 		do
 			local size = GUI_SIZE*3/8
-			local Decal = GripGraphic(Vector2_new(size,size),horizontal and 'Vertical' or 'Horizontal',2,graphicTemplate)
-			Decal.Position = UDim2_new(.5,-size/2,.5,-size/2)
+			local Decal = GripGraphic(Vector2.new(size,size),horizontal and 'Vertical' or 'Horizontal',2,graphicTemplate)
+			Decal.Position = UDim2.new(.5,-size/2,.5,-size/2)
 			Decal.Parent = ScrollThumbFrame
 		end
 
@@ -794,7 +771,7 @@ do
 					self:Update()
 				end,
 				SetScrollPercent = function(self,percent)
-					self.ScrollIndex = math_floor((self.TotalSpace - self.VisibleSpace)*percent + .5)
+					self.ScrollIndex = math.floor((self.TotalSpace - self.VisibleSpace)*percent + .5)
 					self:Update()
 				end
 			}
@@ -803,27 +780,27 @@ do
 		local UpdateScrollThumb
 		if horizontal then
 			function UpdateScrollThumb()
-				ScrollThumbFrame.Size = UDim2_new(Class.VisibleSpace/Class.TotalSpace,0,0,GUI_SIZE)
+				ScrollThumbFrame.Size = UDim2.new(Class.VisibleSpace/Class.TotalSpace,0,0,GUI_SIZE)
 				if ScrollThumbFrame.AbsoluteSize.X < GUI_SIZE then
-					ScrollThumbFrame.Size = UDim2_new(0,GUI_SIZE,0,GUI_SIZE)
+					ScrollThumbFrame.Size = UDim2.new(0,GUI_SIZE,0,GUI_SIZE)
 				end
 				local barSize = ScrollBarFrame.AbsoluteSize.X
-				ScrollThumbFrame.Position = UDim2_new(Class:GetScrollPercent()*(barSize - ScrollThumbFrame.AbsoluteSize.X)/barSize,0,0,0)
+				ScrollThumbFrame.Position = UDim2.new(Class:GetScrollPercent()*(barSize - ScrollThumbFrame.AbsoluteSize.X)/barSize,0,0,0)
 			end
 		else
 			function UpdateScrollThumb()
-				ScrollThumbFrame.Size = UDim2_new(0,GUI_SIZE,Class.VisibleSpace/Class.TotalSpace,0)
+				ScrollThumbFrame.Size = UDim2.new(0,GUI_SIZE,Class.VisibleSpace/Class.TotalSpace,0)
 				if ScrollThumbFrame.AbsoluteSize.Y < GUI_SIZE then
-					ScrollThumbFrame.Size = UDim2_new(0,GUI_SIZE,0,GUI_SIZE)
+					ScrollThumbFrame.Size = UDim2.new(0,GUI_SIZE,0,GUI_SIZE)
 				end
 				local barSize = ScrollBarFrame.AbsoluteSize.Y
-				ScrollThumbFrame.Position = UDim2_new(0,0,Class:GetScrollPercent()*(barSize - ScrollThumbFrame.AbsoluteSize.Y)/barSize,0)
+				ScrollThumbFrame.Position = UDim2.new(0,0,Class:GetScrollPercent()*(barSize - ScrollThumbFrame.AbsoluteSize.Y)/barSize,0)
 			end
 		end
 
 		local lastDown, lastUp
-		local scrollStyle = {BackgroundColor3=Color3_new(1, 1, 1),BackgroundTransparency=0}
-		local scrollStyle_ds = {BackgroundColor3=Color3_new(1, 1, 1),BackgroundTransparency=.7}
+		local scrollStyle = {BackgroundColor3=Color3.new(1, 1, 1),BackgroundTransparency=0}
+		local scrollStyle_ds = {BackgroundColor3=Color3.new(1, 1, 1),BackgroundTransparency=.7}
 
 		local function Update()
 			local t, v, s = Class.TotalSpace, Class.VisibleSpace, Class.ScrollIndex
@@ -876,8 +853,8 @@ do
 
 		local MouseDrag = Create('ImageButton',{
 			Name = "MouseDrag",
-			Position = UDim2_new(-.25,0,-.25,0),
-			Size = UDim2_new(1.5,0,1.5,0),
+			Position = UDim2.new(-.25,0,-.25,0),
+			Size = UDim2.new(1.5,0,1.5,0),
 			Transparency = 1,
 			AutoButtonColor = false,
 			Active = true,
@@ -1156,24 +1133,24 @@ local listFrame = Create('Frame',{
 	BorderSizePixel = 0,
 	BackgroundTransparency = 1,
 	ClipsDescendants = true,
-	Position = UDim2_new(0,0,0,HEADER_SIZE),
-	Size = UDim2_new(1,-GUI_SIZE,1,-HEADER_SIZE),
+	Position = UDim2.new(0,0,0,HEADER_SIZE),
+	Size = UDim2.new(1,-GUI_SIZE,1,-HEADER_SIZE),
 	Parent = explorerPanel
 })
 
 local scrollBar = ScrollBar(false)
 scrollBar.PageIncrement = 1
 Create(scrollBar.GUI,{
-	Position = UDim2_new(1,-GUI_SIZE,0,HEADER_SIZE),
-	Size = UDim2_new(0,GUI_SIZE,1,-HEADER_SIZE),
+	Position = UDim2.new(1,-GUI_SIZE,0,HEADER_SIZE),
+	Size = UDim2.new(0,GUI_SIZE,1,-HEADER_SIZE),
 	Parent = explorerPanel
 })
 
 local scrollBarH = ScrollBar(true)
 scrollBarH.PageIncrement = GUI_SIZE
 Create(scrollBarH.GUI,{
-	Position = UDim2_new(0,0,1,-GUI_SIZE),
-	Size = UDim2_new(1,-GUI_SIZE,0,GUI_SIZE),
+	Position = UDim2.new(0,0,1,-GUI_SIZE),
+	Size = UDim2.new(1,-GUI_SIZE,0,GUI_SIZE),
 	Visible = false,
 	Parent = explorerPanel
 })
@@ -1184,8 +1161,8 @@ local headerFrame = Create('Frame',{
 	BorderSizePixel = 0,
 	BackgroundColor3 = GuiColor.Background,
 	BorderColor3 = GuiColor.Border,
-	Position = UDim2_new(),
-	Size = UDim2_new(1,0,0,HEADER_SIZE),
+	Position = UDim2.new(),
+	Size = UDim2.new(1,0,0,HEADER_SIZE),
 	Parent = explorerPanel,
 	Create('TextLabel',{
 		Text = "Explorer",
@@ -1194,8 +1171,8 @@ local headerFrame = Create('Frame',{
 		TextXAlignment = 'Left',
 		Font = FONT,
 		FontSize = FONT_SIZE,
-		Position = UDim2_new(0,4,0,0),
-		Size = UDim2_new(1,-4,.5,0)
+		Position = UDim2.new(0,4,0,0),
+		Size = UDim2.new(1,-4,.5,0)
 	})
 })
 MainExplorerTitle = headerFrame.TextLabel
@@ -1213,8 +1190,8 @@ local explorerFilter = Create('TextBox', {
     TextXAlignment = Enum.TextXAlignment.Left,
     Font = FONT,
     FontSize = FONT_SIZE,
-    Position = UDim2_new(0, 4, 0.5, 0),
-    Size = UDim2_new(1, -8, 0.5, -2),
+    Position = UDim2.new(0, 4, 0.5, 0),
+    Size = UDim2.new(1, -8, 0.5, -2),
     ZIndex = 1
 })
 
@@ -1223,7 +1200,7 @@ SG.Parent = CoreGui
 local FFrame = Create('Frame', {
 	BackgroundTransparency = 1,
 	Visible = true,
-	Size = UDim2_new(1, 0, 1, 0)
+	Size = UDim2.new(1, 0, 1, 0)
 })
 FFrame.Parent = SG
 local FFTextbutton = Create('TextButton', {
@@ -1231,15 +1208,15 @@ local FFTextbutton = Create('TextButton', {
 	TextTransparency = 1,
 	Visible = false,
 	Modal = false,
-	Size = UDim2_new(1, 0, 1, 0)
+	Size = UDim2.new(1, 0, 1, 0)
 })
 FFTextbutton.Parent = FFrame
 local FilterInstance = Create('Frame', {
     BackgroundTransparency = 0,
     BackgroundColor3 = GuiColor.Field,
 	BorderSizePixel = 3,
-    Position = UDim2_new(0, 0, 1.1, 0),
-    Size = UDim2_new(1, 0, 15.25, 0),
+    Position = UDim2.new(0, 0, 1.1, 0),
+    Size = UDim2.new(1, 0, 15.25, 0),
     Visible = false,
     ZIndex = 2
 })
@@ -1269,7 +1246,7 @@ FramePadding.Parent = FilterInstance
 
 local TitleLabel = Create('TextLabel', {
     Text = "Suggested Filters",
-    Size = UDim2_new(1, 0, 0, 30),
+    Size = UDim2.new(1, 0, 0, 30),
     BackgroundTransparency = 1,
     TextColor3 = GuiColor.Text,
     TextXAlignment = Enum.TextXAlignment.Left,
@@ -1283,8 +1260,8 @@ TitleLabel.Parent = FilterInstance
 local SuggestedFilterNames = {"anchored=", "locked=", "transparency=", "material=", "meshId=", "textureId=", "tag="}
 for i = 1, 7 do
     local FilterButton = Create('TextButton', {
-        Text = string.upper(string_sub(SuggestedFilterNames[i], 1, 1)) .. string_sub(SuggestedFilterNames[i], 2),
-        Size = UDim2_new(0.985, 0, 0, 25),
+        Text = string.upper(string.sub(SuggestedFilterNames[i], 1, 1)) .. string.sub(SuggestedFilterNames[i], 2),
+        Size = UDim2.new(0.985, 0, 0, 25),
         BackgroundColor3 = GuiColor.Field,
         BorderColor3 = GuiColor.Border,
         TextColor3 = GuiColor.Text,
@@ -1312,9 +1289,9 @@ for i = 1, 7 do
     local FilterImage = Create('ImageLabel', {
         Image = getcustomasset("DEXV5\\Assets\\" .. ImageAsset .. ".png"),
         BackgroundTransparency = 1,
-        Size = UDim2_new(0, 16, 0, 16),
+        Size = UDim2.new(0, 16, 0, 16),
         AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2_new(0, -20, 0.5, 0),
+        Position = UDim2.new(0, -20, 0.5, 0),
         ZIndex = 2
     })
     FilterImage.Parent = FilterButton
@@ -1335,8 +1312,8 @@ local MatchWholeWord = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2_new(0, 16, 0, 16),
-    Position = UDim2_new(1, -7, 0.5, 0),
+    Size = UDim2.new(0, 16, 0, 16),
+    Position = UDim2.new(1, -7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 MatchWholeWord.Parent = explorerFilter
@@ -1357,8 +1334,8 @@ local MatchCase = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2_new(0, 16, 0, 16),
-    Position = UDim2_new(1, -4 - 16 - 7, 0.5, 0),
+    Size = UDim2.new(0, 16, 0, 16),
+    Position = UDim2.new(1, -4 - 16 - 7, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1
 })
 MatchCase.Parent = explorerFilter
@@ -1431,8 +1408,8 @@ SearchLoading = Create('ImageButton', {
     BackgroundColor3 = Color3.new(1, 1, 1),
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
-    Size = UDim2_new(0, 16, 0, 16),
-    Position = UDim2_new(1, -4 - 16 - 7 - 16 - 4, 0.5, 0),
+    Size = UDim2.new(0, 16, 0, 16),
+    Position = UDim2.new(1, -4 - 16 - 7 - 16 - 4, 0.5, 0),
     ZIndex = explorerFilter.ZIndex + 1,
 	Visible = false
 })
@@ -1445,12 +1422,12 @@ SetZIndexOnChanged(explorerPanel)
 local Styles = {
 	Font = Enum.Font.Arial,
 	Margin = 5,
-	Black = Color3_fromRGB(0,0,5),
-	Black2 = Color3_fromRGB(24, 24, 29),
-	White = Color3_fromRGB(244,244,249),
-	WhiteOver = Color3_fromRGB(200,200,205),
-	Hover = Color3_fromRGB(2, 128, 149),
-	Hover2 = Color3_fromRGB(5, 102, 146)
+	Black = Color3.fromRGB(0,0,5),
+	Black2 = Color3.fromRGB(24, 24, 29),
+	White = Color3.fromRGB(244,244,249),
+	WhiteOver = Color3.fromRGB(200,200,205),
+	Hover = Color3.fromRGB(2, 128, 149),
+	Hover2 = Color3.fromRGB(5, 102, 146)
 }
 
 local Row = {
@@ -1459,35 +1436,35 @@ local Row = {
 	TextXAlignment = Enum.TextXAlignment.Left,
 	TextColor = Styles.White,
 	TextColorOver = Styles.WhiteOver,
-	TextLockedColor = Color3_fromRGB(155,155,160),
+	TextLockedColor = Color3.fromRGB(155,155,160),
 	Height = 24,
-	BorderColor = Color3_fromRGB(54,54,55),
+	BorderColor = Color3.fromRGB(54,54,55),
 	BackgroundColor = Styles.Black2,
-	BackgroundColorAlternate = Color3_fromRGB(32, 32, 37),
-	BackgroundColorMouseover = Color3_fromRGB(40, 40, 45),
+	BackgroundColorAlternate = Color3.fromRGB(32, 32, 37),
+	BackgroundColorMouseover = Color3.fromRGB(40, 40, 45),
 	TitleMarginLeft = 15
 }
 
 local DropDown = {
 	Font = Styles.Font,
 	FontSize = Enum.FontSize.Size14,
-	TextColor = Color3_fromRGB(255,255,260),
+	TextColor = Color3.fromRGB(255,255,260),
 	TextColorOver = Row.TextColorOver,
 	TextXAlignment = Enum.TextXAlignment.Left,
 	Height = 20,
 	BackColor = Styles.Black2,
 	BackColorOver = Styles.Hover2,
-	BorderColor = Color3_fromRGB(45,45,50),
+	BorderColor = Color3.fromRGB(45,45,50),
 	BorderSizePixel = 0,
-	ArrowColor = Color3_fromRGB(80,80,83),
+	ArrowColor = Color3.fromRGB(80,80,83),
 	ArrowColorOver = Styles.Hover
 }
 
 local BrickColors = {
 	BoxSize = 13,
 	BorderSizePixel = 0,
-	BorderColor = Color3_fromRGB(53,53,55),
-	FrameColor = Color3_fromRGB(53,53,55),
+	BorderColor = Color3.fromRGB(53,53,55),
+	FrameColor = Color3.fromRGB(53,53,55),
 	Size = 20,
 	Padding = 4,
 	ColorsPerRow = 8,
@@ -1501,7 +1478,7 @@ function IsCreatable(Class)
 	local Class_Tags = Class.Tags
 	if Class_Tags then
 		for _, Tag in next, Class_Tags do
-			if string_lower(Tag) == "notcreatable" then
+			if string.lower(Tag) == "notcreatable" then
 				return false
 			end
 		end
@@ -1513,7 +1490,7 @@ function IsAService(Class)
 	local Class_Tags = Class.Tags
 	if Class_Tags then
 		for _, Tag in next, Class_Tags do
-			if string_lower(Tag) == "service" then
+			if string.lower(Tag) == "service" then
 				return true
 			end
 		end
@@ -1526,14 +1503,14 @@ function GetClasses()
 	local classTable = {}
 	for _,Class in next, RbxApi.InstanceClasses do
 		if IsCreatable(Class) and not IsAService(Class) then
-			table_insert(classTable, Class.Name)
+			table.insert(classTable, Class.Name)
 		end
 	end
 	return classTable
 end
 
 local function sortAlphabetic(t, property)
-	table_sort(t, function(x,y) return x[property] < y[property] end)
+	table.sort(t, function(x,y) return x[property] < y[property] end)
 end
 
 function CreateInsertObjectMenu(choices, currentChoice, readOnly, onClick)
@@ -1543,11 +1520,11 @@ function CreateInsertObjectMenu(choices, currentChoice, readOnly, onClick)
 		return
 	end
 
-	table_sort(choices, function(a,b) return a < b end)
+	table.sort(choices, function(a,b) return a < b end)
 
 	local frame = Create('Frame',{
 		Name = "InsertObject",
-		Size = UDim2_new(0, 200, 1, 0),
+		Size = UDim2.new(0, 200, 1, 0),
 		BackgroundTransparency = 1,
 		Active = true
 	})
@@ -1564,9 +1541,9 @@ function CreateInsertObjectMenu(choices, currentChoice, readOnly, onClick)
 	local function showMenu()
 		expanded = true
 		menu = Create('ScrollingFrame',{
-			Size = UDim2_new(0, 200, 1, 0),
-			CanvasSize = UDim2_new(0, 500, 0, #choices * DropDown.Height),
-			Position = UDim2_new(0, margin, 0, 0),
+			Size = UDim2.new(0, 200, 1, 0),
+			CanvasSize = UDim2.new(0, 500, 0, #choices * DropDown.Height),
+			Position = UDim2.new(0, margin, 0, 0),
 			BackgroundTransparency = 0,
 			BackgroundColor3 = DropDown.BackColor,
 			BorderColor3 = DropDown.BorderColor,
@@ -1588,8 +1565,8 @@ function CreateInsertObjectMenu(choices, currentChoice, readOnly, onClick)
 			local option = CreateRightClickMenuItem(name, {}, function()
 				choice(name)
 			end,1)
-			option.Size = UDim2_new(1, 0, 0, 20)
-			option.Position = UDim2_new(0, 0, 0, (i - 1) * DropDown.Height)
+			option.Size = UDim2.new(1, 0, 0, 20)
+			option.Position = UDim2.new(0, 0, 0, (i - 1) * DropDown.Height)
 			option.ZIndex = menu.ZIndex
 			option.Parent = menu
 		end
@@ -1602,7 +1579,7 @@ function CreateInsertObject()
 	if not CurrentInsertObjectWindow then return end
 	CurrentInsertObjectWindow.Visible = true
 	if currentRightClickMenu and CurrentInsertObjectWindow.Visible then
-		CurrentInsertObjectWindow.Position = UDim2_new(0,currentRightClickMenu.Position.X.Offset-currentRightClickMenu.Size.X.Offset-2,0,0)
+		CurrentInsertObjectWindow.Position = UDim2.new(0,currentRightClickMenu.Position.X.Offset-currentRightClickMenu.Size.X.Offset-2,0,0)
 	end
 	if CurrentInsertObjectWindow.Visible then
 		CurrentInsertObjectWindow.Parent = Dex
@@ -1642,11 +1619,11 @@ function CreateRightClickMenuItem(text, customizationData, onClick, insObj)
 
 	if insObj == 1 then
 		local newIcon = Icon(nil, GetCorrectIcon(text) or 0)
-		newIcon.Position = UDim2_new(0,0,0,2)
-		newIcon.Size = UDim2_new(0,GUI_SIZE,0,GUI_SIZE)
+		newIcon.Position = UDim2.new(0,0,0,2)
+		newIcon.Size = UDim2.new(0,GUI_SIZE,0,GUI_SIZE)
 		newIcon.IconMap.ZIndex = 5
 		newIcon.Parent = button
-		button.Text = string_rep(" ", 4)..button.Text
+		button.Text = string.rep(" ", 4)..button.Text
 	elseif insObj == 2 then
 		button.FontSize = Enum.FontSize.Size11
 	end
@@ -1674,7 +1651,7 @@ end
 function CreateRightClickMenu(choices, currentChoice, readOnly, onClick)
 	local frame = Create('Frame',{
 		Name = "DropDown",
-		Size = UDim2_new(0, 200, 1, 0),
+		Size = UDim2.new(0, 200, 1, 0),
 		BackgroundTransparency = 1,
 		Active = true
 	})
@@ -1692,8 +1669,8 @@ function CreateRightClickMenu(choices, currentChoice, readOnly, onClick)
 	local function showMenu()
 		expanded = true
 		menu = Create('Frame',{
-			Size = UDim2_new(0, 200, 0, #choices * DropDown.Height),
-			Position = UDim2_new(0, margin, 0, 5),
+			Size = UDim2.new(0, 200, 0, #choices * DropDown.Height),
+			Position = UDim2.new(0, margin, 0, 5),
 			BackgroundTransparency = 0,
 			BackgroundColor3 = DropDown.BackColor,
 			BorderColor3 = DropDown.BorderColor,
@@ -1718,8 +1695,8 @@ function CreateRightClickMenu(choices, currentChoice, readOnly, onClick)
 			local option = CreateRightClickMenuItem(name, {TextXAlignment = "Center"}, function()
 				choice(name)
 			end)
-			option.Size = UDim2_new(1, 0, 0, 20)
-			option.Position = UDim2_new(0, 0, 0, (i - 1) * DropDown.Height)
+			option.Size = UDim2.new(1, 0, 0, 20)
+			option.Position = UDim2.new(0, 0, 0, (i - 1) * DropDown.Height)
 			option.ZIndex = menu.ZIndex
 			option.Parent = menu
 		end
@@ -1750,8 +1727,8 @@ local getTextWidth do
 		Font = FONT,
 		FontSize = FONT_SIZE,
 		Text = "",
-		Position = UDim2_new(),
-		Size = UDim2_new(1,0,1,0),
+		Position = UDim2.new(),
+		Size = UDim2.new(1,0,1,0),
 		Visible = false,
 		Parent = explorerPanel
 	})
@@ -1779,8 +1756,8 @@ end
 function lookForAName(obj, lowerName, originalName)
     for _, v in ipairs(GetChildren(obj)) do
         local vName = v.Name
-        local checkName = MatchCaseToggle and vName or string_lower(vName)
-        if (MatchWholeWordToggle and checkName == lowerName) or (not MatchWholeWordToggle and string_find(checkName, lowerName, 1, true)) then 
+        local checkName = MatchCaseToggle and vName or string.lower(vName)
+        if (MatchWholeWordToggle and checkName == lowerName) or (not MatchWholeWordToggle and string.find(checkName, lowerName, 1, true)) then 
             nameScanned = true
             return
         end
@@ -1793,20 +1770,20 @@ function scanName(Obj)
     nameScanned = false
     local ObjName = Obj.Name
     local Filter = explorerFilter.Text
-    local LowerFilter = MatchCaseToggle and Filter or string_lower(Filter)
-    local CheckName = MatchCaseToggle and ObjName or string_lower(ObjName)
-    local IsPropSearch = string_find(Filter, "=") ~= nil
+    local LowerFilter = MatchCaseToggle and Filter or string.lower(Filter)
+    local CheckName = MatchCaseToggle and ObjName or string.lower(ObjName)
+    local IsPropSearch = string.find(Filter, "=") ~= nil
 
     if IsPropSearch then
         local Prop, Value
-        if string_find(Filter, "^%s*[Tt][Aa][Gg]=") or string_find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
-            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
+        if string.find(Filter, "^%s*[Tt][Aa][Gg]=") or string.find(Filter, "^%s*[Aa][Tt][Tt][Rr][Ii][Bb][Uu][Tt][Ee]=") then
+            Prop, Value = string.match(Filter, "^%s*([^=]+)=(.+)%s*$")
         else
-            Prop, Value = string_match(Filter, "^%s*([^=]+)=(.+)%s*$")
+            Prop, Value = string.match(Filter, "^%s*([^=]+)=(.+)%s*$")
         end
         if Prop and Value then
-            local LowerProp = string_lower(Prop)
-            local LowerValue = string_lower(Value)
+            local LowerProp = string.lower(Prop)
+            local LowerValue = string.lower(Value)
             local ParsedValue
             local CanCheckProp = true
             if LowerProp == "tag" then
@@ -1857,7 +1834,7 @@ function scanName(Obj)
                     end
                 end
             end
-            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
             end
             if not nameScanned then
@@ -1886,8 +1863,8 @@ function scanName(Obj)
                         nameScanned = true
                         break
                     end
-                    local ChildCheckName = MatchCaseToggle and v.Name or string_lower(v.Name)
-                    if (MatchWholeWordToggle and ChildCheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(ChildCheckName, LowerFilter, 1, true)) then
+                    local ChildCheckName = MatchCaseToggle and v.Name or string.lower(v.Name)
+                    if (MatchWholeWordToggle and ChildCheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(ChildCheckName, LowerFilter, 1, true)) then
                         nameScanned = true
                         break
                     end
@@ -1898,14 +1875,14 @@ function scanName(Obj)
                 end
             end
         else
-            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+            if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
                 nameScanned = true
             else
                 lookForAName(Obj, LowerFilter, Filter)
             end
         end
     else
-        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string_find(CheckName, LowerFilter, 1, true)) then
+        if (MatchWholeWordToggle and CheckName == LowerFilter) or (not MatchWholeWordToggle and string.find(CheckName, LowerFilter, 1, true)) then
             nameScanned = true
         else
             lookForAName(Obj, LowerFilter, Filter)
@@ -1929,7 +1906,7 @@ do
 		for i = 1,#t do
 			coroutine.wrap(function()
 				if not filteringInstances() or scanName(t[i].Object) then
-					table_insert(TreeList, t[i])
+					table.insert(TreeList, t[i])
 					local w = (t[i].Depth)*(2+ENTRY_PADDING+GUI_SIZE) + 2 + ENTRY_SIZE + 4 + getTextWidth(t[i].Object.Name) + 4
 					if w > nodeWidth then
 						nodeWidth = w
@@ -1950,10 +1927,10 @@ do
 		local visible = scrollBarH:CanScrollDown() or scrollBarH:CanScrollUp()
 		scrollBarH.GUI.Visible = visible
 
-		listFrame.Size = UDim2_new(1,-GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
+		listFrame.Size = UDim2.new(1,-GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
 
 		scrollBar.VisibleSpace = math.ceil(listFrame.AbsoluteSize.Y/ENTRY_BOUND)
-		scrollBar.GUI.Size = UDim2_new(0,GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
+		scrollBar.GUI.Size = UDim2.new(0,GUI_SIZE,1,-GUI_SIZE*(visible and 1 or 0) - HEADER_SIZE)
 
 		scrollBar.TotalSpace = #TreeList+1
 		scrollBar:Update()
@@ -2011,7 +1988,7 @@ do
 		if not SelectionSet[object] then
 			local node = NodeLookup[object]
 			if node then
-				table_insert(SelectionList,object)
+				table.insert(SelectionList,object)
 				SelectionSet[object] = true
 				node.Selected = true
 				node = node.Parent
@@ -2097,7 +2074,7 @@ do
 				SelectionSet[object] = nil
 				for i = 1,#SelectionList do
 					if SelectionList[i] == object then
-						table_remove(SelectionList,i)
+						table.remove(SelectionList,i)
 						break
 					end
 				end
@@ -2179,9 +2156,9 @@ function CreateTableCaution(title,msg)
 		local newResult = Clone(TableTemplate)
 		newResult.Type.Text = typeof(v)
 		newResult.Value.Text = tostring(v)
-		newResult.Position = UDim2_new(0,0,0, #GetChildren(TableList) * 20)
+		newResult.Position = UDim2.new(0,0,0, #GetChildren(TableList) * 20)
 		newResult.Parent = TableList
-		TableList.CanvasSize = UDim2_new(0,0,0, #GetChildren(TableList) * 20)
+		TableList.CanvasSize = UDim2.new(0,0,0, #GetChildren(TableList) * 20)
 		newResult.Visible = true
 	end
 	newCaution.Parent = Dex
@@ -2193,48 +2170,48 @@ end
 
 local function ToValue(value,type)
 	if type == "Vector2" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list < 2 then return nil end
 		local x = tonumber(list[1]) or 0
 		local y = tonumber(list[2]) or 0
-		return Vector2_new(x,y)
+		return Vector2.new(x,y)
 	elseif type == "Vector3" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list < 3 then return nil end
 		local x = tonumber(list[1]) or 0
 		local y = tonumber(list[2]) or 0
 		local z = tonumber(list[3]) or 0
-		return Vector3_new(x,y,z)
+		return Vector3.new(x,y,z)
 	elseif type == "Color3" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list < 3 then return nil end
 		local r = tonumber(list[1]) or 0
 		local g = tonumber(list[2]) or 0
 		local b = tonumber(list[3]) or 0
-		return Color3_new(r/255,g/255, b/255)
+		return Color3.new(r/255,g/255, b/255)
 	elseif type == "UDim2" then
-		local list = string_split(string_gsub(string_gsub(value, "{", ""),"}",""),",")
+		local list = string.split(string.gsub(string.gsub(value, "{", ""),"}",""),",")
 		if #list < 4 then return nil end
 		local xScale = tonumber(list[1]) or 0
 		local xOffset = tonumber(list[2]) or 0
 		local yScale = tonumber(list[3]) or 0
 		local yOffset = tonumber(list[4]) or 0
-		return UDim2_new(xScale, xOffset, yScale, yOffset)
+		return UDim2.new(xScale, xOffset, yScale, yOffset)
 	elseif type == "Number" then
 		return tonumber(value)
 	elseif type == "String" then
 		return value
 	elseif type == "NumberRange" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list == 1 then
 			if tonumber(list[1]) == nil then return nil end
 			local newVal = tonumber(list[1]) or 0
-			return NumberRange_new(newVal)
+			return NumberRange.new(newVal)
 		end
 		if #list < 2 then return nil end
 		local x = tonumber(list[1]) or 0
 		local y = tonumber(list[2]) or 0
-		return NumberRange_new(x,y)
+		return NumberRange.new(x,y)
 	else
 		return nil
 	end
@@ -2268,33 +2245,33 @@ local function GetModelCFrameAndSize(model)
 end
 local function ToPropValue(value,type)
 	if type == "Vector2" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list < 2 then return nil end
 		local x = tonumber(list[1]) or 0
 		local y = tonumber(list[2]) or 0
-		return Vector2_new(x,y)
+		return Vector2.new(x,y)
 	elseif type == "Vector3" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list < 3 then return nil end
 		local x = tonumber(list[1]) or 0
 		local y = tonumber(list[2]) or 0
 		local z = tonumber(list[3]) or 0
-		return Vector3_new(x,y,z)
+		return Vector3.new(x,y,z)
 	elseif type == "Color3" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list < 3 then return nil end
 		local r = tonumber(list[1]) or 0
 		local g = tonumber(list[2]) or 0
 		local b = tonumber(list[3]) or 0
-		return Color3_new(r/255,g/255, b/255)
+		return Color3.new(r/255,g/255, b/255)
 	elseif type == "UDim2" then
-		local list = string_split(string_gsub(string_gsub(value, "{", ""),"}",""),",")
+		local list = string.split(string.gsub(string.gsub(value, "{", ""),"}",""),",")
 		if #list < 4 then return nil end
 		local xScale = tonumber(list[1]) or 0
 		local xOffset = tonumber(list[2]) or 0
 		local yScale = tonumber(list[3]) or 0
 		local yOffset = tonumber(list[4]) or 0
-		return UDim2_new(xScale, xOffset, yScale, yOffset)
+		return UDim2.new(xScale, xOffset, yScale, yOffset)
 	elseif type == "Content" then
 		return value
 	elseif type == "float" or type == "int" or type == "double" then
@@ -2302,7 +2279,7 @@ local function ToPropValue(value,type)
 	elseif type == "string" then
 		return value
 	elseif type == "NumberRange" then
-		local list = string_split(value,",")
+		local list = string.split(value,",")
 		if #list == 1 then
 			if tonumber(list[1]) == nil then return nil end
 			local newVal = tonumber(list[1]) or 0
@@ -2312,12 +2289,12 @@ local function ToPropValue(value,type)
 		local x = tonumber(list[1]) or 0
 		local y = tonumber(list[2]) or 0
 		return NumberRange.new(x,y)
-	elseif string_sub(value,1,4) == "Enum" then
+	elseif string.sub(value,1,4) == "Enum" then
 		local getEnum = value
 		while true do
-			local x,y = string_find(getEnum,".")
+			local x,y = string.find(getEnum,".")
 			if y then
-				getEnum = string_sub(getEnum,y+1)
+				getEnum = string.sub(getEnum,y+1)
 			else
 				break
 			end
@@ -2441,8 +2418,8 @@ function PromptPartESP(inst)
 	local TextSizeArg = Clone(ArgumentTemplate)
 	local Default = Instance.new("StringValue")
 	Default.Name = "15"
-	TextSizeArg.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
-	ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
+	TextSizeArg.Position = UDim2.new(0,0,0,#GetChildren(ArgumentList) * 20)
+	ArgumentList.CanvasSize = UDim2.new(0,0,0,#GetChildren(ArgumentList) * 20)
 	TextSizeArg.Visible = true
 	TextSizeArg.Parent = ArgumentList
 	createDDown(TextSizeArg.Type, Default, "TextSize")
@@ -2572,7 +2549,7 @@ function PromptRemoteCaller(inst)
 		if CurrentRemoteWindow and inst.Parent ~= nil then
 			local MyArguments = {}
 			for _,v in ipairs(GetChildren(ArgumentList)) do
-				table_insert(MyArguments, ToValue(v.Value.Text,v.Type.Text))
+				table.insert(MyArguments, ToValue(v.Value.Text,v.Type.Text))
 			end
 			if IsA(inst, "RemoteFunction") then
 				if displayValues then
@@ -2604,8 +2581,8 @@ function PromptRemoteCaller(inst)
 	Connect(CurrentRemoteWindow.MainWindow.Add.MouseButton1Up, function()
 		if CurrentRemoteWindow then
 			local newArgument = Clone(ArgumentTemplate)
-			newArgument.Position = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
-			ArgumentList.CanvasSize = UDim2_new(0,0,0,#GetChildren(ArgumentList) * 20)
+			newArgument.Position = UDim2.new(0,0,0,#GetChildren(ArgumentList) * 20)
+			ArgumentList.CanvasSize = UDim2.new(0,0,0,#GetChildren(ArgumentList) * 20)
 			newArgument.Visible = true
 			newArgument.Parent = ArgumentList
 			Connect(newArgument.Type.MouseButton1Down, function()
@@ -2622,7 +2599,7 @@ function PromptRemoteCaller(inst)
 			local B = #A
 			if B > 1 then
 				Destroy(A[B])
-				ArgumentList.CanvasSize = UDim2_new(0, 0, 0, B * 20)
+				ArgumentList.CanvasSize = UDim2.new(0, 0, 0, B * 20)
 			end
 		end
 	end)
@@ -2655,11 +2632,11 @@ function DestroyRightClick()
 	end
 end
 
-local tabChar = string_rep(" ", 4)
+local tabChar = string.rep(" ", 4)
 
 local function getSmaller(a, b, notLast)
-	local aByte = string_byte(a) or -1
-	local bByte = string_byte(b) or -1
+	local aByte = string.byte(a) or -1
+	local bByte = string.byte(b) or -1
 	if aByte == bByte then
 		if notLast and #a == 1 and #b == 1 then
 			return -1
@@ -2668,7 +2645,7 @@ local function getSmaller(a, b, notLast)
 		elseif #a == 1 then
 			return true
 		else
-			return getSmaller(string_sub(a, 2), string_sub(b, 2), notLast)
+			return getSmaller(string.sub(a, 2), string.sub(b, 2), notLast)
 		end
 	else
 		return aByte < bByte
@@ -2693,12 +2670,12 @@ local function parseData(obj, numTabs, isKey, overflow, noTables, forceDict)
 				nextIndex += 1
 			end
 
-			table_insert(data, {key, val})
+			table.insert(data, {key, val})
 		end
 
 		if isDict or hasTables or forceDict then
-			table_insert(out, (isCyclic and "Cyclic " or "") .. "{")
-			table_sort(data, function(a, b)
+			table.insert(out, (isCyclic and "Cyclic " or "") .. "{")
+			table.sort(data, function(a, b)
 				local aType, bType = typeof(a[2]), typeof(b[2])
 				if bType == "string" and aType ~= "string" then
 					return false
@@ -2718,27 +2695,27 @@ local function parseData(obj, numTabs, isKey, overflow, noTables, forceDict)
 					if i < #data and nowValType == "table" and typeof(data[i+1][2]) ~= "table" and typeof(data[i+1][2]) == nowValType then
 						postStr = "\n"
 					end
-					table_insert(out, preStr .. string_rep(tabChar, numTabs+1) .. parseKey .. " = " .. parseVal .. ";" .. postStr)
+					table.insert(out, preStr .. string.rep(tabChar, numTabs+1) .. parseKey .. " = " .. parseVal .. ";" .. postStr)
 				else
-					table_insert(out, string_rep(tabChar, numTabs+1) .. parseVal .. ";")
+					table.insert(out, string.rep(tabChar, numTabs+1) .. parseVal .. ";")
 				end
 			end
-			table_insert(out, string_rep(tabChar, numTabs) .. "}")
+			table.insert(out, string.rep(tabChar, numTabs) .. "}")
 		else
 			local data2 = {}
 			for i = 1, #data do
 				local arr = data[i]
 				local nowVal = arr[2]
 				local parseVal = parseData(nowVal, 0, false, overflow, isCyclic)
-				table_insert(data2, parseVal)
+				table.insert(data2, parseVal)
 			end
-			table_insert(out, "{" .. table_concat(data2, ", ") .. "}")
+			table.insert(out, "{" .. table.concat(data2, ", ") .. "}")
 		end
 
-		return table_concat(out, "\n")
+		return table.concat(out, "\n")
 	else
 		local returnVal
-		if (objType == "string" or objType == "Content") and (not isKey or tonumber(string_sub(obj, 1, 1))) then
+		if (objType == "string" or objType == "Content") and (not isKey or tonumber(string.sub(obj, 1, 1))) then
 			local retVal = '"' .. objStr .. '"'
 			if isKey then
 				retVal = "[" .. retVal .. "]"
@@ -2753,15 +2730,15 @@ local function parseData(obj, numTabs, isKey, overflow, noTables, forceDict)
 		elseif objType == "CFrame" then
 			returnVal = "CFrame.new(" .. objStr .. ")"
 		elseif objType == "Vector3" then
-			returnVal = "Vector3_new(" .. objStr .. ")"
+			returnVal = "Vector3.new(" .. objStr .. ")"
 		elseif objType == "Vector2" then
-			returnVal = "Vector2_new(" .. objStr .. ")"
+			returnVal = "Vector2.new(" .. objStr .. ")"
 		elseif objType == "UDim2" then
-			returnVal = "UDim2_new(" .. objStr:gsub("[{}]", "") .. ")"
+			returnVal = "UDim2.new(" .. objStr:gsub("[{}]", "") .. ")"
 		elseif objType == "BrickColor" then
 			returnVal = "BrickColor.new(\"" .. objStr .. "\")"
 		elseif objType == "Color3" then
-			returnVal = "Color3_new(" .. objStr .. ")"
+			returnVal = "Color3.new(" .. objStr .. ")"
 		elseif objType == "NumberRange" then
 			returnVal = "NumberRange.new(" .. objStr:gsub("^%s*(.-)%s*$", "%1"):gsub(" ", ", ") .. ")"
 		elseif objType == "PhysicalProperties" then
@@ -2781,7 +2758,7 @@ local function tableToString(t)
 end
 
 local function HasSpecial(str)
-	return (string_match(str, "%c") or string_match(str, "%s") or string_match(str, "%p")) ~= nil
+	return (string.match(str, "%c") or string.match(str, "%s") or string.match(str, "%p")) ~= nil
 end
 
 local function GetPath(Instance)
@@ -2792,17 +2769,17 @@ local function GetPath(Instance)
 			error = true
 			break
 		end
-		table_insert(temp, Obj.Parent == game and Obj.ClassName or tostring(Obj))
+		table.insert(temp, Obj.Parent == game and Obj.ClassName or tostring(Obj))
 		Obj = Obj.Parent
 	end
 
-	table_insert(string, "game:GetService(\"" .. temp[#temp] .. "\")")
+	table.insert(string, "game:GetService(\"" .. temp[#temp] .. "\")")
 
 	for i = #temp - 1, 1, -1 do
-		table_insert(string, HasSpecial(temp[i]) and "[\"" .. temp[i] .. "\"]" or "." .. temp[i])
+		table.insert(string, HasSpecial(temp[i]) and "[\"" .. temp[i] .. "\"]" or "." .. temp[i])
 	end
 
-	return (error and "nil -- Path contained an invalid instance" or table_concat(string, ""))
+	return (error and "nil -- Path contained an invalid instance" or table.concat(string, ""))
 end
 
 local function canViewServerScript(scriptObj)
@@ -2811,7 +2788,7 @@ local function canViewServerScript(scriptObj)
 		return true
 	end
 	if linkedSource and #linkedSource >= 1 then
-		local result = tonumber(string_match(linkedSource, "(%d+)"))
+		local result = tonumber(string.match(linkedSource, "(%d+)"))
 		if result then
 			return true
 		end
@@ -2838,39 +2815,39 @@ function rightClickMenu(sObj)
 		'Copy Path'
 	}
 	if sObj == RunningScriptsStorageMain or sObj == NilStorageMain then
-		table_insert(actions, 1, "Refresh Instances")
+		table.insert(actions, 1, "Refresh Instances")
 	end
     if IsA(sObj, "RemoteEvent") or IsA(sObj, "RemoteFunction") or IsA(sObj, "BindableEvent") or IsA(sObj, "BindableFunction") then
-		table_insert(actions, 10, "Call Remote")
+		table.insert(actions, 10, "Call Remote")
 	end
     if IsA(sObj, "BasePart") or IsA(sObj, "Model") or IsA(sObj, "Humanoid") or IsA(sObj, "Player") and not sObj == workspace then
 		local b = 10
-		table_insert(actions, 8, "Teleport to")
-		table_insert(actions, 9, "Add to ESP")
+		table.insert(actions, 8, "Teleport to")
+		table.insert(actions, 9, "Add to ESP")
 		if IsA(sObj, "Model") then
 			b = 11
-			table_insert(actions, 7, "Ungroup")
-			table_insert(actions, 10, "View Model")
+			table.insert(actions, 7, "Ungroup")
+			table.insert(actions, 10, "View Model")
 		end
-		table_insert(actions, b, "View Object")
+		table.insert(actions, b, "View Object")
 		if ViewingObject then
-			table_insert(actions, b + 1, "Unview Object")
+			table.insert(actions, b + 1, "Unview Object")
 		end
 	end
     if filteringInstances() and Searched then
-		table_insert(actions, 1, "Clear Search and Jump to")
+		table.insert(actions, 1, "Clear Search and Jump to")
 	end
     if IsA(sObj, "ClickDetector") then
-		table_insert(actions, 8, "Fire ClickDetector")
+		table.insert(actions, 8, "Fire ClickDetector")
 	elseif IsA(sObj, "TouchTransmitter") then
-		table_insert(actions, 8, "Fire TouchTransmitter")
+		table.insert(actions, 8, "Fire TouchTransmitter")
 	elseif IsA(sObj, "ProximityPrompt") then
-		table_insert(actions, 8, "Fire ProximityPrompt")
+		table.insert(actions, 8, "Fire ProximityPrompt")
 	end
     if IsA(sObj, "LocalScript") or IsA(sObj, "ModuleScript") or (IsA(sObj, "Script") and canViewServerScript(sObj)) then
-		table_insert(actions, 7, "View Script")
-		table_insert(actions, 8, "Save Script")
-		table_insert(actions, 9, "Save Bytecode")
+		table.insert(actions, 7, "View Script")
+		table.insert(actions, 8, "Save Script")
+		table.insert(actions, 9, "Save Bytecode")
 	end
 
 	currentRightClickMenu = CreateRightClickMenu(actions, "", false, function(option)
@@ -2882,8 +2859,8 @@ function rightClickMenu(sObj)
 			for _, Selected in ipairs(Selection.List) do
 				local obj = Clone(Selected)
 				if obj then
-					table_insert(Clipboard, obj)
-					table_insert(cut, Selected)
+					table.insert(Clipboard, obj)
+					table.insert(cut, Selected)
 				end
 			end
 			for _, CutInstance in next, cut do
@@ -2895,7 +2872,7 @@ function rightClickMenu(sObj)
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
-				table_insert(Clipboard, Clone(Selected))
+				table.insert(Clipboard, Clone(Selected))
 			end
 			updateActions()
 		elseif option == "Paste Into" then
@@ -2908,7 +2885,7 @@ function rightClickMenu(sObj)
 					Clone(Copied).Parent = parent
 				end
 			end
-			table_clear(Clipboard)
+			table.clear(Clipboard)
 		elseif option == "Duplicate" then
 			if not Option.Modifiable then
 				return
@@ -2945,7 +2922,7 @@ function rightClickMenu(sObj)
 			for _, Selected in ipairs(Selection:Get()) do
 				for _, Selected_Instance in ipairs(GetChildren(Selected)) do
 					Selected_Instance.Parent = Selected.Parent or workspace
-					table_insert(ungrouped, Selected_Instance)
+					table.insert(ungrouped, Selected_Instance)
 				end	
 				pcall(game.Destroy, Selected)
 			end
@@ -2974,7 +2951,7 @@ function rightClickMenu(sObj)
 				end
 			end
 			local ViewportFrame = Instance.new("ViewportFrame")
-			ViewportFrame.Size = UDim2_new(1, 0, 1, 0)
+			ViewportFrame.Size = UDim2.new(1, 0, 1, 0)
 			ViewportFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 			ViewportFrame.BorderColor3 = Color3.fromRGB(149, 149, 149)
 			ViewportFrame.ZIndex = 10
@@ -3175,8 +3152,8 @@ function rightClickMenu(sObj)
 			local insertedParts = {}
 			for _, Selected in ipairs(Selection:Get()) do
 				pcall(function()
-					table_insert(insertedParts, Create('Part', {
-						Position = LocalPlayer.Character.Head.Position + Vector3_new(0, 3, 0),
+					table.insert(insertedParts, Create('Part', {
+						Position = LocalPlayer.Character.Head.Position + Vector3.new(0, 3, 0),
 						Parent = Selected
 					}))
 				end)
@@ -3304,14 +3281,14 @@ function rightClickMenu(sObj)
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
-				writefile("DEXV5\\Scripts\\" .. game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'.lua', decompile(Selected))
+				writefile("DEXV5\\Scripts\\" .. game.PlaceId .. '_' ..string.gsub(Selected, "%W", "").. '_'..math.random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'.lua', decompile(Selected))
 			end
 		elseif option == "Save Bytecode" then
 			if not Option.Modifiable then
 				return
 			end
 			for _, Selected in ipairs(Selection:Get()) do
-				writefile("DEXV5\\Scripts\\" .. game.PlaceId .. '_' ..string_gsub(Selected, "%W", "").. '_'..math_random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'_bytecode.lua', getscriptbytecode(Selected))
+				writefile("DEXV5\\Scripts\\" .. game.PlaceId .. '_' ..string.gsub(Selected, "%W", "").. '_'..math.random(1e5, 1e9+1e9+1e8+1e7+1e7+1e7+1e7+1e6+1e6+1e6+1e6+1e6+1e6+1e6+1e5+1e5+1e5+1e5+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e4+1e3+1e3+1e3+1e2+1e2+1e2+1e2+1e2+1e2+1e1+1e1+1e1+1e1+7)..'_bytecode.lua', getscriptbytecode(Selected))
 			end
 		elseif option == 'Refresh Instances' then
     		ClearAllChildren(sObj)
@@ -3356,9 +3333,9 @@ function rightClickMenu(sObj)
 		end
 	end)
 	currentRightClickMenu.Parent = Dex
-	currentRightClickMenu.Position = UDim2_new(0, Mouse.X,0, Mouse.Y)
+	currentRightClickMenu.Position = UDim2.new(0, Mouse.X,0, Mouse.Y)
 	if currentRightClickMenu.AbsolutePosition.X + currentRightClickMenu.AbsoluteSize.X > explorerPanel.AbsolutePosition.X + explorerPanel.AbsoluteSize.X then
-		currentRightClickMenu.Position = UDim2_new(0, explorerPanel.AbsolutePosition.X + explorerPanel.AbsoluteSize.X - currentRightClickMenu.AbsoluteSize.X, 0, Mouse.Y)
+		currentRightClickMenu.Position = UDim2.new(0, explorerPanel.AbsolutePosition.X + explorerPanel.AbsoluteSize.X - currentRightClickMenu.AbsoluteSize.X, 0, Mouse.Y)
 	end
 end
 
@@ -3373,8 +3350,8 @@ do
 
 	local mouseDrag = Create('ImageButton',{
 		Name = "MouseDrag",
-		Position = UDim2_new(-.25,0,-.25,0),
-		Size = UDim2_new(1.5,0,1.5,0),
+		Position = UDim2.new(-.25,0,-.25,0),
+		Size = UDim2.new(1.5,0,1.5,0),
 		Transparency = 1,
 		AutoButtonColor = false,
 		Active = true,
@@ -3385,10 +3362,10 @@ do
 		local conDrag, conUp
 
 		conDrag = Connect(mouseDrag.MouseMoved, function(x,y)
-			local pos, size = Vector2_new(x,y) - listFrame.AbsolutePosition, listFrame.AbsoluteSize
+			local pos, size = Vector2.new(x,y) - listFrame.AbsolutePosition, listFrame.AbsoluteSize
 			if pos.X < 0 or pos.X > size.X or pos.Y < 0 or pos.Y > size.Y then return end
 
-			local i = math_floor(pos.Y/ENTRY_BOUND) - 2 + scrollBar.ScrollIndex
+			local i = math.floor(pos.Y/ENTRY_BOUND) - 2 + scrollBar.ScrollIndex
 			for n = i<last and i or last, i>last and i or last do
 				local node = TreeList[n]
 				if node then
@@ -3428,42 +3405,42 @@ do
 			Visible = false,
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundColor3 = Color3.new(0.95, 0.95, 0.95),
 				BackgroundTransparency = .3,
-				Position = UDim2_new(),
-				Size = UDim2_new(1,0,0,1)
+				Position = UDim2.new(),
+				Size = UDim2.new(1,0,0,1)
 			}),
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundColor3 = Color3.new(0.95, 0.95, 0.95),
 				BackgroundTransparency = .3,
-				Position = UDim2_new(1,0,0,0),
-				Size = UDim2_new(0,1,1,0)
+				Position = UDim2.new(1,0,0,0),
+				Size = UDim2.new(0,1,1,0)
 			}),
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundColor3 = Color3.new(0.95, 0.95, 0.95),
 				BackgroundTransparency = .3,
-				Position = UDim2_new(0,0,1,0),
-				Size = UDim2_new(1,0,0,1)
+				Position = UDim2.new(0,0,1,0),
+				Size = UDim2.new(1,0,0,1)
 			}),
 			Create('Frame',{
 				BorderSizePixel = 0,
-				BackgroundColor3 = Color3_new(0.95, 0.95, 0.95),
+				BackgroundColor3 = Color3.new(0.95, 0.95, 0.95),
 				BackgroundTransparency = .3,
-				Position = UDim2_new(),
-				Size = UDim2_new(0,1,1,0)
+				Position = UDim2.new(),
+				Size = UDim2.new(0,1,1,0)
 			}),
 		})
 		SetZIndex(parentHighlight,9)
 		conDrag = Connect(mouseDrag.MouseMoved, function(x,y)
-			local dragPos = Vector2_new(x,y)
+			local dragPos = Vector2.new(x,y)
 			if dragged then
 				local pos,size = dragPos - listFrame.AbsolutePosition,listFrame.AbsoluteSize
 				parentIndex = nil
 				parentHighlight.Visible = false
 				if pos.X >= -5 and pos.X <= size.X + 5 and pos.Y >= 0 and pos.Y <= size.Y + ENTRY_SIZE*2 then
-					local i = math_floor(pos.Y/ENTRY_BOUND) - 2
+					local i = math.floor(pos.Y/ENTRY_BOUND) - 2
 					local actualIndex = i + scrollBar.ScrollIndex
 					local node = TreeList[actualIndex]
 					if node and node.Object ~= object and not IsAncestorOf(object, node.Object) then
@@ -3486,19 +3463,19 @@ do
 							if entry then
 								parentHighlight.Visible = true
 								local entryRelativeY = entry.AbsolutePosition.Y - listFrame.AbsolutePosition.Y
-								parentHighlight.Position = UDim2_new(0,1,0,entryRelativeY)
-								parentHighlight.Size = UDim2_new(0,size.X-4,0,entry.AbsoluteSize.Y)
+								parentHighlight.Position = UDim2.new(0,1,0,entryRelativeY)
+								parentHighlight.Size = UDim2.new(0,size.X-4,0,entry.AbsoluteSize.Y)
 							end
 						end
 					end
 				end
-				dragGhost.Position = UDim2_new(0,dragPos.X+ghostOffset.X,0,dragPos.Y+ghostOffset.Y)
+				dragGhost.Position = UDim2.new(0,dragPos.X+ghostOffset.X,0,dragPos.Y+ghostOffset.Y)
 			elseif not dragged and canStartDrag and (clickPos-dragPos).Magnitude > 6 then
 				dragged = true
 				SetZIndex(dragGhost,9)
 				dragGhost.IndentFrame.Transparency = .25
 				dragGhost.IndentFrame.EntryText.TextColor3 = GuiColor.TextSelected
-				dragGhost.Position = UDim2_new(0,dragPos.X+ghostOffset.X,0,dragPos.Y+ghostOffset.Y)
+				dragGhost.Position = UDim2.new(0,dragPos.X+ghostOffset.X,0,dragPos.Y+ghostOffset.Y)
 				dragGhost.Parent = GetScreen(listFrame)
 				parentHighlight.Parent = listFrame
 			end
@@ -3573,25 +3550,25 @@ do
 		Name = "Entry",
 		Transparency = 1,
 		AutoButtonColor = false,
-		Position = UDim2_new(),
-		Size = UDim2_new(1,0,0,ENTRY_SIZE),
+		Position = UDim2.new(),
+		Size = UDim2.new(1,0,0,ENTRY_SIZE),
 		Create('Frame',{
 			Name = "IndentFrame",
 			BackgroundTransparency = 1,
 			BackgroundColor3 = GuiColor.Selected,
 			BorderColor3 = GuiColor.BorderSelected,
-			Position = UDim2_new(),
-			Size = UDim2_new(1,0,1,0),
-			Create(SpecialIcon('ImageButton',NodeTextures[1],UDim2_new(0,9,0,5)),{
+			Position = UDim2.new(),
+			Size = UDim2.new(1,0,1,0),
+			Create(SpecialIcon('ImageButton',NodeTextures[1],UDim2.new(0,9,0,5)),{
 				Name = "Expand",
 				AutoButtonColor = false,
-				Position = UDim2_new(0,-9,.5,-8/2),
-				Size = UDim2_new(0,16,0,16)
+				Position = UDim2.new(0,-9,.5,-8/2),
+				Size = UDim2.new(0,16,0,16)
 			}),
 			Create(Icon(nil,0),{
 				Name = "ExplorerIcon",
-				Position = UDim2_new(0,2+ENTRY_PADDING,.5,-GUI_SIZE/2),
-				Size = UDim2_new(0,GUI_SIZE,0,GUI_SIZE)
+				Position = UDim2.new(0,2+ENTRY_PADDING,.5,-GUI_SIZE/2),
+				Size = UDim2.new(0,GUI_SIZE,0,GUI_SIZE)
 			}),
 			Create('TextLabel',{
 				Name = "EntryText",
@@ -3602,8 +3579,8 @@ do
 				Font = FONT,
 				FontSize = FONT_SIZE,
 				Text = "",
-				Position = UDim2_new(0,2+ENTRY_SIZE+4,0,0),
-				Size = UDim2_new(1,-2,1,0)
+				Position = UDim2.new(0,2+ENTRY_SIZE+4,0,0),
+				Size = UDim2.new(1,-2,1,0)
 			})
 		})
 	})
@@ -3616,8 +3593,8 @@ do
 				local curSelect
 				if not entry then
 					entry = Create(Clone(entryTemplate), {
-						Position = UDim2_new(0,2,0,ENTRY_BOUND*(i-1)+2),
-						Size = UDim2_new(0,nodeWidth,0,ENTRY_SIZE),
+						Position = UDim2.new(0,2,0,ENTRY_BOUND*(i-1)+2),
+						Size = UDim2.new(0,nodeWidth,0,ENTRY_SIZE),
 						ZIndex = listFrame.ZIndex
 					})
 					listEntries[i] = entry
@@ -3663,7 +3640,7 @@ do
 							lastSelectedNode = i + self.ScrollIndex
 						end
 						if Option.Modifiable then
-							local pos = Vector2_new(x,y)
+							local pos = Vector2.new(x,y)
 							dragReparent(node.Object, Clone(entry), pos, entry.AbsolutePosition - pos)
 						elseif Option.Selectable then
 							if Selection.Selected[node.Object] then
@@ -3746,8 +3723,8 @@ do
 				Icon(entry.IndentFrame.ExplorerIcon, GetCorrectIcon(object) or 0)
 
 				local w = (node.Depth)*(2+ENTRY_PADDING+GUI_SIZE)
-				entry.IndentFrame.Position = UDim2_new(0,w,0,0)
-				entry.IndentFrame.Size = UDim2_new(1,-w,1,0)
+				entry.IndentFrame.Position = UDim2.new(0,w,0,0)
+				entry.IndentFrame.Size = UDim2.new(1,-w,1,0)
 
 				if nameConnLookup[entry] then
 					Disconnect(nameConnLookup[entry])
@@ -3762,7 +3739,7 @@ do
 				entry.IndentFrame.Transparency = node.Selected and 0 or 1
 				text.TextColor3 = GuiColor[node.Selected and 'TextSelected' or 'Text']
 
-				entry.Size = UDim2_new(0,nodeWidth,0,ENTRY_SIZE)
+				entry.Size = UDim2.new(0,nodeWidth,0,ENTRY_SIZE)
 			elseif listEntries[i] then
 				listEntries[i].Visible = false
 			end
@@ -3782,7 +3759,7 @@ do
 			if B then
 				local C = listEntries[A]
 				if C then
-					C.Position = UDim2_new(0, 2 - scrollBarH.ScrollIndex, 0, ENTRY_BOUND * (A - 1) + 2)
+					C.Position = UDim2.new(0, 2 - scrollBarH.ScrollIndex, 0, ENTRY_BOUND * (A - 1) + 2)
 				end
 			end
 		end
@@ -4002,7 +3979,7 @@ local function addObject(object,noupdate)
 end
 
 local function makeObject(obj,par)
-	local newObject = Instance_new(obj.ClassName)
+	local newObject = Instance.new(obj.ClassName)
 	for i,v in next, obj.Properties do
 		pcall(function()
 			newObject[tostring(v)] = ToPropValue(v.Value, v.Type)
@@ -4015,7 +3992,7 @@ local function writeObject(obj)
 	local newObject = {ClassName = obj.ClassName, Properties = {}}
 	for i,v in next, RbxApi.GetProperties(obj.className) do
 		if v["Name"] ~= "Parent" then
-			table_insert(newObject.Properties,{Name = v["Name"], Type = v["ValueType"], Value = tostring(obj[v["Name"]])})
+			table.insert(newObject.Properties,{Name = v["Name"], Type = v["ValueType"], Value = tostring(obj[v["Name"]])})
 		end
 	end
 	return newObject
@@ -4108,8 +4085,8 @@ do
 		local button = Create(SpecialIcon('ImageButton',icon),{
 			Name = name .. "Button",
 			Visible = Option.Modifiable and Option.Selectable,
-			Position = UDim2_new(1,-(GUI_SIZE+2)*currentActions+2,.25,-GUI_SIZE/2),
-			Size = UDim2_new(0,GUI_SIZE,0,GUI_SIZE),
+			Position = UDim2.new(1,-(GUI_SIZE+2)*currentActions+2,.25,-GUI_SIZE/2),
+			Size = UDim2.new(0,GUI_SIZE,0,GUI_SIZE),
 			Parent = headerFrame
 		})
 		local tipText = Create('TextLabel',{
@@ -4120,8 +4097,8 @@ do
 			TextXAlignment = 'Right',
 			Font = FONT,
 			FontSize = FONT_SIZE,
-			Position = UDim2_new(),
-			Size = UDim2_new(1,-(GUI_SIZE+2)*totalActions,1,0),
+			Position = UDim2.new(),
+			Size = UDim2.new(1,-(GUI_SIZE+2)*totalActions,1,0),
 			Parent = headerFrame
 		})
 		Connect(button.MouseEnter, function()
@@ -4133,7 +4110,7 @@ do
 			button.BackgroundTransparency = 1
 		end)
 		currentActions += 1
-		table_insert(actionButtons, {Obj = button, Cond = cond})
+		table.insert(actionButtons, {Obj = button, Cond = cond})
 		QuickButtons[#actionButtons+1] = {Obj = button, Cond = cond, Toggle = function(on)
 			buttonEnabled = on and true or false
 			SpecialIcon(button, on and over or icon)
@@ -4164,7 +4141,7 @@ do
 		if not Option.Modifiable then return end
 		local list = Selection.List
 		for _, Selected in next, list do
-			table_insert(Clipboard, Clone(Selected))
+			table.insert(Clipboard, Clone(Selected))
 		end
 		updateActions()
 	end)
@@ -4356,10 +4333,10 @@ for i = 1, #Children do
 	end
 	if 2 % i == 0 then
 		if B.Text:find(Dex.Console.Search.Text) then
-			B.Position = UDim2_new(0, 0, 0, OutputCount)
+			B.Position = UDim2.new(0, 0, 0, OutputCount)
 			B.TextTransparency = 0
 		end
-		A.Position = UDim2_new(0, 25, 0, OutputCount)
+		A.Position = UDim2.new(0, 25, 0, OutputCount)
 		A.ImageTransparency = 0
 	OutputCount += (B.TextBounds.Y + 5)
 	end
@@ -4486,7 +4463,7 @@ CurrentInsertObjectWindow = CreateInsertObjectMenu(GetClasses(), "", false, func
 	CurrentInsertObjectWindow.Visible = false
 	for _, ArrayItem in ipairs(Selection:Get()) do
 		pcall(function()
-			Instance_new(option, ArrayItem)
+			Instance.new(option, ArrayItem)
 		end)
 	end
 	DestroyRightClick()
