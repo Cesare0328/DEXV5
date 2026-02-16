@@ -1752,6 +1752,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     statusCallback(processedInstances, totalInstances, "Serialization complete, writing file...")
 
     local xml = table.concat(output, "\n")
+	local placeName = "NIL "
     local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
     if ok and info and info.Name then
         placeName = info.Name:gsub("[%s%p]+", "_")
