@@ -896,7 +896,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                     if instance:IsA("LocalScript") then
                         scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s (LocalScript)\n-- Electron V3 Decompiler\n-- This script is an electron script.\n-- It can not be viewed.", path)
                     else
-						scriptSource = format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
+						scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
 					end
                 else
                     local success, result = pcall(decompile, instance)
