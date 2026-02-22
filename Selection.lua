@@ -494,7 +494,7 @@ local PropertySerializers = {
     end,
 
     Axes = function(name, value)
-        return string.format('<Axes name="%s">%s</Axes>', name, value)
+        return string.format('<Axes name="%s">%s</Axes>', name, tostring(value))
     end,
     
     UDim = function(name, value)
