@@ -2,10 +2,13 @@
 local script = getgenv().Dex:WaitForChild("Selection")
 -- < Aliases > --
 local table_insert = table.insert
+local table_clear = table.clear
+local table_concat = table.concat
 local string_format = string.format
 local string_sub = string.sub
 local string_split = string.split
 local os_date = os.date
+local os_clock = os.clock
 local UDim2_new = UDim2.new
 local Color3_new = Color3.new
 local Instance_new = Instance.new
@@ -88,7 +91,9 @@ local Windows = {
 	Remotes = {RemoteDebugWindow},
 	About = {AboutPanel}
 }
+-- < Required executor functions for streaming write > --
 local Writefile = writefile or error("Executor requires writefile function", 0)
+local Appendfile = appendfile or error("Executor requires appendfile function", 0)
 local XmlHeader = [[
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -107,23 +112,29 @@ local Blacklist = {
 	AnimationRigData = true
 }
 local BlacklistModels = {}
-local BlacklistDescendantSet = {} -- < Fast lookup for descendants of blacklisted models > --
 local RefCounter = 0
 local RefCache = {}
 -- < Custom Aliases > --
 local wait = task.wait
 -- < Performance Tuning > --
-local YIELD_EVERY_N_INSTANCES = 200 -- Yield to scheduler every N instances during serialization
-local YIELD_EVERY_N_COUNT = 1000 -- Yield every N instances during the count pre-pass
--- < Property Cache (per ClassName) > --
+local YIELD_EVERY_N_INSTANCES = 200 -- Yield to scheduler every N instances
+local OUTPUT_FLUSH_THRESHOLD = 5000 -- Flush buffer to disk after this many XML fragments accumulate
+local STATUS_UPDATE_INTERVAL = 0.05 -- Throttle TextLabel updates to ~20fps
+-- < Module-level state used by the streaming serializer > --
+local CurrentSavePath = nil -- Set at the start of each saveinstance() call
+local CurrentTitleLabel = nil -- Set at the start of each saveinstance() call
+local LastStatusUpdate = 0
+-- < Property cache: maps ClassName -> property list. Avoids per-instance getproperties() reflection > --
 local PropertyCache = {}
 local function GetCachedProperties(instance)
 	local className = instance.ClassName
-	if not PropertyCache[className] then
+	local cached = PropertyCache[className]
+	if cached == nil then
 		local ok, props = pcall(getproperties, instance)
-		PropertyCache[className] = ok and props or {}
+		cached = ok and props or false -- false (not nil) marks negative cache hits
+		PropertyCache[className] = cached
 	end
-	return PropertyCache[className]
+	return cached or nil
 end
 -- < Source > --
 local function BeforeLoad()
@@ -208,8 +219,8 @@ local SaveMapSettings = {
 	AvoidPlayerCharacters = true,
 	SaveNilInstances = true,
 	CloseRobloxAfterSave = true,
-    ProgressiveSave = false,
-    Compress = true
+    ProgressiveSave = false
+    -- < Compress option removed: always save as XML (.rbxlx) > --
 }
 
 local Settings = {
@@ -584,25 +595,31 @@ local PropertySerializers = {
         end
     end
 }
--- < Counts instances, with periodic yielding to prevent freezing on huge places > --
-local function CountInstances(instance, avoidPlayerCharacters, counterRef)
-    counterRef = counterRef or {count = 0, processed = 0}
-    if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
-        return counterRef.count
+
+-- < Flush the output buffer to the file. Either when it's full, or at end-of-save (force=true) > --
+local function FlushOutput(output, force)
+    local count = #output
+    if count == 0 then return end
+    if force or count >= OUTPUT_FLUSH_THRESHOLD then
+        local ok, err = pcall(Appendfile, CurrentSavePath, table_concat(output, "\n") .. "\n")
+        if not ok then
+            warn("Dex saveinstance: appendfile failed:", err)
+        end
+        table_clear(output)
     end
-    if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
-        return counterRef.count
+end
+
+-- < Update progress label, throttled to STATUS_UPDATE_INTERVAL > --
+local function UpdateStatus(processed, total, message)
+    local now = os_clock()
+    if now - LastStatusUpdate < STATUS_UPDATE_INTERVAL then return end
+    LastStatusUpdate = now
+    if not CurrentTitleLabel then return end
+    if total and total > 0 then
+        CurrentTitleLabel.Text = string_format("[%.2f%%] %s", (processed / total) * 100, message)
+    else
+        CurrentTitleLabel.Text = message
     end
-    counterRef.count = counterRef.count + 1
-    counterRef.processed = counterRef.processed + 1
-    -- < Yield occasionally to keep the UI responsive during a huge pre-pass > --
-    if counterRef.processed % YIELD_EVERY_N_COUNT == 0 then
-        task.wait()
-    end
-    for _, child in ipairs(instance:GetChildren()) do
-        CountInstances(child, avoidPlayerCharacters, counterRef)
-    end
-    return counterRef.count
 end
 
 local function StartScaleBasedRendering(base, scale, interval, max, TitleLabel)
@@ -765,50 +782,39 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     return response
 end
 
--- < Decompiles a script with yields wrapped around the call to prevent freezing > --
+-- < Decompile with yields before and after to prevent freezing > --
 local function SafeDecompile(instance)
-    task.wait() -- < Yield BEFORE the heavy call > --
+    task.wait()
     local success, result = pcall(decompile, instance)
-    task.wait() -- < Yield AFTER as well > --
+    task.wait()
     return success, result
 end
 
-local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-    -- < Periodic yield based on instance count, NOT just progressive mode > --
+local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total)
+    -- < Yield + flush + status update at periodic checkpoints (every N instances) > --
     if processed % YIELD_EVERY_N_INSTANCES == 0 then
+        FlushOutput(output)
+        UpdateStatus(processed, total, "Serializing instances...")
         task.wait()
     end
-    -- < Fixed broken condition: was `not instance == workspace.CurrentCamera` which always evaluated false > --
     if SaveMapSettings.ProgressiveSave and instance ~= workspace.CurrentCamera then
         task.wait(0.05)
     end
-    if instance.ClassName:find("Wrap") then return processed end
+
+    local className = instance.ClassName -- < Cache: used multiple times > --
+    if className:find("Wrap") then return processed end
     if instance:IsA("Bone") and (not instance.Parent or not instance.Parent:IsA("BasePart") or instance.Parent:IsA("Bone")) then return processed end
-    if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
-        statusCallback(processed, total, "Skipping blacklisted instance: " .. (instance:GetFullName() or "Unnamed"))
+    if Blacklist[className] or Blacklist[instance.Name] then
         return processed
     end
 
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
-        table.insert(BlacklistModels, instance)
-        BlacklistDescendantSet[instance] = true
-        statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
-        return processed -- < Don't recurse: short-circuit the entire subtree > --
+        table_insert(BlacklistModels, instance)
+        -- < Short-circuit: don't recurse into children. Since recursion is depth-first this is sufficient
+        --   to skip the entire character subtree without needing an IsDescendantOf check elsewhere. > --
+        return processed
     end
 
-    -- < Fast O(1) check against ancestors we've already marked > --
-    -- < We only need to check direct parent: if a parent was blacklisted it would have already returned > --
-    -- < But the recursion is depth-first so we need a different approach: check IsDescendantOf only against tracked models > --
-    if #BlacklistModels > 0 then
-        for i = 1, #BlacklistModels do
-            if instance:IsDescendantOf(BlacklistModels[i]) then
-                statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
-                return processed
-            end
-        end
-    end
-    
-    statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
     processed = processed + 1
 
     local isLocalPlayer = instance == Player
@@ -816,12 +822,12 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
     local scriptSource = nil
 
     if isLocalPlayer then
-        table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
-        table.insert(output, string.format('<string name="Name">%s</string>', EscapeXml(instance.Name .. "[LocalPlayer]")))
+        output[#output + 1] = string.format('<Item class="Folder" referent="%s">', ref)
+        output[#output + 1] = string.format('<string name="Name">%s</string>', EscapeXml(instance.Name .. "[LocalPlayer]"))
     else
-        table.insert(output, string.format('<Item class="%s" referent="%s">', instance.ClassName or "Unknown", ref))
-        table.insert(output, "<Properties>")
-        table.insert(output, PropertySerializers.string("Name", instance.Name or "Unnamed"))
+        output[#output + 1] = string.format('<Item class="%s" referent="%s">', className or "Unknown", ref)
+        output[#output + 1] = "<Properties>"
+        output[#output + 1] = PropertySerializers.string("Name", instance.Name or "Unnamed")
 
         local properties = {}
         if instance:IsA("BasePart") then
@@ -941,9 +947,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 						scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
 					end
                 else
-                    -- < Use SafeDecompile which yields around the call to prevent freezing > --
                     local success, result = SafeDecompile(instance)
-					local Class = instance.ClassName
+					local Class = className
                     if success then
 						result = result:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
                         if result:find(triggers, 1, true) then
@@ -973,7 +978,6 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 				local passed = false
 				local linkedSource = instance.LinkedSource
 				if instance.RunContext == Enum.RunContext.Client then
-                    -- < Yield around decompile here too > --
                     local decompileSuccess, decompiled = SafeDecompile(instance)
                     if decompileSuccess then
 					    scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
@@ -1054,11 +1058,10 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
         end
-        -- < Use the cached property list per ClassName instead of recalling getproperties for every instance > --
+        -- < Reflect remaining properties via per-ClassName cached list > --
         local cachedProps = GetCachedProperties(instance)
 		if cachedProps and #cachedProps > 0 then
-			for _,v in pairs(cachedProps) do
-                -- < Direct indexing avoids the closure allocation per property > --
+			for _,v in ipairs(cachedProps) do
 				local success, val = pcall(function() return instance[v] end)
 				if success and val ~= nil and v ~= "Parent" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
 					properties[v] = val
@@ -1070,610 +1073,36 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             local serializer = PropertySerializers[propType]
             if propName == "Source" and scriptSource then
                 local eS = scriptSource:gsub("]]>", "]]]]><![CDATA[>")
-                table.insert(output, string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', eS))
+                output[#output + 1] = string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', eS)
             elseif propName == "ScaleFactor" then
-                table.insert(output, PropertySerializers.customfloat(propName, propValue))
+                output[#output + 1] = PropertySerializers.customfloat(propName, propValue)
             elseif serializer and propValue ~= nil then
                 if instance == workspace.CurrentCamera and propName == "CameraType" then
-                    table.insert(output, serializer(propName, Enum.CameraType.Fixed))
+                    output[#output + 1] = serializer(propName, Enum.CameraType.Fixed)
                 else
-                    table.insert(output, serializer(propName, propValue))
+                    output[#output + 1] = serializer(propName, propValue)
                 end
             end
         end
 
-        table.insert(output, "</Properties>")
+        output[#output + 1] = "</Properties>"
     end
 
     for _, child in ipairs(instance:GetChildren()) do
-        processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
+        processed = SerializeInstance(child, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total)
     end
 
-    table.insert(output, "</Item>")
+    output[#output + 1] = "</Item>"
     return processed
 end
 
-local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
-	local function WriteString(Buffer, offset, String)
-		local StringBuffer = buffer.fromstring(String)
-		buffer.writeu32(Buffer, offset, #String)
-		buffer.copy(Buffer, offset + 4, StringBuffer, 0, #String)
-		return offset + 4 + #String
-	end
-
-	local function TransformInt32(Value)
-		if Value >= 0 then
-			return Value * 2
-		else
-			return math.abs(Value) * 2 - 1
-		end
-	end
-
-	local function WriteFloat32Roblox(Buffer, offset, Value)
-		local TempBytes = buffer.create(4)
-		buffer.writef32(TempBytes, 0, Value)
-		local Byte0 = buffer.readu8(TempBytes, 0)
-		local Byte1 = buffer.readu8(TempBytes, 1)
-		local Byte2 = buffer.readu8(TempBytes, 2)
-		local Byte3 = buffer.readu8(TempBytes, 3)
-		local SignBit = bit32.rshift(Byte0, 7)
-		Byte0 = bit32.band(Byte0, 0x7F)
-		Byte3 = bit32.bor(bit32.lshift(Byte3, 1), SignBit)
-		buffer.writeu8(Buffer, offset, Byte0)
-		buffer.writeu8(Buffer, offset + 1, Byte1)
-		buffer.writeu8(Buffer, offset + 2, Byte2)
-		buffer.writeu8(Buffer, offset + 3, Byte3)
-		return offset + 4
-	end
-
-	local function GetAxisIndex(Column)
-		local AxisX = math.abs(Column[1])
-		local AxisY = math.abs(Column[2])
-		local AxisZ = math.abs(Column[3])
-		if AxisX > AxisY and AxisX > AxisZ then
-			return Column[1] > 0 and 0 or 1
-		elseif AxisY > AxisX and AxisY > AxisZ then
-			return Column[2] > 0 and 2 or 3
-		else
-			return Column[3] > 0 and 4 or 5
-		end
-	end
-
-	local function InterleaveBytes(Arrays)
-		if #Arrays == 0 then return buffer.create(0) end
-		local BytesPerValue = buffer.len(Arrays[1])
-		local ResultBuffer = buffer.create(#Arrays * BytesPerValue)
-		local offset = 0
-		for byteIndex = 0, BytesPerValue - 1 do
-			for _, array in ipairs(Arrays) do
-				buffer.writeu8(ResultBuffer, offset, buffer.readu8(array, byteIndex))
-				offset = offset + 1
-			end
-		end
-		return ResultBuffer
-	end
-
-	local function GetTypeId(XmlType)
-		local TypeMap = {
-			["string"] = 0x01, ["Content"] = 0x01, ["ProtectedString"] = 0x01, ["BinaryString"] = 0x1D,
-			["bool"] = 0x02,
-			["int"] = 0x03,
-			["float"] = 0x04,
-			["double"] = 0x05,
-			["UDim"] = 0x06,
-			["UDim2"] = 0x07,
-			["Ray"] = 0x08,
-			["Faces"] = 0x09,
-			["Axes"] = 0x0A,
-			["BrickColor"] = 0x0B,
-			["Color3"] = 0x0C,
-			["Vector2"] = 0x0D,
-			["Vector3"] = 0x0E,
-			["CoordinateFrame"] = 0x10, ["OptionalCoordinateFrame"] = 0x10,
-			["token"] = 0x12, ["Enum"] = 0x12,
-			["Ref"] = 0x13,
-			["Vector3int16"] = 0x14,
-			["NumberSequence"] = 0x15,
-			["ColorSequence"] = 0x16,
-			["NumberRange"] = 0x17,
-			["Rect"] = 0x18,
-			["PhysicalProperties"] = 0x19,
-			["Color3uint8"] = 0x1A,
-			["int64"] = 0x1B,
-		}
-		return TypeMap[XmlType] or 0x01
-	end
-
-	local function ParseValue(PropertyType, Value)
-		if type(Value) == "string" then
-			local CleanString = Value:match("^%s*(.-)%s*$")
-			if PropertyType == "string" or PropertyType == "Content" or PropertyType == "ProtectedString" or PropertyType == "BinaryString" then
-				local Cdata = CleanString:match("<!%[CDATA%[(.*)%]%]>")
-				return Cdata or CleanString
-			end
-			if PropertyType == "bool" then return CleanString == "true" end
-			if PropertyType == "int" or PropertyType == "token" or PropertyType == "BrickColor" or PropertyType == "int64" then return tonumber(CleanString) or 0 end
-			if PropertyType == "float" or PropertyType == "double" then return tonumber(CleanString) or 0.0 end
-			if PropertyType == "Ref" then return CleanString end
-			return CleanString
-		end
-
-		if type(Value) == "table" then
-			local subValues = {}
-			for _, subNode in ipairs(Value) do
-				local subValue = ParseValue(subNode.Tag, subNode.Children or subNode.Value)
-				subValues[subNode.Tag] = subValue
-			end
-
-			if PropertyType == "Vector3" then
-				return {tonumber(subValues.X or 0), tonumber(subValues.Y or 0), tonumber(subValues.Z or 0)}
-			end
-			if PropertyType == "Color3" then
-				return {tonumber(subValues.R or 0), tonumber(subValues.G or 0), tonumber(subValues.B or 0)}
-			end
-			if PropertyType == "CoordinateFrame" then
-				return {tonumber(subValues.X or 0), tonumber(subValues.Y or 0), tonumber(subValues.Z or 0),
-					tonumber(subValues.R00 or 1), tonumber(subValues.R01 or 0), tonumber(subValues.R02 or 0),
-					tonumber(subValues.R10 or 0), tonumber(subValues.R11 or 1), tonumber(subValues.R12 or 0),
-					tonumber(subValues.R20 or 0), tonumber(subValues.R21 or 0), tonumber(subValues.R22 or 1)}
-			end
-			if PropertyType == "OptionalCoordinateFrame" then
-				local cframe = subValues.CFrame or {}
-				return {tonumber(cframe.X or 0), tonumber(cframe.Y or 0), tonumber(cframe.Z or 0),
-					tonumber(cframe.R00 or 1), tonumber(cframe.R01 or 0), tonumber(cframe.R02 or 0),
-					tonumber(cframe.R10 or 0), tonumber(cframe.R11 or 1), tonumber(cframe.R12 or 0),
-					tonumber(cframe.R20 or 0), tonumber(cframe.R21 or 0), tonumber(cframe.R22 or 1)}
-			end
-			if PropertyType == "PhysicalProperties" then
-				local isCustom = subValues.CustomPhysics == "true"
-				if not isCustom then return {false} end
-				return {true, tonumber(subValues.Density or 0.7), tonumber(subValues.Friction or 0.3), tonumber(subValues.Elasticity or 0.5), tonumber(subValues.FrictionWeight or 1), tonumber(subValues.ElasticityWeight or 1)}
-			end
-			if PropertyType == "Faces" then
-				return tonumber(subValues.faces or 0)
-			end
-			-- Add handlers for other structured types as needed
-		end
-		return {}
-	end
-
-	local AllInstances = {}
-	local ReferentMap = {}
-	local NextReferent = 0
-	local SharedStrings = {}
-	local SharedStringMap = {}
-
-	local function AddSharedString(String)
-		if SharedStringMap[String] == nil then
-			table.insert(SharedStrings, String)
-			SharedStringMap[String] = #SharedStrings - 1
-		end
-		return SharedStringMap[String]
-	end
-
-	local function ParseXmlNode(XmlString)
-		local Items = {}
-		local cursor = 1
-		while true do
-			local startIndex, endIndex, tagName, attributesString, content = XmlString:find("<([%w:]+)%s*([^>]*)>(.-)</%1>", cursor)
-			if not startIndex then
-				startIndex, endIndex, tagName, attributesString = XmlString:find("<([%w:]+)%s*([^>]*)/>", cursor)
-				if not startIndex then break end
-				content = ""
-			end
-			cursor = endIndex + 1
-
-			local Attributes = {}
-			for key, value in attributesString:gmatch('([%w:]+)="([^"]*)"') do
-				Attributes[key:gsub("&amp;", "&")] = value:gsub("&amp;", "&")
-			end
-
-			local Item = {
-				Tag = tagName,
-				Attributes = Attributes,
-				Children = ParseXmlNode(content),
-				Value = #content > 0 and #content == #XmlString and content or nil
-			}
-			table.insert(Items, Item)
-		end
-		if #Items == 0 and #XmlString > 0 then return XmlString end
-		return Items
-	end
-
-	local XMLContent = InputXMLFile
-	local XmlRoot = ParseXmlNode(XMLContent)[1]
-	local ItemNodes = XmlRoot.Children
-
-	local function ProcessItemNode(Node, ParentReferent)
-		if Node.Tag ~= "Item" then return end
-		local ReferenceString = Node.Attributes.referent
-		local ClassName = Node.Attributes["class"]
-		if not (ReferenceString and ClassName) then return end
-
-		local IsArchivable = true
-		local ReferenceNumber = NextReferent
-		NextReferent = NextReferent + 1
-		ReferentMap[ReferenceString] = ReferenceNumber
-
-		local InstanceData = {
-			ClassName = ClassName,
-			Referent = ReferenceNumber,
-			Properties = {},
-			Parent = ParentReferent,
-			IsArchivable = true
-		}
-
-		local PropertiesNode = Node.Children[1]
-		if PropertiesNode and PropertiesNode.Tag == "Properties" then
-			for _, propertyNode in ipairs(PropertiesNode.Children) do
-				local propertyName = propertyNode.Attributes.name
-				if propertyName then
-					local propertyType = propertyNode.Tag
-					local value = ParseValue(propertyType, propertyNode.Children)
-					InstanceData.Properties[propertyName] = {Type = propertyType, Value = value}
-					if propertyName == "Archivable" and value == false then
-						IsArchivable = false
-					end
-				end
-			end
-		end
-
-		InstanceData.IsArchivable = IsArchivable
-		if InstanceData.IsArchivable or ParentReferent == -1 then
-			table.insert(AllInstances, InstanceData)
-			for _, childNode in ipairs(Node.Children) do
-				if childNode.Tag == "Item" then
-					ProcessItemNode(childNode, ReferenceNumber)
-				end
-			end
-		end
-	end
-
-	for _, node in ipairs(ItemNodes) do
-		ProcessItemNode(node, -1)
-	end
-
-	local Classes = {}
-	for _, instanceData in ipairs(AllInstances) do
-		local className = instanceData.ClassName
-		if not Classes[className] then
-			Classes[className] = {Instances = {}, Properties = {}}
-			AddSharedString(className)
-		end
-		table.insert(Classes[className].Instances, instanceData)
-
-		for propertyName, propertyData in pairs(instanceData.Properties) do
-			if not Classes[className].Properties[propertyName] then
-				Classes[className].Properties[propertyName] = {
-					TypeId = GetTypeId(propertyData.Type),
-					Values = {}
-				}
-				AddSharedString(propertyName)
-			end
-			Classes[className].Properties[propertyName].Values[instanceData.Referent] = propertyData.Value
-		end
-	end
-
-	local ClassList = {}
-	for className in pairs(Classes) do table.insert(ClassList, className) end
-	table.sort(ClassList)
-
-	local GlobalInstances = {}
-	for _, className in ipairs(ClassList) do
-		table.sort(Classes[className].Instances, function(a, b) return a.Referent < b.Referent end)
-		for _, instanceData in ipairs(Classes[className].Instances) do
-			table.insert(GlobalInstances, instanceData)
-		end
-	end
-
-	local function WriteFileHeader()
-		local HeaderBuffer = buffer.create(32)
-		buffer.writestring(HeaderBuffer, 0, "<roblox!\x89\xff\x0d\x0a\x1a\x0a")
-		buffer.writeu16(HeaderBuffer, 14, 0)
-		buffer.writeu32(HeaderBuffer, 16, #ClassList)
-		buffer.writeu32(HeaderBuffer, 20, #GlobalInstances)
-		buffer.fill(HeaderBuffer, 24, 0, 8)
-		return HeaderBuffer
-	end
-
-	local function WriteChunkHeader(ChunkName, UncompressedData)
-		local HeaderBuffer = buffer.create(16)
-		buffer.writestring(HeaderBuffer, 0, ChunkName)
-		buffer.writeu32(HeaderBuffer, 4, 0)  -- Compressed length = 0 (no compression)
-		buffer.writeu32(HeaderBuffer, 8, buffer.len(UncompressedData))
-		buffer.fill(HeaderBuffer, 12, 0, 4)
-		return HeaderBuffer, UncompressedData
-	end
-
-	local function WriteSSTRChunk()
-		local TotalSize = 4
-		for _, s in ipairs(SharedStrings) do
-			TotalSize = TotalSize + 4 + #s
-		end
-
-		local DataBuffer = buffer.create(TotalSize)
-		local offset = 0
-		buffer.writeu32(DataBuffer, offset, #SharedStrings); offset = offset + 4
-
-		for _, s in ipairs(SharedStrings) do
-			offset = WriteString(DataBuffer, offset, s)
-		end
-		return DataBuffer
-	end
-
-	local function WriteINSTChunk(ClassName, ClassId)
-		local ClassData = Classes[ClassName]
-		local IsService = ClassName:match("Service$") and not ClassName:match("NonReplicated")
-
-		local ReferentIdSize = #ClassData.Instances * 4
-		local ServiceFlagSize = IsService and #ClassData.Instances or 0
-		local DataSize = 4 + 4 + #ClassName + 1 + 4 + ReferentIdSize + ServiceFlagSize
-
-		local DataBuffer = buffer.create(DataSize)
-		local offset = 0
-
-		buffer.writeu32(DataBuffer, offset, ClassId); offset = offset + 4
-		offset = WriteString(DataBuffer, offset, ClassName)
-		buffer.writeu8(DataBuffer, offset, IsService and 1 or 0); offset = offset + 1
-		buffer.writeu32(DataBuffer, offset, #ClassData.Instances); offset = offset + 4
-
-		local Arrays = {}
-		local previous = 0
-		for _, instance in ipairs(ClassData.Instances) do
-			local Delta = instance.Referent - previous
-			local Transformed = TransformInt32(Delta)
-			local ReferenceBuffer = buffer.create(4)
-			buffer.writeu32(ReferenceBuffer, 0, Transformed)
-			table.insert(Arrays, ReferenceBuffer)
-			previous = instance.Referent
-		end
-
-		local InterleavedData = InterleaveBytes(Arrays)
-		buffer.copy(DataBuffer, offset, InterleavedData, 0, buffer.len(InterleavedData))
-		offset = offset + buffer.len(InterleavedData)
-
-		if IsService then
-			for i = 1, #ClassData.Instances do
-				buffer.writeu8(DataBuffer, offset, 1)
-				offset = offset + 1
-			end
-		end
-		return DataBuffer
-	end
-
-	local function WritePROPChunk(ClassName, ClassId, PropertyName, PropertyInfo)
-		local ClassData = Classes[ClassName]
-		local PropertyType = PropertyInfo.TypeId
-		local PropertyValues = {}
-		for _, instance in ipairs(ClassData.Instances) do
-			table.insert(PropertyValues, PropertyInfo.Values[instance.Referent])
-		end
-
-		local DataParts = {}
-
-		if PropertyType == 0x01 then
-			local StringIndexArrays = {}
-			for _, value in ipairs(PropertyValues) do
-				local b = buffer.create(4)
-				buffer.writeu32(b, 0, AddSharedString(tostring(value or "")))
-				table.insert(StringIndexArrays, b)
-			end
-			table.insert(DataParts, InterleaveBytes(StringIndexArrays))
-		elseif PropertyType == 0x02 then
-			local BoolBuffer = buffer.create(#PropertyValues)
-			for i, value in ipairs(PropertyValues) do
-				buffer.writeu8(BoolBuffer, i - 1, value and 1 or 0)
-			end
-			table.insert(DataParts, BoolBuffer)
-		elseif PropertyType == 0x03 or PropertyType == 0x0B or PropertyType == 0x12 then
-			local Arrays, previous = {}, 0
-			for _, value in ipairs(PropertyValues) do
-				local val = value or 0
-				local b = buffer.create(4)
-				buffer.writeu32(b, 0, TransformInt32(val - previous))
-				table.insert(Arrays, b)
-				previous = val
-			end
-			table.insert(DataParts, InterleaveBytes(Arrays))
-		elseif PropertyType == 0x04 then
-			local Arrays = {}
-			for _, value in ipairs(PropertyValues) do
-				local b = buffer.create(4)
-				WriteFloat32Roblox(b, 0, value or 0)
-				table.insert(Arrays, b)
-			end
-			table.insert(DataParts, InterleaveBytes(Arrays))
-		elseif PropertyType == 0x0C or PropertyType == 0x0E then
-			local X, Y, Z = {}, {}, {}
-			for _, value in ipairs(PropertyValues) do
-				local v = value or {0,0,0}
-				local bx, by, bz = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(bx, 0, v[1])
-				WriteFloat32Roblox(by, 0, v[2])
-				WriteFloat32Roblox(bz, 0, v[3])
-				table.insert(X, bx); table.insert(Y, by); table.insert(Z, bz)
-			end
-			table.insert(DataParts, InterleaveBytes(X))
-			table.insert(DataParts, InterleaveBytes(Y))
-			table.insert(DataParts, InterleaveBytes(Z))
-		elseif PropertyType == 0x10 then
-			local pos_x, pos_y, pos_z = {}, {}, {}
-			local r00, r01, r02, r10, r11, r12, r20, r21, r22 = {}, {}, {}, {}, {}, {}, {}, {}, {}
-			for _, value in ipairs(PropertyValues) do
-				local v = value or {0,0,0,1,0,0,0,1,0,0,0,1}
-				local bx, by, bz = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(bx, 0, v[1]); table.insert(pos_x, bx)
-				WriteFloat32Roblox(by, 0, v[2]); table.insert(pos_y, by)
-				WriteFloat32Roblox(bz, 0, v[3]); table.insert(pos_z, bz)
-				local br00, br01, br02 = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(br00, 0, v[4]); table.insert(r00, br00)
-				WriteFloat32Roblox(br01, 0, v[5]); table.insert(r01, br01)
-				WriteFloat32Roblox(br02, 0, v[6]); table.insert(r02, br02)
-				local br10, br11, br12 = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(br10, 0, v[7]); table.insert(r10, br10)
-				WriteFloat32Roblox(br11, 0, v[8]); table.insert(r11, br11)
-				WriteFloat32Roblox(br12, 0, v[9]); table.insert(r12, br12)
-				local br20, br21, br22 = buffer.create(4), buffer.create(4), buffer.create(4)
-				WriteFloat32Roblox(br20, 0, v[10]); table.insert(r20, br20)
-				WriteFloat32Roblox(br21, 0, v[11]); table.insert(r21, br21)
-				WriteFloat32Roblox(br22, 0, v[12]); table.insert(r22, br22)
-			end
-			local OrientationBuffer = buffer.create(#PropertyValues)
-			for i=1, #PropertyValues do buffer.writeu8(OrientationBuffer, i-1, 0) end
-			table.insert(DataParts, OrientationBuffer)
-
-			table.insert(DataParts, InterleaveBytes(pos_x)); table.insert(DataParts, InterleaveBytes(pos_y)); table.insert(DataParts, InterleaveBytes(pos_z))
-			table.insert(DataParts, InterleaveBytes(r00)); table.insert(DataParts, InterleaveBytes(r01)); table.insert(DataParts, InterleaveBytes(r02))
-			table.insert(DataParts, InterleaveBytes(r10)); table.insert(DataParts, InterleaveBytes(r11)); table.insert(DataParts, InterleaveBytes(r12))
-			table.insert(DataParts, InterleaveBytes(r20)); table.insert(DataParts, InterleaveBytes(r21)); table.insert(DataParts, InterleaveBytes(r22))
-		elseif PropertyType == 0x13 then
-			local Arrays, previous = {}, 0
-			for _, value in ipairs(PropertyValues) do
-				local ReferenceNumber = ReferentMap[value] or -1
-				local Delta = ReferenceNumber - previous
-				local b = buffer.create(4)
-				buffer.writeu32(b, 0, TransformInt32(Delta))
-				table.insert(Arrays, b)
-				previous = ReferenceNumber
-			end
-			table.insert(DataParts, InterleaveBytes(Arrays))
-		elseif PropertyType == 0x19 then
-			for _, value in ipairs(PropertyValues) do
-				local v = value or {false}
-				if not v[1] then
-					local b = buffer.create(1); buffer.writeu8(b, 0, 0)
-					table.insert(DataParts, b)
-				else
-					local b = buffer.create(1 + 5 * 4)
-					buffer.writeu8(b, 0, 1)
-					local offset = 1
-					offset = WriteFloat32Roblox(b, offset, v[2])
-					offset = WriteFloat32Roblox(b, offset, v[3])
-					offset = WriteFloat32Roblox(b, offset, v[4])
-					offset = WriteFloat32Roblox(b, offset, v[5])
-					WriteFloat32Roblox(b, offset, v[6])
-					table.insert(DataParts, b)
-				end
-			end
-		elseif PropertyType == 0x1D then
-			for _, value in ipairs(PropertyValues) do
-				local b = buffer.create(4 + #value)
-				WriteString(b, 0, value or "")
-				table.insert(DataParts, b)
-			end
-		end
-
-		local TotalSize = 4 + 4 + #PropertyName + 1
-		for _, part in ipairs(DataParts) do TotalSize = TotalSize + buffer.len(part) end
-
-		local DataBuffer = buffer.create(TotalSize)
-		local offset = 0
-		buffer.writeu32(DataBuffer, offset, ClassId); offset = offset + 4
-		offset = WriteString(DataBuffer, offset, PropertyName)
-		buffer.writeu8(DataBuffer, offset, PropertyType); offset = offset + 1
-
-		for _, part in ipairs(DataParts) do
-			buffer.copy(DataBuffer, offset, part, 0, buffer.len(part))
-			offset = offset + buffer.len(part)
-		end
-
-		return DataBuffer
-	end
-
-	local function WritePRNTChunk()
-		local DataBuffer = buffer.create(1 + 4 + (#GlobalInstances * 8))
-		local offset = 0
-		buffer.writeu8(DataBuffer, offset, 0); offset = offset + 1
-		buffer.writeu32(DataBuffer, offset, #GlobalInstances); offset = offset + 4
-
-		local ChildArrays, childPrevious = {}, 0
-		for _, instance in ipairs(GlobalInstances) do
-			local b = buffer.create(4)
-			buffer.writeu32(b, 0, TransformInt32(instance.Referent - childPrevious))
-			table.insert(ChildArrays, b)
-			childPrevious = instance.Referent
-		end
-		local InterleavedChildren = InterleaveBytes(ChildArrays)
-		buffer.copy(DataBuffer, offset, InterleavedChildren, 0, buffer.len(InterleavedChildren))
-		offset = offset + buffer.len(InterleavedChildren)
-
-		local ParentArrays, parentPrevious = {}, 0
-		for _, instance in ipairs(GlobalInstances) do
-			local ParentId = instance.Parent or -1
-			local b = buffer.create(4)
-			buffer.writeu32(b, 0, TransformInt32(ParentId - parentPrevious))
-			table.insert(ParentArrays, b)
-			parentPrevious = ParentId
-		end
-		local InterleavedParents = InterleaveBytes(ParentArrays)
-		buffer.copy(DataBuffer, offset, InterleavedParents, 0, buffer.len(InterleavedParents))
-
-		return DataBuffer
-	end
-
-	local Chunks = {}
-
-	local MetaData = buffer.create(4); buffer.writeu32(MetaData, 0, 0)
-	local MetaHeader, CompressedMetaData = WriteChunkHeader("META", MetaData)
-	table.insert(Chunks, MetaHeader); table.insert(Chunks, CompressedMetaData)
-
-	local SstrData = WriteSSTRChunk()
-	local SstrHeader, CompressedSstrData = WriteChunkHeader("SSTR", SstrData)
-	table.insert(Chunks, SstrHeader); table.insert(Chunks, CompressedSstrData)
-
-	for classId, className in ipairs(ClassList) do
-		local InstData = WriteINSTChunk(className, classId - 1)
-		local InstHeader, CompressedInstData = WriteChunkHeader("INST", InstData)
-		table.insert(Chunks, InstHeader); table.insert(Chunks, CompressedInstData)
-	end
-
-	for classId, className in ipairs(ClassList) do
-		local SortedPropertyNames = {}
-		for propertyName in pairs(Classes[className].Properties) do table.insert(SortedPropertyNames, propertyName) end
-		table.sort(SortedPropertyNames)
-
-		for _, propertyName in ipairs(SortedPropertyNames) do
-			local PropertyInfo = Classes[className].Properties[propertyName]
-			local PropData = WritePROPChunk(className, classId - 1, propertyName, PropertyInfo)
-			local PropHeader, CompressedPropData = WriteChunkHeader("PROP", PropData)
-			table.insert(Chunks, PropHeader); table.insert(Chunks, CompressedPropData)
-		end
-	end
-
-	local PrntData = WritePRNTChunk()
-	local PrntHeader, CompressedPrntData = WriteChunkHeader("PRNT", PrntData)
-	table.insert(Chunks, PrntHeader); table.insert(Chunks, CompressedPrntData)
-
-	local EndHeader, CompressedEndData = WriteChunkHeader("END\0", buffer.create(0))
-	table.insert(Chunks, EndHeader)
-	table.insert(Chunks, CompressedEndData)
-
-	local FinalBufferParts = {}
-	table.insert(FinalBufferParts, WriteFileHeader())
-	for _, part in ipairs(Chunks) do
-		table.insert(FinalBufferParts, part)
-	end
-
-	local TotalSize = 0
-	for _, part in ipairs(FinalBufferParts) do TotalSize = TotalSize + buffer.len(part) end
-
-	local ResultBuffer = buffer.create(TotalSize)
-	local offset = 0
-	for _, part in ipairs(FinalBufferParts) do
-		buffer.copy(ResultBuffer, offset, part, 0, buffer.len(part))
-		offset = offset + buffer.len(part)
-	end
-
-	writefile(OutputRBXLFile, buffer.tostring(ResultBuffer) .. "</roblox>")
-end
-
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
-    -- < Reset state for each save run > --
+    -- < Reset state for each save run so re-running doesn't carry stale data > --
     PropertyCache = {}
     BlacklistModels = {}
-    BlacklistDescendantSet = {}
     RefCounter = 0
     RefCache = {}
+    LastStatusUpdate = 0
 
     local ScreenGui = Instance.new("ScreenGui")
     local Started = true
@@ -1684,7 +1113,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     TitleLabel.Visible = true
     TitleLabel.Name = "Title"
     TitleLabel.Font = Enum.Font.SourceSans
-    TitleLabel.Text = "Starting serialization..."
+    TitleLabel.Text = "Starting..."
     TitleLabel.Position = UDim2.new(1, -220, 0, -45)
     TitleLabel.Size = UDim2.new(0, 180, 0, 30)
     TitleLabel.BackgroundTransparency = 1
@@ -1692,6 +1121,7 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     TitleLabel.TextSize = 16
     TitleLabel.FontFace.Weight = Enum.FontWeight.Bold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Right
+    CurrentTitleLabel = TitleLabel
 
     local Loading = Instance.new("ImageLabel")
     Loading.Parent = ScreenGui
@@ -1730,141 +1160,126 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         end)
     end
 
-    local output = {XmlHeader}
-    -- < Count pass with yielding to prevent freeze on huge places > --
-    TitleLabel.Text = "Counting instances..."
+    -- < Build save path and prime the file > --
+    local placeName = "NIL"
+    local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
+    if ok and info and info.Name then
+        placeName = info.Name:gsub("[%s%p]+", "_")
+    end
+    local fileName = placeName .. ".rbxlx"
+    local savePath = "DEXV5\\SaveInstances\\" .. fileName
+    CurrentSavePath = savePath
+
+    -- < Clear/create the output file, then write the header > --
+    local writeOk, writeErr = pcall(Writefile, savePath, "")
+    if not writeOk then
+        warn("Dex saveinstance: failed to create file:", writeErr)
+        TitleLabel.Text = "Failed: cannot create file"
+        Started = false
+        task.delay(2, function() ScreenGui:Destroy() end)
+        return
+    end
+    pcall(Appendfile, savePath, XmlHeader)
+
+    -- < FAST count phase: GetDescendants is implemented in C++ and is dramatically faster
+    --   than recursive Lua iteration. Slight inaccuracy (doesn't filter player characters)
+    --   is fine since this is only for the progress percentage. > --
+    TitleLabel.Text = "Processing Map..."
     local totalInstances = 0
-    for _, instance in ipairs(game:GetChildren()) do
-        local counterRef = {count = 0, processed = 0}
-        CountInstances(instance, avoidPlayerCharacters, counterRef)
-        totalInstances = totalInstances + counterRef.count
-        task.wait() -- < Yield between top-level services > --
+    for _, service in ipairs(game:GetChildren()) do
+        if not Blacklist[service.ClassName] and not Blacklist[service.Name] then
+            local descOk, descs = pcall(function() return service:GetDescendants() end)
+            if descOk and descs then
+                totalInstances = totalInstances + 1 + #descs
+            end
+            task.wait() -- < Yield between top-level services > --
+        end
     end
     if saveNilInstances then
         local Nil = getnilinstances() or {}
         totalInstances = totalInstances + #Nil
     end
 
+    -- < Output buffer: filled by SerializeInstance, flushed to file periodically by FlushOutput > --
+    local output = {}
     local processedInstances = 0
-    -- < Throttle status updates: updating the TextLabel every single instance is itself expensive > --
-    local lastStatusUpdate = 0
-    local function statusCallback(processed, total, message)
-        local now = os.clock()
-        if now - lastStatusUpdate < 0.05 then return end -- < Cap status updates to ~20fps > --
-        lastStatusUpdate = now
-        if total and total > 0 then
-            local percentage = (processed / total) * 100
-            TitleLabel.Text = string.format("[%.2f%%] %s", percentage, message)
-        else
-            TitleLabel.Text = string.format("[N/A] %s", message)
-        end
-    end
 
-    statusCallback(0, totalInstances, "Starting serialization...")
-
+    TitleLabel.Text = "Serializing..."
     for _, instance in ipairs(game:GetChildren()) do
         if instance == Players then
             local ref = GetRef(instance)
-            statusCallback(processedInstances, totalInstances, "Processing Players service")
-            table.insert(output, string.format('<Item class="Players" referent="%s">', ref))
-            table.insert(output, "<Properties>")
-            table.insert(output, PropertySerializers.string("Name", instance.Name))
-            table.insert(output, "</Properties>")
+            output[#output + 1] = string.format('<Item class="Players" referent="%s">', ref)
+            output[#output + 1] = "<Properties>"
+            output[#output + 1] = PropertySerializers.string("Name", instance.Name)
+            output[#output + 1] = "</Properties>"
             if Player then
-                processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+                processedInstances = SerializeInstance(Player, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances)
             end
-            table.insert(output, "</Item>")
+            output[#output + 1] = "</Item>"
         else
-            processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+            processedInstances = SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances)
         end
     end
 
     if saveNilInstances then
-        statusCallback(processedInstances, totalInstances, "Processing Nil Instances folder")
+        UpdateStatus(processedInstances, totalInstances, "Processing nil instances...")
         local ref = GetRef(Workspace)
-        table.insert(output, string.format('<Item class="Workspace" referent="%s">', ref))
-        table.insert(output, "<Properties>")
-        table.insert(output, PropertySerializers.string("Name", "Workspace"))
-        table.insert(output, "</Properties>")
+        output[#output + 1] = string.format('<Item class="Workspace" referent="%s">', ref)
+        output[#output + 1] = "<Properties>"
+        output[#output + 1] = PropertySerializers.string("Name", "Workspace")
+        output[#output + 1] = "</Properties>"
         ref = GetRef("NilInstancesFolder")
-        table.insert(output, string.format('<Item class="Folder" referent="%s">', ref))
-        table.insert(output, "<Properties>")
-        table.insert(output, PropertySerializers.string("Name", "Nil Instances"))
-        table.insert(output, "</Properties>")
+        output[#output + 1] = string.format('<Item class="Folder" referent="%s">', ref)
+        output[#output + 1] = "<Properties>"
+        output[#output + 1] = PropertySerializers.string("Name", "Nil Instances")
+        output[#output + 1] = "</Properties>"
         local Nil = getnilinstances() or {}
         for _, v in ipairs(Nil) do
             local Class = v.ClassName
             if not Class:find("Wrap") and not Class == "Attachment" and not Class == "Bone" then
-                statusCallback(processedInstances, totalInstances, "Processing nil instance: " .. (v:GetFullName() or "Unnamed Nil"))
                 processedInstances = processedInstances + 1
-                local ref = GetRef(v)
-                table.insert(output, string.format('<Item class="%s" referent="%s">', className or "Unknown", ref))
-                table.insert(output, "<Properties>")
-                table.insert(output, PropertySerializers.string("Name", v.Name or "Unnamed"))
-                table.insert(output, "</Properties>")
+                local ref2 = GetRef(v)
+                output[#output + 1] = string.format('<Item class="%s" referent="%s">', Class or "Unknown", ref2)
+                output[#output + 1] = "<Properties>"
+                output[#output + 1] = PropertySerializers.string("Name", v.Name or "Unnamed")
+                output[#output + 1] = "</Properties>"
 
                 for _, k in ipairs(v:GetChildren()) do
-                    processedInstances = SerializeInstance(k, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances, statusCallback)
+                    processedInstances = SerializeInstance(k, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processedInstances, totalInstances)
                 end
 
-                table.insert(output, "</Item>")
+                output[#output + 1] = "</Item>"
             end
         end
-        table.insert(output, "</Item>")
-        table.insert(output, "</Item>")
+        output[#output + 1] = "</Item>"
+        output[#output + 1] = "</Item>"
     end
 
-    table.insert(output, XmlFooter)
-    -- < Force a final status update even though the throttle may be active > --
-    TitleLabel.Text = "Serialization complete, writing file..."
+    -- < Force-flush any remaining buffered output, then write the footer > --
+    TitleLabel.Text = "Writing final chunk..."
+    task.wait()
+    FlushOutput(output, true)
+    pcall(Appendfile, savePath, XmlFooter)
 
-    -- < Yield before the giant table.concat to let the UI breathe > --
-    task.wait()
-    local xml = table.concat(output, "\n")
-    task.wait()
-	local placeName = "NIL "
-    local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
-    if ok and info and info.Name then
-        placeName = info.Name:gsub("[%s%p]+", "_")
-    end
-    if SaveMapSettings.Compress then
-        local fileName = placeName .. ".rbxl"
-        local savepath = "DEXV5\\SaveInstances\\" .. fileName
-        local success, errorMsg = pcall(XMLtoBinary, xml, savepath)
-        if success then
-            TitleLabel.Text = string.format("Saved instance as %s", fileName)
-        else
-            warn(errorMsg)
-            TitleLabel.Text = string.format("Failed to save %s: %s", fileName, errorMsg)
-        end
-        Started = false
-        Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
-        task.delay(2, function()
-            ScreenGui:Destroy()
-        end)
-    else
-        local fileName = placeName .. ".rbxlx"
-        local savepath = "DEXV5\\SaveInstances\\" .. fileName
-        local success, errorMsg = pcall(Writefile, savepath, xml)
-        if success then
-            TitleLabel.Text = string.format("Saved instance as %s", fileName)
-        else
-            warn(errorMsg)
-            TitleLabel.Text = string.format("Failed to save %s: %s", fileName, errorMsg)
-        end
-        Started = false
-        Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
-        task.delay(2, function()
-            ScreenGui:Destroy()
-        end)
-    end
+    TitleLabel.Text = string.format("Saved as %s", fileName)
+    Started = false
+    Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
+    CurrentSavePath = nil
+    CurrentTitleLabel = nil
+    task.delay(2, function()
+        ScreenGui:Destroy()
+    end)
 end
+
 createMapSetting(SaveMapSettingFrame.Scripts, "SaveScripts", SaveMapSettings.SaveScripts)
 createMapSetting(SaveMapSettingFrame.ProgressiveSave, "ProgressiveSave", SaveMapSettings.ProgressiveSave)
-createMapSetting(SaveMapSettingFrame.Compress, "Compress", SaveMapSettings.Compress)
 createMapSetting(SaveMapSettingFrame.SaveNilInstances, "SaveNilInstances", SaveMapSettings.SaveNilInstances)
 createMapSetting(SaveMapSettingFrame.AvoidPlayerCharacters, "AvoidPlayerCharacters", SaveMapSettings.AvoidPlayerCharacters)
 createMapSetting(SaveMapSettingFrame.CloseRobloxAfterSave, "CloseRobloxAfterSave", SaveMapSettings.CloseRobloxAfterSave)
+-- < Compress GUI element exists but is no longer wired up; hide it to avoid user confusion > --
+if SaveMapSettingFrame:FindFirstChild("Compress") then
+    SaveMapSettingFrame.Compress.Visible = false
+end
 
 Connect(SaveMapButton.Activated, function()
 	saveinstance(SaveMapSettings.SaveScripts, SaveMapSettings.AvoidPlayerCharacters, SaveMapSettings.SaveNilInstances)
