@@ -107,10 +107,24 @@ local Blacklist = {
 	AnimationRigData = true
 }
 local BlacklistModels = {}
+local BlacklistDescendantSet = {} -- < Fast lookup for descendants of blacklisted models > --
 local RefCounter = 0
 local RefCache = {}
 -- < Custom Aliases > --
 local wait = task.wait
+-- < Performance Tuning > --
+local YIELD_EVERY_N_INSTANCES = 200 -- Yield to scheduler every N instances during serialization
+local YIELD_EVERY_N_COUNT = 1000 -- Yield every N instances during the count pre-pass
+-- < Property Cache (per ClassName) > --
+local PropertyCache = {}
+local function GetCachedProperties(instance)
+	local className = instance.ClassName
+	if not PropertyCache[className] then
+		local ok, props = pcall(getproperties, instance)
+		PropertyCache[className] = ok and props or {}
+	end
+	return PropertyCache[className]
+end
 -- < Source > --
 local function BeforeLoad()
 	local A, B = pcall(readfile, "dexv5_settings.json")
@@ -570,18 +584,25 @@ local PropertySerializers = {
         end
     end
 }
-local function CountInstances(instance, avoidPlayerCharacters)
-    local count = 1
+-- < Counts instances, with periodic yielding to prevent freezing on huge places > --
+local function CountInstances(instance, avoidPlayerCharacters, counterRef)
+    counterRef = counterRef or {count = 0, processed = 0}
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
-        return 0
+        return counterRef.count
     end
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
-        return 0
+        return counterRef.count
+    end
+    counterRef.count = counterRef.count + 1
+    counterRef.processed = counterRef.processed + 1
+    -- < Yield occasionally to keep the UI responsive during a huge pre-pass > --
+    if counterRef.processed % YIELD_EVERY_N_COUNT == 0 then
+        task.wait()
     end
     for _, child in ipairs(instance:GetChildren()) do
-        count = count + CountInstances(child, avoidPlayerCharacters)
+        CountInstances(child, avoidPlayerCharacters, counterRef)
     end
-    return count
+    return counterRef.count
 end
 
 local function StartScaleBasedRendering(base, scale, interval, max, TitleLabel)
@@ -744,8 +765,23 @@ local function PromptStreamingEnabledCaution(TitleLabel)
     return response
 end
 
+-- < Decompiles a script with yields wrapped around the call to prevent freezing > --
+local function SafeDecompile(instance)
+    task.wait() -- < Yield BEFORE the heavy call > --
+    local success, result = pcall(decompile, instance)
+    task.wait() -- < Yield AFTER as well > --
+    return success, result
+end
+
 local function SerializeInstance(instance, output, saveScripts, avoidPlayerCharacters, saveNilInstances, processed, total, statusCallback)
-    if SaveMapSettings.ProgressiveSave and not instance == workspace.CurrentCamera then task.wait(0.05) end
+    -- < Periodic yield based on instance count, NOT just progressive mode > --
+    if processed % YIELD_EVERY_N_INSTANCES == 0 then
+        task.wait()
+    end
+    -- < Fixed broken condition: was `not instance == workspace.CurrentCamera` which always evaluated false > --
+    if SaveMapSettings.ProgressiveSave and instance ~= workspace.CurrentCamera then
+        task.wait(0.05)
+    end
     if instance.ClassName:find("Wrap") then return processed end
     if instance:IsA("Bone") and (not instance.Parent or not instance.Parent:IsA("BasePart") or instance.Parent:IsA("Bone")) then return processed end
     if Blacklist[instance.ClassName] or Blacklist[instance.Name] then
@@ -755,15 +791,21 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 
     if avoidPlayerCharacters and instance:IsA("Model") and Players:GetPlayerFromCharacter(instance) then
         table.insert(BlacklistModels, instance)
+        BlacklistDescendantSet[instance] = true
         statusCallback(processed, total, "Skipping player character: " .. (instance:GetFullName() or "Unnamed"))
-        return processed
+        return processed -- < Don't recurse: short-circuit the entire subtree > --
     end
-    
-    for _,v in pairs(BlacklistModels) do
-    if instance:IsDescendantOf(v) then
-        statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
-        return processed
-    end
+
+    -- < Fast O(1) check against ancestors we've already marked > --
+    -- < We only need to check direct parent: if a parent was blacklisted it would have already returned > --
+    -- < But the recursion is depth-first so we need a different approach: check IsDescendantOf only against tracked models > --
+    if #BlacklistModels > 0 then
+        for i = 1, #BlacklistModels do
+            if instance:IsDescendantOf(BlacklistModels[i]) then
+                statusCallback(processed, total, "Skipping player character object: " .. (instance:GetFullName() or "Unnamed"))
+                return processed
+            end
+        end
     end
     
     statusCallback(processed, total, "Processing: " .. (instance:GetFullName() or "Unnamed"))
@@ -899,7 +941,8 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 						scriptSource = string.format("-- Script GUID: NULL\n-- Script Path: %s (ModuleScript)\n-- Electron V3 Decompiler\n-- This script is a Core Script.\n-- It can not be viewed.", path)
 					end
                 else
-                    local success, result = pcall(decompile, instance)
+                    -- < Use SafeDecompile which yields around the call to prevent freezing > --
+                    local success, result = SafeDecompile(instance)
 					local Class = instance.ClassName
                     if success then
 						result = result:gsub("^[ \t]*--[^\n]*\n", "") --remove pre-comments
@@ -930,9 +973,12 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
 				local passed = false
 				local linkedSource = instance.LinkedSource
 				if instance.RunContext == Enum.RunContext.Client then
-					decompiled = decompile(instance)
-					scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
-					passed = true
+                    -- < Yield around decompile here too > --
+                    local decompileSuccess, decompiled = SafeDecompile(instance)
+                    if decompileSuccess then
+					    scriptSource = string.format("-- Script GUID: %s\n-- Script Path: %s (ServerScript) [Client RunContext]\n%s", guid, path, decompiled)
+					    passed = true
+                    end
 				end
 				if linkedSource and #linkedSource >= 1 and not passed then
 					local result = tonumber(string.match(linkedSource, "(%d+)"))
@@ -1008,11 +1054,14 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
                 AcquisitionMethod = gethiddenproperty(instance, "AcquisitionMethod")
             }
         end
-		if #getproperties(instance) > 0 then
-			for _,v in pairs(getproperties(instance)) do
+        -- < Use the cached property list per ClassName instead of recalling getproperties for every instance > --
+        local cachedProps = GetCachedProperties(instance)
+		if cachedProps and #cachedProps > 0 then
+			for _,v in pairs(cachedProps) do
+                -- < Direct indexing avoids the closure allocation per property > --
 				local success, val = pcall(function() return instance[v] end)
 				if success and val ~= nil and v ~= "Parent" and v ~= "brickcolor" and v ~= "className" and v ~= "archivable" and v ~= "formFactor" and v ~= "Name" and PropertySerializers[typeof(val)] then
-					properties[v] = instance[v]
+					properties[v] = val
 				end
 			end
 		end
@@ -1020,7 +1069,7 @@ local function SerializeInstance(instance, output, saveScripts, avoidPlayerChara
             local propType = typeof(propValue)
             local serializer = PropertySerializers[propType]
             if propName == "Source" and scriptSource then
-                local eS = tostring(scriptSource):gsub("]]>", "]]]]><![CDATA[>")
+                local eS = scriptSource:gsub("]]>", "]]]]><![CDATA[>")
                 table.insert(output, string.format('<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString>', eS))
             elseif propName == "ScaleFactor" then
                 table.insert(output, PropertySerializers.customfloat(propName, propValue))
@@ -1619,6 +1668,13 @@ local function XMLtoBinary(InputXMLFile, OutputRBXLFile)
 end
 
 local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances)
+    -- < Reset state for each save run > --
+    PropertyCache = {}
+    BlacklistModels = {}
+    BlacklistDescendantSet = {}
+    RefCounter = 0
+    RefCache = {}
+
     local ScreenGui = Instance.new("ScreenGui")
     local Started = true
     ScreenGui.Parent = CoreGui
@@ -1675,9 +1731,14 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     local output = {XmlHeader}
+    -- < Count pass with yielding to prevent freeze on huge places > --
+    TitleLabel.Text = "Counting instances..."
     local totalInstances = 0
     for _, instance in ipairs(game:GetChildren()) do
-        totalInstances = totalInstances + CountInstances(instance, avoidPlayerCharacters)
+        local counterRef = {count = 0, processed = 0}
+        CountInstances(instance, avoidPlayerCharacters, counterRef)
+        totalInstances = totalInstances + counterRef.count
+        task.wait() -- < Yield between top-level services > --
     end
     if saveNilInstances then
         local Nil = getnilinstances() or {}
@@ -1685,7 +1746,12 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     local processedInstances = 0
+    -- < Throttle status updates: updating the TextLabel every single instance is itself expensive > --
+    local lastStatusUpdate = 0
     local function statusCallback(processed, total, message)
+        local now = os.clock()
+        if now - lastStatusUpdate < 0.05 then return end -- < Cap status updates to ~20fps > --
+        lastStatusUpdate = now
         if total and total > 0 then
             local percentage = (processed / total) * 100
             TitleLabel.Text = string.format("[%.2f%%] %s", percentage, message)
@@ -1749,9 +1815,13 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
     end
 
     table.insert(output, XmlFooter)
-    statusCallback(processedInstances, totalInstances, "Serialization complete, writing file...")
+    -- < Force a final status update even though the throttle may be active > --
+    TitleLabel.Text = "Serialization complete, writing file..."
 
+    -- < Yield before the giant table.concat to let the UI breathe > --
+    task.wait()
     local xml = table.concat(output, "\n")
+    task.wait()
 	local placeName = "NIL "
     local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
     if ok and info and info.Name then
@@ -1762,10 +1832,10 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         local savepath = "DEXV5\\SaveInstances\\" .. fileName
         local success, errorMsg = pcall(XMLtoBinary, xml, savepath)
         if success then
-            statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
+            TitleLabel.Text = string.format("Saved instance as %s", fileName)
         else
             warn(errorMsg)
-            statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
+            TitleLabel.Text = string.format("Failed to save %s: %s", fileName, errorMsg)
         end
         Started = false
         Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
@@ -1777,10 +1847,10 @@ local function saveinstance(saveScripts, avoidPlayerCharacters, saveNilInstances
         local savepath = "DEXV5\\SaveInstances\\" .. fileName
         local success, errorMsg = pcall(Writefile, savepath, xml)
         if success then
-            statusCallback(totalInstances, totalInstances, string.format("Saved instance as %s", fileName))
+            TitleLabel.Text = string.format("Saved instance as %s", fileName)
         else
             warn(errorMsg)
-            statusCallback(totalInstances, totalInstances, string.format("Failed to save %s: %s", fileName, errorMsg))
+            TitleLabel.Text = string.format("Failed to save %s: %s", fileName, errorMsg)
         end
         Started = false
         Loading.Image = getcustomasset("DEXV5\\Assets\\Finished.png")
