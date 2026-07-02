@@ -486,8 +486,8 @@ end
 
 local Icon 
 do
-	local iconMap = 'rbxasset://textures/ClassImages.png'
-
+	local iconMap = getcustomasset("DEXV5\\Assets\\ClassImages.PNG")
+	
 	function Icon(IconFrame,index)
 		local mapSize = Vector2.new(2352,16)
 		local iconSize = 16
