@@ -484,37 +484,41 @@ do
 	end
 end
 
-local Icon 
+local Icon
 do
-	local iconMap = getcustomasset("DEXV5\\Assets\\ClassImages.PNG")
-	
-	function Icon(IconFrame,index)
-		local mapSize = Vector2.new(2352,16)
-		local iconSize = 16
-		local class = 'Frame'
-		if typeof(IconFrame) == 'string' then
-			class = IconFrame
-			IconFrame = nil
-		end
-		if not IconFrame then
-			IconFrame = Create(class,{
-				Name = "IconFrame",
-				BackgroundTransparency = 1,
-				ClipsDescendants = true,
-				Create('ImageLabel',{
-					Name = "IconMap",
-					Active = false,
-					BackgroundTransparency = 1,
-					Image = iconMap,
-					Size = UDim2.new(0,iconSize,0,mapSize.Y)
-				})
-			})
-		end
-		local IconMap = WaitForChild(IconFrame, "IconMap", 300)
-		IconMap.ImageRectOffset = Vector2.new(iconSize * index, 0)
-		IconMap.ImageRectSize = Vector2.new(iconSize, iconSize)
-		return IconFrame
-	end
+    local iconMap = getcustomasset("DEXV5\\Assets\\ClassImages.png")
+
+    function Icon(IconFrame, index)
+        if typeof(IconFrame) == 'string' then
+            local class = IconFrame
+            IconFrame = nil
+        end
+        
+        if not IconFrame then
+            IconFrame = Create('Frame',{
+                Name = "Icon",
+                BackgroundTransparency = 1,
+                ClipsDescendants = true,
+                Create('ImageLabel',{
+                    Name = "IconMap",
+                    Active = false,
+                    BackgroundTransparency = 1,
+                    Image = iconMap,
+                    Size = UDim2.new(1, 0, 1, 0)
+                })
+            })
+        end
+
+        -- 2352x16 with 16x16 icons (147 icons)
+        local iconSize = 16
+        local col = index % 147
+        local row = math.floor(index / 147)
+
+        IconFrame.IconMap.Position = UDim2.new(-col / (2352 / iconSize), 0, -row, 0)
+        IconFrame.IconMap.Size = UDim2.new(2352 / iconSize, 0, 1, 0)
+
+        return IconFrame
+    end
 end
 
 function SpecialIcon(IconFrame,texture,iconSize)
